@@ -4,7 +4,7 @@ FUNCTION mc_rldist, arr, ndraw
 ;; take XY from the input NH structure
 yh = histogram(arr,bin=scott(arr),locations=xh)
 ;; create finer grid for x-axis (simulate continuous function)
-dx = [xh[0]:xh[-1]:diff(minmax(xh))/9999.]
+dx = [xh[0]:xh[-1]:width(minmax(xh))/9999.]
 ;; interpolate and normalize to create probability distribution function
 pdf = spline(xh,yh,dx)
 pdf >= 0.
