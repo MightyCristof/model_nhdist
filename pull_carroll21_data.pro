@@ -1,4 +1,4 @@
-PRO pull_carroll20_data
+PRO pull_carroll21_data
 
 
 ;; Note 1: RXLIM: RX at flux limit, including detected sources. CMC 11-Dec-20 (after paper acceptace)
@@ -43,7 +43,7 @@ for i = 0,n_elements(rl)-1 do re = execute(rl[i]+' = '+vars[irl[i]])
 vars = [vars[0:irl[0]-1],rl,vars[irl[-1]+1:-1],'XSUBG']     ;; add X-ray stacking sub grouping
 
 var_str = strjoin(vars,',')
-re = execute('save,'+var_str+',file="carroll20_data.sav"')
+re = execute('save,'+var_str+',file="carroll21_data.sav"')
 
 
 END

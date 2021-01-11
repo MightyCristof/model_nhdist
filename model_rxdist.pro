@@ -14,7 +14,8 @@ iixd = xdet ne '' and iiwac
 iixn = xnon ne '' and iiwac
 rxd = rldet[where(iixd,ndet)]
 e_rxd = e_rldet[where(iixd)]
-rxl = rxlim[where(iiwac,nsrc)]
+iwagn = where(iiwac,nsrc)
+rxl = rxlim[iwagn]
 
 ;; resample observed NH distribution to increase data density
 nsamp = nsrc*100.
@@ -69,7 +70,7 @@ print, 'KS: MODEL_RXDIST FREE - 0% COMPLETE'
 re = execute('tag2 = "iter"+string(0,format="('+fmt2+')")')
 re = execute('nh_resamp2_ks = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct_ks*ctf24_ks[0]),25.+randomu(seed,nct_ks*ctf25_ks[0])]}')
 re = execute('nh_mod2_ks = {'+tag2+':(nh_resamp2_ks.(0))[randomi(nsrc,n_elements(nh_resamp2_ks.(0)))]}')
-re = execute('rx_mod2_ks = {'+tag2+':rl2nh(nh_mod2_ks.(0),model="BORUS",/rl_out,scat=rx_scat)}')
+re = execute('rx_mod2_ks = {'+tag2+':rx2nh_z(nh_mod2_ks.(0),z[iwagn],/rx_out,scat=rx_scat)}')
 re = execute('iimod2_ks = {'+tag2+':rx_mod2_ks.(0) gt rxl}')
 ks2 = dblarr(2,niter)
 kstwo,rxd,(rx_mod2_ks.(0))[where(iimod2_ks.(0) eq 1)],d,prob
@@ -78,7 +79,7 @@ for j = 1,niter-1 do begin
     re = execute('tag2 = "iter"+string(j,format="('+fmt2+')")')
     nh_resamp2_ks = create_struct(nh_resamp2_ks,tag2,[nh_samp[ithin],24.+randomu(seed,nct_ks*ctf24_ks),25.+randomu(seed,nct_ks*ctf25_ks)])
     nh_mod2_ks = create_struct(nh_mod2_ks,tag2,(nh_resamp2_ks.(j))[randomi(nsrc,n_elements(nh_resamp2_ks.(j)))])
-    rx_mod2_ks = create_struct(rx_mod2_ks,tag2,rl2nh(nh_mod2_ks.(j),model='BORUS',/rl_out,scat=rx_scat))
+    rx_mod2_ks = create_struct(rx_mod2_ks,tag2,rx2nh_z(nh_mod2_ks.(j),z[iwagn],/rx_out,scat=rx_scat))
     iimod2_ks = create_struct(iimod2_ks,tag2,rx_mod2_ks.(j) gt rxl)
     kstwo,rxd,(rx_mod2_ks.(j))[where(iimod2_ks.(j) eq 1)],d,prob
     ks2[*,j] = [d,prob]
@@ -116,7 +117,7 @@ ctf_ad = ctf2sig_ad[ifrac_ad]
 nct_ad = (nthin/(1.-ctf_ad))*ctf_ad
 nh_resamp_ad = [nh_samp[ithin],24.+randomu(seed,nct_ad)*nh_diff]
 nh_mod_ad = (nh_resamp_ad)[randomi(nsrc,n_elements(nh_resamp_ad))]
-rx_mod_ad = rl2nh(nh_mod_ad,model="BORUS",/rl_out,scat=rx_scat)
+rx_mod_ad = rx2nh_z(nh_mod_ad,z[iwagn],/rx_out,scat=rx_scat)
 iimod_ad = rx_mod_ad gt rxl
 edf,rx_mod_ad[where(iimod_ad eq 1)],x_model,edf_model
 edf_model = interpol(edf_model,x_model,x_data)
@@ -141,7 +142,7 @@ print, 'AD: MODEL_RXDIST FREE - 0% COMPLETE'
 re = execute('tag2 = "iter"+string(0,format="('+fmt2+')")')
 re = execute('nh_resamp2_ad = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct_ad*ctf24_ad[0]),25.+randomu(seed,nct_ad*ctf25_ad[0])]}')
 re = execute('nh_mod2_ad = {'+tag2+':(nh_resamp2_ad.(0))[randomi(nsrc,n_elements(nh_resamp2_ad.(0)))]}')
-re = execute('rx_mod2_ad = {'+tag2+':rl2nh(nh_mod2_ad.(0),model="BORUS",/rl_out,scat=rx_scat)}')
+re = execute('rx_mod2_ad = {'+tag2+':rx2nh_z(nh_mod2_ad.(0),z[iwagn],/rx_out,scat=rx_scat)}')
 re = execute('iimod2_ad = {'+tag2+':rx_mod2_ad.(0) gt rxl}')
 ad2 = dblarr(niter)
 edf,(rx_mod2_ad.(0))[where(iimod2_ad.(0) eq 1)],x_model,edf_model
@@ -152,7 +153,7 @@ for j = 1,niter-1 do begin
     re = execute('tag2 = "iter"+string(j,format="('+fmt2+')")')
     nh_resamp2_ad = create_struct(nh_resamp2_ad,tag2,[nh_samp[ithin],24.+randomu(seed,nct_ad*ctf24_ad),25.+randomu(seed,nct_ad*ctf25_ad)])
     nh_mod2_ad = create_struct(nh_mod2_ad,tag2,(nh_resamp2_ad.(j))[randomi(nsrc,n_elements(nh_resamp2_ad.(j)))])
-    rx_mod2_ad = create_struct(rx_mod2_ad,tag2,rl2nh(nh_mod2_ad.(j),model='BORUS',/rl_out,scat=rx_scat))
+    rx_mod2_ad = create_struct(rx_mod2_ad,tag2,rx2nh_z(nh_mod2_ad.(j),z[iwagn],/rx_out,scat=rx_scat))
     iimod2_ad = create_struct(iimod2_ad,tag2,rx_mod2_ad.(j) gt rxl)
     edf,(rx_mod2_ad.(j))[where(iimod2_ad.(j) eq 1)],x_model,edf_model
     edf_model = interpol(edf_model,x_model,x_data)

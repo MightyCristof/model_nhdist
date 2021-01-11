@@ -13,7 +13,8 @@ iixd = xdet ne '' and iiwac
 iixn = xnon ne '' and iiwac
 rxd = rldet[where(iixd,ndet)]
 e_rxd = e_rldet[where(iixd)]
-rxl = rxlim[where(iiwac,nsrc)]
+iwagn = where(iiwac,nsrc)
+rxl = rxlim[iwagn]
 
 ;; resample observed NH distribution to increase data density
 nsamp = nsrc*100.
@@ -62,7 +63,7 @@ for n = 0,niter-1 do begin
         tag2 = 'split'+string(rnd(ctf24[0]*100,0),format='(i02)')+'_'+string(rnd(ctf25[0]*100,0),format='(i02)')
         re = execute('nh_resamp2 = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct*ctf24[0]),25.+randomu(seed,nct*ctf25[0])]}')
         re = execute('nh_mod2 = {'+tag2+':(nh_resamp2.(0))[randomi(nsrc,n_elements(nh_resamp2.(0)))]}')
-        re = execute('rx_mod2 = {'+tag2+':rl2nh(nh_mod2.(0),model="BORUS",/rl_out,scat=rx_scat)}')
+        re = execute('rx_mod2 = {'+tag2+':rx2nh_z(nh_mod2.(0),z[iwagn],/rx_out,scat=rx_scat)}')
         re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxl}')
         ks2 = dblarr(2,nsplit)
         kstwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],d,prob
@@ -77,7 +78,7 @@ for n = 0,niter-1 do begin
             ;nct = (nthin/(1.-ctf[i]))*ctf[i]
             nh_resamp2 = create_struct(nh_resamp2,tag2,[nh_samp[ithin],24.+randomu(seed,nct*ctf24[j]),25.+randomu(seed,nct*ctf25[j])])
             nh_mod2 = create_struct(nh_mod2,tag2,(nh_resamp2.(j))[randomi(nsrc,n_elements(nh_resamp2.(j)))])
-            rx_mod2 = create_struct(rx_mod2,tag2,rl2nh(nh_mod2.(j),model='BORUS',/rl_out,scat=rx_scat))
+            rx_mod2 = create_struct(rx_mod2,tag2,rx2nh_z(nh_mod2.(j),z[iwagn],/rx_out,scat=rx_scat))
             iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxl)
             kstwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],d,prob
             ks2[*,j] = [d,prob]

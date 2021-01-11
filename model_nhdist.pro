@@ -25,10 +25,10 @@ cd,path
 
 ;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
 if keyword_set(data) then begin
-    pull_carroll20_data
+    pull_carroll21_data
     nkeys--
 endif
-load_vars,'carroll20_data.sav','_data'
+load_vars,'carroll21_data.sav','_data'
 
 ;; pull NH distributions from Lansbury+2015 and Ananna+2019
 if keyword_set(nhobs) then begin
