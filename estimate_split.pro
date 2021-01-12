@@ -70,8 +70,8 @@ for n = 0,niter-1 do begin
         ks2[*,0] = [d,prob]
         ad = dblarr(nsplit)
         edf,(rx_mod2.(0))[where(iimod2.(0) eq 1)],x_model,edf_model
-        edf_model = interpol(edf_model,x_model,x_data)
-        ad_stat = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
+        cdf_model = interpol(edf_model,x_model,x_data)
+        ad_stat = (edf_data-cdf_model)^2./(cdf_model*(1.-cdf_model))
         ad[0] = total(ad_stat,/nan)/total(finite(ad_stat))
         for j = 1,nsplit-1 do begin
             tag2 = 'split'+string(rnd(ctf24[j]*100,0),format='(i02)')+'_'+string(rnd(ctf25[j]*100,0),format='(i02)')
@@ -117,7 +117,7 @@ sav_vars = ['CTF2SIG','CTF24_KSV_FULL','CTF25_KSV_FULL','CTF24_ADV_FULL','CTF25_
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',/compress,file="split_estimate2.sav"')
+re = execute('save,'+sav_str+',/compress,file="split_estimate.sav"')
 
 
 END

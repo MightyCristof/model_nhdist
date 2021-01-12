@@ -174,7 +174,7 @@ sav_vars = [sav_vars,'CTF24_AD','CTF25_AD', $
 sav_inds = [sav_inds,'IIMOD2_AD','IAD2']
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',/compress,file="rx_model2.sav"')
+re = execute('save,'+sav_str+',/compress,file="rx_model.sav"')
 
 
 END

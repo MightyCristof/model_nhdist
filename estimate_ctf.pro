@@ -90,7 +90,7 @@ sav_vars = ['CTF_KSV','CTF_ADV']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',/compress,file="ctf_estimate2.sav"')
+re = execute('save,'+sav_str+',/compress,file="ctf_estimate.sav"')
 
 
 END
