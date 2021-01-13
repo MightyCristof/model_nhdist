@@ -4,7 +4,7 @@ FUNCTION rx2nh_z, in_arr, $
                   SCAT = scat
                 
 
-dir = '/Users/ccarroll/Research/projects/model_nhdist/workspace/data_prep/rx_grid.sav'
+dir = '/Users/ccarroll/Research/projects/model_nhdist/workspace/data_prep/rxz_grid.sav'
 restore,dir
 loc = value_locate(row_z,in_z)
 out_arr = dblarr(n_elements(in_arr))
