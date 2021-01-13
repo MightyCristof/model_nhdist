@@ -46,8 +46,8 @@ nh_resamp_ks = [nh_samp[ithin],24.+randomu(seed,nct_ks)*nh_diff]
 nh_mod_ks = (nh_resamp_ks)[randomi(nsrc,n_elements(nh_resamp_ks))]
 rx_mod_ks = rl2nh(nh_mod_ks,model="BORUS",/rl_out,scat=rx_scat)
 iimod_ks = rx_mod_ks gt rxl
-kstwo,rxd,rx_mod_ks[where(iimod_ks eq 1)],d,prob
-ks = [d,prob]
+kstwo,rxd,rx_mod_ks[where(iimod_ks eq 1)],ks_stat,ks_prob
+ks = [ks_stat,ks_prob]
 iks = 0
 
 sav_vars = ['RX_SCAT','RXD','E_RXD','RXL', $
@@ -73,16 +73,16 @@ re = execute('nh_mod2_ks = {'+tag2+':(nh_resamp2_ks.(0))[randomi(nsrc,n_elements
 re = execute('rx_mod2_ks = {'+tag2+':rx2nh_z(nh_mod2_ks.(0),z[iwagn],/rx_out,scat=rx_scat)}')
 re = execute('iimod2_ks = {'+tag2+':rx_mod2_ks.(0) gt rxl}')
 ks2 = dblarr(2,niter)
-kstwo,rxd,(rx_mod2_ks.(0))[where(iimod2_ks.(0) eq 1)],d,prob
-ks2[*,0] = [d,prob]
+kstwo,rxd,(rx_mod2_ks.(0))[where(iimod2_ks.(0) eq 1)],ks_stat,ks_prob
+ks2[*,0] = [ks_stat,ks_prob]
 for j = 1,niter-1 do begin
     re = execute('tag2 = "iter"+string(j,format="('+fmt2+')")')
     nh_resamp2_ks = create_struct(nh_resamp2_ks,tag2,[nh_samp[ithin],24.+randomu(seed,nct_ks*ctf24_ks),25.+randomu(seed,nct_ks*ctf25_ks)])
     nh_mod2_ks = create_struct(nh_mod2_ks,tag2,(nh_resamp2_ks.(j))[randomi(nsrc,n_elements(nh_resamp2_ks.(j)))])
     rx_mod2_ks = create_struct(rx_mod2_ks,tag2,rx2nh_z(nh_mod2_ks.(j),z[iwagn],/rx_out,scat=rx_scat))
     iimod2_ks = create_struct(iimod2_ks,tag2,rx_mod2_ks.(j) gt rxl)
-    kstwo,rxd,(rx_mod2_ks.(j))[where(iimod2_ks.(j) eq 1)],d,prob
-    ks2[*,j] = [d,prob]
+    kstwo,rxd,(rx_mod2_ks.(j))[where(iimod2_ks.(j) eq 1)],ks_stat,ks_prob
+    ks2[*,j] = [ks_stat,ks_prob]
     if (j mod (niter/2.) eq 0) then print, 'KS: MODEL_RXDIST FREE - 50% COMPLETE'
 endfor
 print, 'KS: MODEL_RXDIST FREE - 100% COMPLETE'
@@ -101,7 +101,7 @@ sav_inds = [sav_inds,'IIMOD2_KS','IKS2']
 ;; run for AD test
 
 ;; empirical distribution function for observed sources
-edf,rxd,x_data,edf_data
+;edf,rxd,x_data,edf_data
 
 ;; scale the number of CT sources
 ;; consider fraction of CT sources rather than arbitrary number
@@ -119,13 +119,16 @@ nh_resamp_ad = [nh_samp[ithin],24.+randomu(seed,nct_ad)*nh_diff]
 nh_mod_ad = (nh_resamp_ad)[randomi(nsrc,n_elements(nh_resamp_ad))]
 rx_mod_ad = rx2nh_z(nh_mod_ad,z[iwagn],/rx_out,scat=rx_scat)
 iimod_ad = rx_mod_ad gt rxl
-edf,rx_mod_ad[where(iimod_ad eq 1)],x_model,edf_model
-edf_model = interpol(edf_model,x_model,x_data)
-adv = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
-ad = total(adv,/nan)/total(finite(adv))
+adtwo,rxd,rx_mod_ad[where(iimod_ad eq 1)],ad_stat,ad_crit
+ad = [ad_stat,ad_crit]
+iad = 0
+;edf,rx_mod_ad[where(iimod_ad eq 1)],x_model,edf_model
+;edf_model = interpol(edf_model,x_model,x_data)
+;adv = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
+;ad = total(adv,/nan)/total(finite(adv))
 
-sav_vars = [sav_vars,'CTF_AD','NH_RESAMP_AD','NH_MOD_AD','RX_MOD_AD','KS']
-sav_inds = [sav_inds,'IIMOD_AD','IKS']
+sav_vars = [sav_vars,'CTF_AD','NH_RESAMP_AD','NH_MOD_AD','RX_MOD_AD','AD']
+sav_inds = [sav_inds,'IIMOD_AD','IAD']
 
 
 ;; now do the same as above, but allow the range of NH to differ in bins
@@ -144,28 +147,32 @@ re = execute('nh_resamp2_ad = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct_ad*
 re = execute('nh_mod2_ad = {'+tag2+':(nh_resamp2_ad.(0))[randomi(nsrc,n_elements(nh_resamp2_ad.(0)))]}')
 re = execute('rx_mod2_ad = {'+tag2+':rx2nh_z(nh_mod2_ad.(0),z[iwagn],/rx_out,scat=rx_scat)}')
 re = execute('iimod2_ad = {'+tag2+':rx_mod2_ad.(0) gt rxl}')
-ad2 = dblarr(niter)
-edf,(rx_mod2_ad.(0))[where(iimod2_ad.(0) eq 1)],x_model,edf_model
-edf_model = interpol(edf_model,x_model,x_data)
-adv2 = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
-ad2[0] = total(adv2,/nan)/total(finite(adv2))
+ad2 = dblarr(2,niter)
+adtwo,rxd,(rx_mod2_ad.(0))[where(iimod2_ad.(0) eq 1)],ad_stat,ad_crit
+ad2[*,0] = [ad_stat,ad_crit]
+;edf,(rx_mod2_ad.(0))[where(iimod2_ad.(0) eq 1)],x_model,edf_model
+;edf_model = interpol(edf_model,x_model,x_data)
+;adv2 = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
+;ad2[0] = total(adv2,/nan)/total(finite(adv2))
 for j = 1,niter-1 do begin
     re = execute('tag2 = "iter"+string(j,format="('+fmt2+')")')
     nh_resamp2_ad = create_struct(nh_resamp2_ad,tag2,[nh_samp[ithin],24.+randomu(seed,nct_ad*ctf24_ad),25.+randomu(seed,nct_ad*ctf25_ad)])
     nh_mod2_ad = create_struct(nh_mod2_ad,tag2,(nh_resamp2_ad.(j))[randomi(nsrc,n_elements(nh_resamp2_ad.(j)))])
     rx_mod2_ad = create_struct(rx_mod2_ad,tag2,rx2nh_z(nh_mod2_ad.(j),z[iwagn],/rx_out,scat=rx_scat))
     iimod2_ad = create_struct(iimod2_ad,tag2,rx_mod2_ad.(j) gt rxl)
-    edf,(rx_mod2_ad.(j))[where(iimod2_ad.(j) eq 1)],x_model,edf_model
-    edf_model = interpol(edf_model,x_model,x_data)
-    adv2 = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
-    ad2[j] = total(adv2,/nan)/total(finite(adv2))
+    adtwo,rxd,(rx_mod2_ad.(j))[where(iimod2_ad.(j) eq 1)],ad_stat,ad_prob
+    ad2[*,j] = [ad_stat,ad_prob]
+    ;edf,(rx_mod2_ad.(j))[where(iimod2_ad.(j) eq 1)],x_model,edf_model
+    ;edf_model = interpol(edf_model,x_model,x_data)
+    ;adv2 = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
+    ;ad2[j] = total(adv2,/nan)/total(finite(adv2))
     if (j mod (niter/2.) eq 0) then print, 'AD: MODEL_RXDIST FREE - 50% COMPLETE'
 endfor
 print, 'AD: MODEL_RXDIST FREE - 100% COMPLETE'
 
-ad2med = median(ad2)
-isort = sort(ad2)
-iloc = value_locate(ad2[isort],ad2med)
+ad2med = median(ad2[0,*])
+isort = sort(ad2[0,*])
+iloc = value_locate(ad2[0,isort],ad2med)
 iad2 = isort[iloc]
 
 

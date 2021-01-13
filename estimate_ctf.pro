@@ -18,12 +18,12 @@ rxl = rxlim[iwagn]
 
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 10000
+niter = 1000
 ctf_ksv = dblarr(niter)
 ctf_adv = dblarr(niter)
 
 ;; empirical distribution function for observed sources
-edf,rxd,x_data,edf_data
+;edf,rxd,x_data,edf_data
 
 for n = 0,niter-1 do begin
     if n mod (niter/10) eq 0 then print, strtrim(n/(niter/100),2)+'% complete'
@@ -57,13 +57,15 @@ for n = 0,niter-1 do begin
     re = execute('rx_mod = {'+tag+':rx2nh_z(nh_mod.(0),z[iwagn],/rx_out,scat=rx_scat)}')
     re = execute('iimod = {'+tag+':rx_mod.(0) gt rxl}')
     ks = dblarr(2,nfrac)
-    kstwo,rxd,(rx_mod.(0))[where(iimod.(0) eq 1)],ks_stat,prob
-    ks[*,0] = [ks_stat,prob]
-    ad = dblarr(nfrac)
-    edf,(rx_mod.(0))[where(iimod.(0) eq 1)],x_model,edf_model
-    edf_model = interpol(edf_model,x_model,x_data)
-    adv = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
-    ad[0] = total(adv,/nan)/total(finite(adv))
+    kstwo,rxd,(rx_mod.(0))[where(iimod.(0) eq 1)],ks_stat,ks_prob
+    ks[*,0] = [ks_stat,ks_prob]
+    ad = dblarr(2,nfrac)
+    adtwo,rxd,(rx_mod.(0))[where(iimod.(0) eq 1)],ad_stat,ad_crit
+    ad[*,0] = [ad_stat,ad_crit]
+    ;edf,(rx_mod.(0))[where(iimod.(0) eq 1)],x_model,edf_model
+    ;edf_model = interpol(edf_model,x_model,x_data)
+    ;adv = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
+    ;ad[0] = total(adv,/nan)/total(finite(adv))
     ;; repeat for all scalings
     for i = 1,nfrac-1 do begin
         tag = 'frac'+string(rnd(ctf[i]*100,0),format='(i02)')
@@ -72,16 +74,18 @@ for n = 0,niter-1 do begin
         nh_mod = create_struct(nh_mod,tag,(nh_resamp.(i))[randomi(nsrc,n_elements(nh_resamp.(i)))])
         rx_mod = create_struct(rx_mod,tag,rx2nh_z(nh_mod.(i),z[iwagn],/rx_out,scat=rx_scat))
         iimod = create_struct(iimod,tag,rx_mod.(i) gt rxl)
-        kstwo,rxd,(rx_mod.(i))[where(iimod.(i) eq 1)],ks_stat,prob
-        ks[*,i] = [ks_stat,prob]
-        edf,(rx_mod.(i))[where(iimod.(i) eq 1)],x_model,edf_model
-        edf_model = interpol(edf_model,x_model,x_data)
-        adv = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
-        ad[i] = total(adv,/nan)/total(finite(adv))
+        kstwo,rxd,(rx_mod.(i))[where(iimod.(i) eq 1)],ks_stat,ks_prob
+        ks[*,i] = [ks_stat,ks_prob]
+        adtwo,rxd,(rx_mod.(i))[where(iimod.(i) eq 1)],ad_stat,ad_crit
+        ad[*,i] = [ad_stat,ad_crit]
+        ;edf,(rx_mod.(i))[where(iimod.(i) eq 1)],x_model,edf_model
+        ;edf_model = interpol(edf_model,x_model,x_data)
+        ;adv = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
+        ;ad[i] = total(adv,/nan)/total(finite(adv))
     endfor
     ks_min = min(ks[0,*],iks)
     ctf_ksv[n] = ctf[iks]
-    ad_min = min(ad,iad)
+    ad_min = min(ad[0,*],iad)
     ctf_adv[n] = ctf[iad]
 endfor
 print, 'ESTIMATE_CTF - COMPLETE'

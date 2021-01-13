@@ -45,14 +45,14 @@ nsplit = n_elements(ctf24)
 
 
 
-niter = 1000
+niter = 100
 ctf24_ksv = dblarr(nfrac,niter)
 ctf25_ksv = dblarr(nfrac,niter)
 ctf24_adv = dblarr(nfrac,niter)
 ctf25_adv = dblarr(nfrac,niter)
 
 ;; empirical distribution function for observed sources
-edf,rxd,x_data,edf_data
+;edf,rxd,x_data,edf_data
 
 for n = 0,niter-1 do begin
     if n mod (niter/10) eq 0 then print, strtrim(n/(niter/100),2)+'% complete'
@@ -66,13 +66,15 @@ for n = 0,niter-1 do begin
         re = execute('rx_mod2 = {'+tag2+':rx2nh_z(nh_mod2.(0),z[iwagn],/rx_out,scat=rx_scat)}')
         re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxl}')
         ks2 = dblarr(2,nsplit)
-        kstwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],d,prob
-        ks2[*,0] = [d,prob]
-        ad = dblarr(nsplit)
-        edf,(rx_mod2.(0))[where(iimod2.(0) eq 1)],x_model,edf_model
-        cdf_model = interpol(edf_model,x_model,x_data)
-        ad_stat = (edf_data-cdf_model)^2./(cdf_model*(1.-cdf_model))
-        ad[0] = total(ad_stat,/nan)/total(finite(ad_stat))
+        kstwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ks_stat,ks_prob
+        ks2[*,0] = [ks_stat,ks_prob]
+        ad2 = dblarr(2,nsplit)
+        adtwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ad_stat,ad_crit
+        ad2[*,0] = [ad_stat,ad_prob]
+        ;edf,(rx_mod2.(0))[where(iimod2.(0) eq 1)],x_model,edf_model
+        ;cdf_model = interpol(edf_model,x_model,x_data)
+        ;ad_stat = (edf_data-cdf_model)^2./(cdf_model*(1.-cdf_model))
+        ;ad[0] = total(ad_stat,/nan)/total(finite(ad_stat))
         for j = 1,nsplit-1 do begin
             tag2 = 'split'+string(rnd(ctf24[j]*100,0),format='(i02)')+'_'+string(rnd(ctf25[j]*100,0),format='(i02)')
             ;nct = (nthin/(1.-ctf[i]))*ctf[i]
@@ -80,19 +82,21 @@ for n = 0,niter-1 do begin
             nh_mod2 = create_struct(nh_mod2,tag2,(nh_resamp2.(j))[randomi(nsrc,n_elements(nh_resamp2.(j)))])
             rx_mod2 = create_struct(rx_mod2,tag2,rx2nh_z(nh_mod2.(j),z[iwagn],/rx_out,scat=rx_scat))
             iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxl)
-            kstwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],d,prob
-            ks2[*,j] = [d,prob]
-            edf,(rx_mod2.(j))[where(iimod2.(j) eq 1)],x_model,edf_model
-            edf_model = interpol(edf_model,x_model,x_data)
-            ad_stat = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
-            ad[j] = total(ad_stat,/nan)/total(finite(ad_stat))
+            kstwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ks_stat,ks_prob
+            ks2[*,j] = [ks_stat,ks_prob]
+            adtwo,rxd,(rx_mod2.(i))[where(iimod2.(i) eq 1)],ad_stat,ad_crit
+            ad2[*,i] = [ad_stat,ad_prob]
+            ;edf,(rx_mod2.(j))[where(iimod2.(j) eq 1)],x_model,edf_model
+            ;edf_model = interpol(edf_model,x_model,x_data)
+            ;ad_stat = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
+            ;ad[j] = total(ad_stat,/nan)/total(finite(ad_stat))
         endfor
         ;re = execute("frac"+string(rnd(ctf[i]*100,0),format="(i02)")+' = {nh_resamp:nh_resamp2,nh_mod:nh_mod2,rx_mod:rx_mod2,iimod:iimod2,ks:ks2}')
         ;if (i gt 0 and i mod (nfrac/2.) eq 0) then print, 'MODEL_RXDIST FREE - 50% COMPLETE'
         ksm = min(ks2[0,*],imin)
         ctf24_ksv[i,n] = ctf24[imin]
         ctf25_ksv[i,n] = ctf25[imin]
-        adm = min(ad,imin)
+        adm = min(ad2[0,*],imin)
         ctf24_adv[i,n] = ctf24[imin]
         ctf25_adv[i,n] = ctf25[imin]
     endfor
