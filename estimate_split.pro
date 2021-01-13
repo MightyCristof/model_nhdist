@@ -1,4 +1,4 @@
-PRO estimate_split
+PRO estimate_split, RXZ = rxz
 
 
 common _data
@@ -63,14 +63,15 @@ for n = 0,niter-1 do begin
         tag2 = 'split'+string(rnd(ctf24[0]*100,0),format='(i02)')+'_'+string(rnd(ctf25[0]*100,0),format='(i02)')
         re = execute('nh_resamp2 = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct*ctf24[0]),25.+randomu(seed,nct*ctf25[0])]}')
         re = execute('nh_mod2 = {'+tag2+':(nh_resamp2.(0))[randomi(nsrc,n_elements(nh_resamp2.(0)))]}')
-        re = execute('rx_mod2 = {'+tag2+':rx2nh_z(nh_mod2.(0),z[iwagn],/rx_out,scat=rx_scat)}')
+        if keyword_set(rxz) then re = execute('rx_mod2 = {'+tag2+':rx2nh_z(nh_mod2.(0),z[iwagn],/rx_out,scat=rx_scat)}') else $
+                                 re = execute('rx_mod2 = {'+tag2+':rx2nh(nh_mod2.(0),model="BORUS",/rx_out,scat=rx_scat)}')
         re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxl}')
         ks2 = dblarr(2,nsplit)
         kstwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ks_stat,ks_prob
         ks2[*,0] = [ks_stat,ks_prob]
         ad2 = dblarr(2,nsplit)
         adtwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ad_stat,ad_crit
-        ad2[*,0] = [ad_stat,ad_prob]
+        ad2[*,0] = [ad_stat,ad_crit]
         ;edf,(rx_mod2.(0))[where(iimod2.(0) eq 1)],x_model,edf_model
         ;cdf_model = interpol(edf_model,x_model,x_data)
         ;ad_stat = (edf_data-cdf_model)^2./(cdf_model*(1.-cdf_model))
@@ -80,12 +81,13 @@ for n = 0,niter-1 do begin
             ;nct = (nthin/(1.-ctf[i]))*ctf[i]
             nh_resamp2 = create_struct(nh_resamp2,tag2,[nh_samp[ithin],24.+randomu(seed,nct*ctf24[j]),25.+randomu(seed,nct*ctf25[j])])
             nh_mod2 = create_struct(nh_mod2,tag2,(nh_resamp2.(j))[randomi(nsrc,n_elements(nh_resamp2.(j)))])
-            rx_mod2 = create_struct(rx_mod2,tag2,rx2nh_z(nh_mod2.(j),z[iwagn],/rx_out,scat=rx_scat))
+            if keyword_set(rxz) then rx_mod2 = create_struct(rx_mod2,tag2,rx2nh_z(nh_mod2.(j),z[iwagn],/rx_out,scat=rx_scat)) else $
+                                     rx_mod2 = create_struct(rx_mod2,tag2,rx2nh(nh_mod2.(j),model='BORUS',/rx_out,scat=rx_scat))
             iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxl)
             kstwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ks_stat,ks_prob
             ks2[*,j] = [ks_stat,ks_prob]
-            adtwo,rxd,(rx_mod2.(i))[where(iimod2.(i) eq 1)],ad_stat,ad_crit
-            ad2[*,i] = [ad_stat,ad_prob]
+            adtwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ad_stat,ad_crit
+            ad2[*,j] = [ad_stat,ad_crit]
             ;edf,(rx_mod2.(j))[where(iimod2.(j) eq 1)],x_model,edf_model
             ;edf_model = interpol(edf_model,x_model,x_data)
             ;ad_stat = (edf_data-edf_model)^2./(edf_model*(1-edf_model))
