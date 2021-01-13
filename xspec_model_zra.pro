@@ -265,7 +265,8 @@ if keyword_set(scat005) then begin
     
     if keyword_set(grid) then begin
         readcol,'fx210_scat005.dat',col,dcol,format='d,d'
-        save,rx_grid,col_nh,row_z,file='rx_scat005.sav'
+        rx_scat = alog10(col[1:-1]/col[1])
+        save,rx_scat,file='rx_scat005.sav'
     endif
 endif
 
