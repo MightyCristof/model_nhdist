@@ -40,7 +40,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of CTF for modeling
 if keyword_set(ctfest) then begin
-    estimate_ctf
+    estimate_ctf,/kcorr
     nkeys--
 endif
 load_vars,'ctf_estimate.sav','_ctfest'
@@ -48,7 +48,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of NH=24-25 split for modeling
 if keyword_set(split) then begin
-    estimate_split
+    estimate_split,/kcorr
     nkeys--
 endif
 load_vars,'split_estimate.sav','_split'
@@ -56,7 +56,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; simulate the NH and RL distributions
 if keyword_set(rxmod) then begin
-    model_rxdist
+    model_rxdist,/kcorr
     nkeys--
 endif
 load_vars,'rx_model.sav','_rxmod'

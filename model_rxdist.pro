@@ -1,4 +1,5 @@
-PRO model_rxdist, RXZ = rxz
+PRO model_rxdist, RXZ = rxz, $
+                  KCORR = kcorr
 
 
 common _data
@@ -12,7 +13,8 @@ rx_scat = 0.2
 ;; separate WISE AGN, detections and non-detections
 iixd = xdet ne '' and iiwac
 iixn = xnon ne '' and iiwac
-rxd = rldet[where(iixd,ndet)]
+if keyword_set(kcorr) then rxd = rldet[where(iixd,ndet)]-alog10((1+z[where(iixd)])^(1.8-2.0)) else $
+                           rxd = rldet[where(iixd,ndet)]
 e_rxd = e_rldet[where(iixd)]
 iwagn = where(iiwac,nsrc)
 rxl = rxlim[iwagn]
@@ -44,7 +46,8 @@ ctf_ks = ctf2sig_ks[ifrac_ks]
 nct_ks = (nthin/(1.-ctf_ks))*ctf_ks
 nh_resamp_ks = [nh_samp[ithin],24.+randomu(seed,nct_ks)*nh_diff]
 nh_mod_ks = (nh_resamp_ks)[randomi(nsrc,n_elements(nh_resamp_ks))]
-rx_mod_ks = rl2nh(nh_mod_ks,model="BORUS",/rl_out,scat=rx_scat)
+if keyword_set(rxz) then rx_mod_ks = rx2nh_z(nh_mod_ks,z[iwagn],/rx_out,scat=rx_scat) else $
+                         rx_mod_ks = rx2nh(nh_mod_ks,/rx_out,scat=rx_scat)
 iimod_ks = rx_mod_ks gt rxl
 kstwo,rxd,rx_mod_ks[where(iimod_ks eq 1)],ks_stat,ks_prob
 ks = [ks_stat,ks_prob]
@@ -69,7 +72,7 @@ re = execute('tag2 = "iter"+string(0,format="('+fmt2+')")')
 re = execute('nh_resamp2_ks = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct_ks*ctf24_ks[0]),25.+randomu(seed,nct_ks*ctf25_ks[0])]}')
 re = execute('nh_mod2_ks = {'+tag2+':(nh_resamp2_ks.(0))[randomi(nsrc,n_elements(nh_resamp2_ks.(0)))]}')
 if keyword_set(rxz) then re = execute('rx_mod2_ks = {'+tag2+':rx2nh_z(nh_mod2_ks.(0),z[iwagn],/rx_out,scat=rx_scat)}') else $
-                         re = execute('rx_mod2_ks = {'+tag2+':rx2nh(nh_mod2_ks.(0),model="BORUS",/rx_out,scat=rx_scat)}')
+                         re = execute('rx_mod2_ks = {'+tag2+':rx2nh(nh_mod2_ks.(0),/rx_out,scat=rx_scat)}')
 re = execute('iimod2_ks = {'+tag2+':rx_mod2_ks.(0) gt rxl}')
 ks2 = dblarr(2,niter)
 kstwo,rxd,(rx_mod2_ks.(0))[where(iimod2_ks.(0) eq 1)],ks_stat,ks_prob
@@ -79,7 +82,7 @@ for j = 1,niter-1 do begin
     nh_resamp2_ks = create_struct(nh_resamp2_ks,tag2,[nh_samp[ithin],24.+randomu(seed,nct_ks*ctf24_ks),25.+randomu(seed,nct_ks*ctf25_ks)])
     nh_mod2_ks = create_struct(nh_mod2_ks,tag2,(nh_resamp2_ks.(j))[randomi(nsrc,n_elements(nh_resamp2_ks.(j)))])
     if keyword_set(rxz) then rx_mod2_ks = create_struct(rx_mod2_ks,tag2,rx2nh_z(nh_mod2_ks.(j),z[iwagn],/rx_out,scat=rx_scat)) else $
-                             rx_mod2_ks = create_struct(rx_mod2_ks,tag2,rx2nh(nh_mod2_ks.(j),model='BORUS',/rx_out,scat=rx_scat))
+                             rx_mod2_ks = create_struct(rx_mod2_ks,tag2,rx2nh(nh_mod2_ks.(j),/rx_out,scat=rx_scat))
     iimod2_ks = create_struct(iimod2_ks,tag2,rx_mod2_ks.(j) gt rxl)
     kstwo,rxd,(rx_mod2_ks.(j))[where(iimod2_ks.(j) eq 1)],ks_stat,ks_prob
     ks2[*,j] = [ks_stat,ks_prob]
@@ -115,7 +118,7 @@ nct_ad = (nthin/(1.-ctf_ad))*ctf_ad
 nh_resamp_ad = [nh_samp[ithin],24.+randomu(seed,nct_ad)*nh_diff]
 nh_mod_ad = (nh_resamp_ad)[randomi(nsrc,n_elements(nh_resamp_ad))]
 if keyword_set(rxz) then rx_mod_ad = rx2nh_z(nh_mod_ad,z[iwagn],/rx_out,scat=rx_scat) else $
-                         rx_mod_ad = rx2nh(nh_mod_ad,model='BORUS',/rx_out,scat=rx_scat)
+                         rx_mod_ad = rx2nh(nh_mod_ad,/rx_out,scat=rx_scat)
 iimod_ad = rx_mod_ad gt rxl
 adtwo,rxd,rx_mod_ad[where(iimod_ad eq 1)],ad_stat,ad_crit
 ad = [ad_stat,ad_crit]
@@ -138,7 +141,7 @@ re = execute('tag2 = "iter"+string(0,format="('+fmt2+')")')
 re = execute('nh_resamp2_ad = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct_ad*ctf24_ad[0]),25.+randomu(seed,nct_ad*ctf25_ad[0])]}')
 re = execute('nh_mod2_ad = {'+tag2+':(nh_resamp2_ad.(0))[randomi(nsrc,n_elements(nh_resamp2_ad.(0)))]}')
 if keyword_set(rxz) then re = execute('rx_mod2_ad = {'+tag2+':rx2nh_z(nh_mod2_ad.(0),z[iwagn],/rx_out,scat=rx_scat)}') else $
-                         re = execute('rx_mod2_ad = {'+tag2+':rx2nh(nh_mod2_ad.(0),model="BORUS",/rx_out,scat=rx_scat)}')
+                         re = execute('rx_mod2_ad = {'+tag2+':rx2nh(nh_mod2_ad.(0),/rx_out,scat=rx_scat)}')
 re = execute('iimod2_ad = {'+tag2+':rx_mod2_ad.(0) gt rxl}')
 ad2 = dblarr(2,niter)
 adtwo,rxd,(rx_mod2_ad.(0))[where(iimod2_ad.(0) eq 1)],ad_stat,ad_crit
@@ -148,7 +151,7 @@ for j = 1,niter-1 do begin
     nh_resamp2_ad = create_struct(nh_resamp2_ad,tag2,[nh_samp[ithin],24.+randomu(seed,nct_ad*ctf24_ad),25.+randomu(seed,nct_ad*ctf25_ad)])
     nh_mod2_ad = create_struct(nh_mod2_ad,tag2,(nh_resamp2_ad.(j))[randomi(nsrc,n_elements(nh_resamp2_ad.(j)))])
     if keyword_set(rxz) then rx_mod2_ad = create_struct(rx_mod2_ad,tag2,rx2nh_z(nh_mod2_ad.(j),z[iwagn],/rx_out,scat=rx_scat)) else $
-                             rx_mod2_ad = create_struct(rx_mod2_ad,tag2,rx2nh(nh_mod2_ad.(j),model='BORUS',/rx_out,scat=rx_scat))
+                             rx_mod2_ad = create_struct(rx_mod2_ad,tag2,rx2nh(nh_mod2_ad.(j),/rx_out,scat=rx_scat))
     iimod2_ad = create_struct(iimod2_ad,tag2,rx_mod2_ad.(j) gt rxl)
     adtwo,rxd,(rx_mod2_ad.(j))[where(iimod2_ad.(j) eq 1)],ad_stat,ad_crit
     ad2[*,j] = [ad_stat,ad_crit]
@@ -180,82 +183,3 @@ END
 
 
 
-
-
-
-;if keyword_set(add) then begin
-;    ;; combine RX for detections and non-detections
-;    rl = rldet>rlnon
-;    e_rl = e_rldet>e_rlnon
-;    ;; split WISE AGN + secondary
-;    rlw = rl[where(iiwac)]
-;    e_rlw = e_rl[where(iiwac)]
-;    rls = rl[where(iiwac eq 0)]
-;    e_rls = e_rl[where(iiwac eq 0)]
-;
-;    ;; here we draw up a distribution in NH
-;    nw = n_elements(rlw)
-;    ns = n_elements(rls)
-;    npull = nw
-;    rl_obs = rlw
-;    nh_obs = nh_mc(nh_lan_nst,npull)
-;
-;    ;; here we create random distributions to add to the 
-;    peak = 22.+dindgen(8)/2.
-;    npeak = n_elements(peak)
-;    samp = round([reform(findgen(9,start=1)#10.^findgen(4,start=-2),9*4),1e2] * npull)
-;    nsamp = n_elements(samp)
-;    nh_add = dblarr(max(samp),npeak,nsamp)
-;    for i = 0,npeak-1 do $
-;        for j = 0,nsamp-1 do $
-;            nh_add[0:samp[j]-1,i,j] = peak[i] + randomn(seed,samp[j])*0.5
-;
-;    ;; plot for results
-;    ;plothist, nh_add[*,-1,-1],xra=[20,28]
-;    ;for i = 0,npeak-1 do begin
-;    ;    for j = 0,nsamp-1 do begin
-;    ;        ig = where(nh_add[*,i,j] gt 0)
-;    ;        plothist, nh_add[ig,i,j],/ov
-;    ;    endfor
-;    ;endfor
-;
-;    ;; here we convert to RX and test the CDF
-;    ksd = dblarr(npeak,nsamp)
-;    ksp = dblarr(npeak,nsamp)
-;    ;; STDDEV = 0.3
-;    ;; MAD = 0.2
-;    for i = 0,npeak-1 do begin
-;        for j = 0,nsamp-1 do begin
-;            nh_mod = [nh_obs,nh_add[0:samp[j]-1,i,j]]
-;            rx_mod = rl2nh(nh_mod,model='BORUS',/rl_out) + randomn(seed,n_elements(nh_mod))*rx_scat
-;            kstwo,rl_obs,rx_mod,d,prob
-;            ksd[i,j] = d
-;            ksp[i,j] = prob
-;        endfor
-;    endfor
-;
-;    dmin = min(ksd,imin)
-;    ind = array_indices(ksd,imin)
-;
-;    nh_mod = [nh_obs,nh_add[0:samp[ind[1]]-1,ind[0],ind[1]]]
-;    rx_mod = rl2nh(nh_mod,model='BORUS',/rl_out)
-;
-;    ;; plot comparison
-;    ;col = [[80,193,128],[83,5,124]]
-;    col = ['teal','purple']
-;    bin = 0.1
-;    plothist,rl_obs,/peak,bin=bin,col=col[0],xra=[-3.,1.],yra=[0.,1.2]
-;    plothist,rx_mod,/peak,bin=bin,col=col[1],/ov
-;
-;    yobs = cdf(rl_obs,xloc=xobs)
-;    ymod = cdf(rx_mod,xloc=xmod)
-;    dx = [xobs,xmod]
-;    dx = dx[uniq(dx,sort(dx))]
-;    dyobs = interpol(yobs,xobs,dx)
-;    dymod = interpol(ymod,xmod,dx)
-;
-;    pobs = plot(dx,dyobs,'-',thick=2,col=col[0],yra=[-0.05,1.05],name='Carroll+20')
-;    pmod = plot(dx,dymod,'--',thick=2,col=col[1],/ov,name='Model')
-;    l = legend(target=[pobs,pmod],position=[0.32,0.92],/relative)
-;endif
-;

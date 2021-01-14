@@ -4,12 +4,6 @@ FUNCTION rx2nh, in_arr, $
                 SCAT = scat
                 
 
-if (n_elements(model) eq 0) then begin
-    print, '======================================'
-    print, 'NO MODEL SET. RUNNING CARROLL+21 MODEL'
-    print, '======================================'
-    model = 'POWER'
-endif
 out_arr = dblarr(n_elements(in_arr))-9999.
 
 nh = [21.:25.:0.25];5:0.25]

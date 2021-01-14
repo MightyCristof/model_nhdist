@@ -1,4 +1,4 @@
-plot_model_nhdist
+plot_model_nhdist, COMP_NH = comp_nh
 
 
 common _data
@@ -7,8 +7,6 @@ common _ctfest
 common _split
 common _rxmod
 common _fxest
-
-
 
 
 if keyword_set(postdoc_apps)
@@ -30,7 +28,13 @@ if keyword_set(postdoc_apps)
 endif
 
 
-
+if keyword_set(comp_nh) then begin
+    p = plot(nh_ana_lo.xh,nh_ana_lo.yh,/stairstep,xra=[20.,26.],yra=[0.,2.5])
+    yks = histogram(nh_mod2_ks.(iks2),location=xks,min=20.,max=26.,bin=1.)
+    yad = histogram(nh_mod2_ad.(iad2),location=xad,min=20.,max=26.,bin=1.)
+    p = plot(xks+0.5,yks/total(yks[where(xks lt 24.)]),/stairstep,col='teal',/ov)
+    p = plot(xad+0.5,yad/total(yad[where(xad lt 24.)]),/stairstep,col='purple',/ov)
+endif
 
 
 
