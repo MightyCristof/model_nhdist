@@ -11,8 +11,6 @@ load_vars,'fx_estimate.sav','_fxest'
 
 END
 
-;edf, rand, xrand, yrand
-;cdf = call_function('cdf', xrand, _extra = extra)
-;delta = edf - cdf
+
 
 

@@ -23,8 +23,7 @@
 ; cmc
 ;-----------------------------------------------------------------------------------------
 FUNCTION nh_mc, nh_obs, $
-                niter, $
-                SEED = seed, $
+                ndraw, $
                 PLT = plt
 
 
@@ -45,11 +44,9 @@ cdf = total(pdf,/cumulative)
 iu = uniq(cdf)
 xdx = dx[iu]
 cdf = cdf[iu]
-;; set seed
-if keyword_set(seed) then seed = seed
-;; draw random values from 0-1 (same as resamp_nhling from CDF)
-randcdf = randomu(seed,niter)
-;; project to resamp_nhle X input variable
+;; draw random values from 0-1
+randcdf = randomu(seed,ndraw)
+;; project to resamp_nh X input variable
 ;; remember newY=interpol(Y,X,newX)
 resamp_nh = interpol(xdx,cdf,randcdf)
 

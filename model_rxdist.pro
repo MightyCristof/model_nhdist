@@ -1,5 +1,4 @@
-PRO model_rxdist, RXZ = rxz, $
-                  KCORR = kcorr
+PRO model_rxdist, RXZ = rxz
 
 
 common _data
@@ -13,8 +12,8 @@ rx_scat = 0.2
 ;; separate WISE AGN, detections and non-detections
 iixd = xdet ne '' and iiwac
 iixn = xnon ne '' and iiwac
-if keyword_set(kcorr) then rxd = rldet[where(iixd,ndet)]-alog10((1+z[where(iixd)])^(1.8-2.0)) else $
-                           rxd = rldet[where(iixd,ndet)]
+if keyword_set(rxz) then rxd = rldet[where(iixd,ndet)]-alog10((1+z[where(iixd)])^(1.8-2.0)) else $
+                         rxd = rldet[where(iixd,ndet)]
 e_rxd = e_rldet[where(iixd)]
 iwagn = where(iiwac,nsrc)
 rxl = rxlim[iwagn]

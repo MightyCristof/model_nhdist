@@ -1,4 +1,5 @@
-PRO estimate_fx
+PRO estimate_fx, CHA = cha, $
+                 KCORR = kcorr
 
 
 common _data
@@ -10,8 +11,10 @@ common _rxmod
 ;; Follow procedure of Carroll+20 (XSTACK_OUTPUT, STACK_NONDET_FLUX, MC_NONDET_DIST)
 
 ;; LIR and luminosity distance for non-detected sample
-ixn = where(iixn,nnon)
+if keyword_set(cha) then ixn = where(iixn and xnon eq 'CHA',nnon) else $
+                         ixn = where(iixn,nnon)
 loglir_non = loglir[ixn]
+z_non = z[ixn]
 dlumsq = dl2[ixn]
 
 ;; run for KS test
@@ -29,9 +32,10 @@ rx_modn_ks = (rx_mod2_ks.(iks2))[where(iimod2_ks.(iks2) eq 0,nmodn_ks)]
 ;; sample from model RL for each non-detected observation (NNON)
 print, 'KS: ESTIMATE_FX - 0%'
 for j = 0,niter-1 do begin    
-    rx_samp_ks = mc_rldist(rx_modn_ks,nnon)
+    rx_samp_ks = mc_samp(rx_modn_ks,nnon)
     loglx_non_ks = rx_samp_ks + loglir_non
     logfx_non_ks = loglx_non_ks - alog10(4.*!const.pi*dlumsq)
+    if keyword_set(kcorr) then logfx_non_ks -= alog10((1.+z_non)^(1.8-2.0))
     logfx_avg_ksv[j] = mean(logfx_non_ks)
     logfx_med_ksv[j] = median(logfx_non_ks)
     if (j gt 0 and j mod (niter/2.) eq 0) then print, 'KS: ESTIMATE_FX - 50% COMPLETE'
@@ -58,9 +62,10 @@ rx_modn_ad = (rx_mod2_ad.(iad2))[where(iimod2_ad.(iad2) eq 0,nmodn_ad)]
 ;; sample from model RL for each non-detected observation (NNON)
 print, 'AD: ESTIMATE_FX - 0%'
 for j = 0,niter-1 do begin    
-    rx_samp_ad = mc_rldist(rx_modn_ad,nnon)
+    rx_samp_ad = mc_samp(rx_modn_ad,nnon)
     loglx_non_ad = rx_samp_ad + loglir_non
     logfx_non_ad = loglx_non_ad - alog10(4.*!const.pi*dlumsq)
+    if keyword_set(kcorr) then logfx_non_ad -= alog10((1.+z_non)^(1.8-2.0))
     logfx_avg_adv[j] = mean(logfx_non_ad)
     logfx_med_adv[j] = median(logfx_non_ad)
     if (j gt 0 and j mod (niter/2.) eq 0) then print, 'AD: ESTIMATE_FX - 50% COMPLETE'

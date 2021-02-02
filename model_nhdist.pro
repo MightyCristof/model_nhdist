@@ -20,9 +20,6 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 if (n_elements(subdir) eq 0) then path = './' else $
                                   path = subdir+'/' & file_mkdir,path
 
-;; directory for output
-cd,path
-
 ;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
 if keyword_set(data) then begin
     pull_carroll21_data
@@ -38,9 +35,12 @@ endif
 load_vars,'nhdist_obs.sav','_nhobs'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
+;; directory for output
+cd,path
+
 ;; estimate the distribution of CTF for modeling
 if keyword_set(ctfest) then begin
-    estimate_ctf,/kcorr
+    estimate_ctf,/rxz
     nkeys--
 endif
 load_vars,'ctf_estimate.sav','_ctfest'
@@ -48,7 +48,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of NH=24-25 split for modeling
 if keyword_set(split) then begin
-    estimate_split,/kcorr
+    estimate_split,/rxz
     nkeys--
 endif
 load_vars,'split_estimate.sav','_split'
@@ -56,7 +56,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; simulate the NH and RL distributions
 if keyword_set(rxmod) then begin
-    model_rxdist,/kcorr
+    model_rxdist,/rxz
     nkeys--
 endif
 load_vars,'rx_model.sav','_rxmod'
@@ -64,7 +64,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate X-ray flux from model RL distribution
 if keyword_set(fxest) then begin
-    estimate_fx
+    estimate_fx,/cha
     nkeys--
 endif
 load_vars,'fx_estimate.sav','_fxest'
