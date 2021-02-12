@@ -22,7 +22,7 @@ fits = ['OBJID','RA','DEC','Z','ZERR', $                    ;; fits.sav
         'XDET','XNON','LOGEBV', $                           ;; 
         'RXLIM']                                            ;; 
 surv = ['SIMRLW','WNH_POWER','WNH_BORUS']                   ;; surv_anal.sav
-stak = ['FLUXV','FLUX_ERRV','LXV']                          ;; stack_output.sav
+stak = ['ENRANGEV','FLUXV','FLUX_ERRV','LXV']               ;; stack_output.sav
 
 ;; IDL save files containing above variables
 files = ['fits.sav','resamp.sav','detections_cha.sav','detections_wac.sav','src_luminosities.sav', $
@@ -39,10 +39,23 @@ fits = [fits,'FXS_CHA','E_FXS_CHA','FXH_CHA','E_FXH_CHA']
 ;; correct RCH output to have BAGN then GAL
 isort = [0,1,2,3,5,4]       ;; sort on Carroll+20 Table 6 [WDET,WNON,RDET,RNON,BAGN,GAL]
 xsubg = ['WDET','WNON','RDET','RNON','BAGN','GAL']
-fluxv = fluxv[isort,2]      ;; 2 == ENRANGEV of 2-7keV, fluxes scaled to 2-10keV for comparison
-flux_errv = flux_errv[isort,2]
-lxv = lxv[isort,2]
-stak  = [stak,'XSUBG']
+fluxv = fluxv[isort,*]
+flux_errv = flux_errv[isort,*]
+lxv = lxv[isort,*]
+;; correct energy ranges [0.5-2,2-7,2-10] keV
+;; remember RCH scaled 2-7 to 2-10 keV for comparison
+;; 2-10 to 2-7 keV = 6.888E-01
+ien = [1,0,2]
+enrangev = enrangev[ien]
+enrangev[1] = '27'
+enrangev[2] = '210'
+fluxv = fluxv[*,ien]
+fluxv[*,1] = fluxv[*,2]*6.888E-01
+flux_errv = flux_errv[*,ien]
+flux_errv[*,1] = flux_errv[*,2]*6.888E-01
+lxv = lxv[*,ien]
+lxv[*,1] = lxv[*,2]*6.888E-01
+stak  = ['XSUBG',stak]
 
 ;; trim analysis subset
 iq = where(iiqual)

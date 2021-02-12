@@ -35,6 +35,9 @@ endif
 load_vars,'nhdist_obs.sav','_nhobs'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
+;; load RX-NH conversions
+load_vars,'data_prep/rxz_scat01.sav','_rxnh'
+
 ;; directory for output
 cd,path
 

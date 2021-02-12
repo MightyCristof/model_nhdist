@@ -1,29 +1,34 @@
-PRO estimate_fx, CHA = cha, $
-                 KCORR = kcorr
+PRO estimate_fx, CHA = cha
 
 
 common _data
 common _nhobs
+common _rxnh
 common _ctfest
 common _split
 common _rxmod
 
 ;; Follow procedure of Carroll+20 (XSTACK_OUTPUT, STACK_NONDET_FLUX, MC_NONDET_DIST)
 
-;; LIR and luminosity distance for non-detected sample
+;; use only Chandra sources to match Chandra X-ray stacking
 if keyword_set(cha) then ixn = where(iixn and xnon eq 'CHA',nnon) else $
                          ixn = where(iixn,nnon)
-loglir_non = loglir[ixn]
+;; data for non-detected sample
+loglxir_non = loglxir[ixn]
 z_non = z[ixn]
-dlumsq = dl2[ixn]
+dl2_non = dl2[ixn]
+;; prep observed frame hard and soft conversion arrays
+iz = value_locate(zv,z_non)
+c_hard_non = c_hard[*,iz]
+c_soft_non = c_soft[*,iz]
 
 ;; run for KS test
 
 ;; capture mean and median of the modeled log FX distribution 
 niter = 10000
-logfx_avg_ksv = dblarr(niter)
-logfx_med_ksv = dblarr(niter)
-
+logfx_full_ksv = dblarr(nnon,niter)
+logfx_hard_ksv = dblarr(nnon,niter)
+logfx_soft_ksv = dblarr(nnon,niter)
 ;; in Carroll+20, we take the model RL and subtract from it the observations
 ;; this doesn't work here as the observations are greater than the simulated observed
 ;; for now, subtracting the model detected 
@@ -33,17 +38,24 @@ rx_modn_ks = (rx_mod2_ks.(iks2))[where(iimod2_ks.(iks2) eq 0,nmodn_ks)]
 print, 'KS: ESTIMATE_FX - 0%'
 for j = 0,niter-1 do begin    
     rx_samp_ks = mc_samp(rx_modn_ks,nnon)
-    loglx_non_ks = rx_samp_ks + loglir_non
-    logfx_non_ks = loglx_non_ks - alog10(4.*!const.pi*dlumsq)
-    if keyword_set(kcorr) then logfx_non_ks -= alog10((1.+z_non)^(1.8-2.0))
-    logfx_avg_ksv[j] = mean(logfx_non_ks)
-    logfx_med_ksv[j] = median(logfx_non_ks)
+    loglx_full_ks = rx_samp_ks + loglxir_non
+    logfx_full_ks = loglx_full_ks - alog10(4.*!const.pi*dl2_non)
+    logfx_full_ksv[*,j] = logfx_full_ks
     if (j gt 0 and j mod (niter/2.) eq 0) then print, 'KS: ESTIMATE_FX - 50% COMPLETE'
+    ;; convert 2-10keV to soft and hard fluxes
+    logfx_hard_ks = logfx_full_ks
+    logfx_soft_ks = logfx_full_ks
+    ibnd = where(rx_samp_ks ge min(rx),nbnd,complement=iunb,ncomplement=nunb)
+    for i = 0,nbnd-1 do logfx_hard_ks[ibnd[i]] += interpol(c_hard_non[*,ibnd[i]],rx,rx_samp_ks[ibnd[i]])
+    for i = 0,nbnd-1 do logfx_soft_ks[ibnd[i]] += interpol(c_soft_non[*,ibnd[i]],rx,rx_samp_ks[ibnd[i]])
+    logfx_hard_ks[iunb] += c_hard_non[-1,iunb]
+    logfx_soft_ks[iunb] += c_soft_non[-1,iunb]
+    logfx_hard_ksv[*,j] = logfx_hard_ks
+    logfx_soft_ksv[*,j] = logfx_soft_ks
 endfor
 print, 'KS: ESTIMATE_FX - 100% COMPLETE'
 
-
-sav_vars = ['LOGFX_AVG_KSV','LOGFX_MED_KSV']
+sav_vars = ['LOGFX_FULL_KSV','LOGFX_HARD_KSV','LOGFX_SOFT_KSV']
 sav_inds = []
 
 
@@ -51,8 +63,9 @@ sav_inds = []
 
 ;; capture mean and median of the modeled log FX distribution 
 niter = 10000
-logfx_avg_adv = dblarr(niter)
-logfx_med_adv = dblarr(niter)
+logfx_full_adv = dblarr(nnon,niter)
+logfx_hard_adv = dblarr(nnon,niter)
+logfx_soft_adv = dblarr(nnon,niter)
 
 ;; in Carroll+20, we take the model RL and subtract from it the observations
 ;; this doesn't work here as the observations are greater than the simulated observed
@@ -63,16 +76,24 @@ rx_modn_ad = (rx_mod2_ad.(iad2))[where(iimod2_ad.(iad2) eq 0,nmodn_ad)]
 print, 'AD: ESTIMATE_FX - 0%'
 for j = 0,niter-1 do begin    
     rx_samp_ad = mc_samp(rx_modn_ad,nnon)
-    loglx_non_ad = rx_samp_ad + loglir_non
-    logfx_non_ad = loglx_non_ad - alog10(4.*!const.pi*dlumsq)
-    if keyword_set(kcorr) then logfx_non_ad -= alog10((1.+z_non)^(1.8-2.0))
-    logfx_avg_adv[j] = mean(logfx_non_ad)
-    logfx_med_adv[j] = median(logfx_non_ad)
+    loglx_full_ad = rx_samp_ad + loglxir_non
+    logfx_full_ad = loglx_full_ad - alog10(4.*!const.pi*dl2_non)
+    logfx_full_adv[*,j] = logfx_full_ad
     if (j gt 0 and j mod (niter/2.) eq 0) then print, 'AD: ESTIMATE_FX - 50% COMPLETE'
+    ;; convert 2-10keV to soft and hard fluxes
+    logfx_hard_ad = logfx_full_ad
+    logfx_soft_ad = logfx_full_ad
+    ibnd = where(rx_samp_ad ge min(rx),nbnd,complement=iunb,ncomplement=nunb)
+    for i = 0,nbnd-1 do logfx_hard_ad[ibnd[i]] += interpol(c_hard_non[*,ibnd[i]],rx,rx_samp_ad[ibnd[i]])
+    for i = 0,nbnd-1 do logfx_soft_ad[ibnd[i]] += interpol(c_soft_non[*,ibnd[i]],rx,rx_samp_ad[ibnd[i]])
+    logfx_hard_ad[iunb] += c_hard_non[-1,iunb]
+    logfx_soft_ad[iunb] += c_soft_non[-1,iunb]
+    logfx_hard_adv[*,j] = logfx_hard_ad
+    logfx_soft_adv[*,j] = logfx_soft_ad
 endfor
 print, 'AD: ESTIMATE_FX - 100% COMPLETE'
 
-sav_vars = [sav_vars,'LOGFX_AVG_ADV','LOGFX_MED_ADV']
+sav_vars = [sav_vars,'LOGFX_FULL_ADV','LOGFX_HARD_ADV','LOGFX_SOFT_ADV']
 sav_inds = [sav_inds]
 
 

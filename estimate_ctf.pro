@@ -1,9 +1,9 @@
-PRO estimate_ctf, RXZ = rxz
+PRO estimate_ctf
 
 
 common _data
 common _nhobs
-
+common _rxnh
 
 ;; STDDEV observed in LX-LMIR relation of Chen+17
 rx_scat = 0.2
@@ -11,8 +11,7 @@ rx_scat = 0.2
 ;; separate WISE AGN, detections and non-detections
 iixd = xdet ne '' and iiwac
 iixn = xnon ne '' and iiwac
-if keyword_set(rxz) then rxd = rldet[where(iixd,ndet)]-alog10((1+z[where(iixd)])^(1.8-2.0)) else $
-                         rxd = rldet[where(iixd,ndet)]
+rxd = rldet[where(iixd,ndet)]
 e_rxd = e_rldet[where(iixd)]
 iwagn = where(iiwac,nsrc)
 rxl = rxlim[iwagn]
@@ -51,8 +50,7 @@ for n = 0,niter-1 do begin
     tag = 'frac'+string(rnd(ctf[0]*100,0),format='(i02)')
     re = execute('nh_resamp = {'+tag+':[nh_samp[ithin],24.+randomu(seed,nct)*nh_diff]}')
     re = execute('nh_mod = {'+tag+':(nh_resamp.(0))[randomi(nsrc,n_elements(nh_resamp.(0)))]}')
-    if keyword_set(rxz) then re = execute('rx_mod = {'+tag+':rx2nh_z(nh_mod.(0),z[iwagn],/rx_out,scat=rx_scat)}') else $
-                             re = execute('rx_mod = {'+tag+':rx2nh(nh_mod.(0),/rx_out,scat=rx_scat)}')
+    re = execute('rx_mod = {'+tag+':rx2nh(nh_mod.(0),/rx_out,scat=rx_scat)}')
     re = execute('iimod = {'+tag+':rx_mod.(0) gt rxl}')
     ks = dblarr(2,nfrac)
     kstwo,rxd,(rx_mod.(0))[where(iimod.(0) eq 1)],ks_stat,ks_prob
@@ -65,8 +63,7 @@ for n = 0,niter-1 do begin
         nct = (nthin/(1.-ctf[i]))*ctf[i]
         nh_resamp = create_struct(nh_resamp,tag,[nh_samp[ithin],24.+randomu(seed,nct)*nh_diff])
         nh_mod = create_struct(nh_mod,tag,(nh_resamp.(i))[randomi(nsrc,n_elements(nh_resamp.(i)))])
-        if keyword_set(rxz) then rx_mod = create_struct(rx_mod,tag,rx2nh_z(nh_mod.(i),z[iwagn],/rx_out,scat=rx_scat)) else $
-                                 rx_mod = create_struct(rx_mod,tag,rx2nh(nh_mod.(i),/rx_out,scat=rx_scat))
+        rx_mod = create_struct(rx_mod,tag,rx2nh(nh_mod.(i),/rx_out,scat=rx_scat))
         iimod = create_struct(iimod,tag,rx_mod.(i) gt rxl)
         kstwo,rxd,(rx_mod.(i))[where(iimod.(i) eq 1)],ks_stat,ks_prob
         ks[*,i] = [ks_stat,ks_prob]
