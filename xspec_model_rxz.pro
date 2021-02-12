@@ -115,11 +115,15 @@ if keyword_set(calc) then begin
         c_soft[*,i] = soft[iz[i]+1:iz[i]+num_nh]/full
     endfor
     ;; limit NH ² 25.0
-    ilim = where(nh le 25.,ct)
-    nh = nh[ilim]
-    rx = rx[ilim]
-    c_hard = alog10(c_hard[ilim,*])
-    c_soft = alog10(c_soft[ilim,*])
+    if keyword_set(nhlim) then begin
+        ilim = where(nh le 25.,ct)
+        nh = nh[ilim]
+        rx = rx[ilim]
+        c_hard = c_hard[ilim,*]
+        c_soft = c_soft[ilim,*]
+    endif
+    c_hard = alog10(c_hard)
+    c_soft = alog10(c_soft)
     
     save,zv,nh,rx,c_hard,c_soft,file=model+'_scat'+(strsplit(scat,'.',/extract))[-1]+'.sav'
 endif

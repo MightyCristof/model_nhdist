@@ -3,7 +3,7 @@ FUNCTION rx2nh, in_arr, $
                 SCAT = scat
                 
 
-common _rx
+common _rxnh
 
 
 out_arr = dblarr(n_elements(in_arr))-9999.
