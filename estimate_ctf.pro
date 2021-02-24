@@ -5,16 +5,6 @@ common _data
 common _nhobs
 common _rxnh
 
-;; STDDEV observed in LX-LMIR relation of Chen+17
-rx_scat = 0.2
-
-;; separate WISE AGN, detections and non-detections
-iixd = xdet ne '' and iiwac
-iixn = xnon ne '' and iiwac
-rxd = rldet[where(iixd,ndet)]
-e_rxd = e_rldet[where(iixd)]
-iwagn = where(iiwac,nsrc)
-rxl = rxlim[iwagn]
 
 ;; run this script NITER times and look at the distribution in CTF
 niter = 10000
@@ -53,12 +43,12 @@ for n = 0,niter-1 do begin
     re = execute('nh_resamp = {'+tag+':[nh_samp[ithin],24.+randomu(seed,nct)*nh_diff]}')
     re = execute('nh_mod = {'+tag+':(nh_resamp.(0))[randomi(nsrc,n_elements(nh_resamp.(0)))]}')
     re = execute('rx_mod = {'+tag+':rx2nh(nh_mod.(0),/rx_out,scat=rx_scat)}')
-    re = execute('iimod = {'+tag+':rx_mod.(0) gt rxl}')
+    re = execute('iimod = {'+tag+':rx_mod.(0) gt rxwl}')
     ks = dblarr(2,nfrac)
-    kstwo,rxd,(rx_mod.(0))[where(iimod.(0) eq 1)],ks_stat,ks_prob
+    kstwo,rxwd,(rx_mod.(0))[where(iimod.(0) eq 1)],ks_stat,ks_prob
     ks[*,0] = [ks_stat,ks_prob]
     ad = dblarr(2,nfrac)
-    adtwo,rxd,(rx_mod.(0))[where(iimod.(0) eq 1)],ad_stat,ad_crit
+    adtwo,rxwd,(rx_mod.(0))[where(iimod.(0) eq 1)],ad_stat,ad_crit
     ad[*,0] = [ad_stat,ad_crit]
     for i = 1,nfrac-1 do begin
         tag = 'frac'+string(rnd(ctf[i]*100,0),format='(i02)')
@@ -66,10 +56,10 @@ for n = 0,niter-1 do begin
         nh_resamp = create_struct(nh_resamp,tag,[nh_samp[ithin],24.+randomu(seed,nct)*nh_diff])
         nh_mod = create_struct(nh_mod,tag,(nh_resamp.(i))[randomi(nsrc,n_elements(nh_resamp.(i)))])
         rx_mod = create_struct(rx_mod,tag,rx2nh(nh_mod.(i),/rx_out,scat=rx_scat))
-        iimod = create_struct(iimod,tag,rx_mod.(i) gt rxl)
-        kstwo,rxd,(rx_mod.(i))[where(iimod.(i) eq 1)],ks_stat,ks_prob
+        iimod = create_struct(iimod,tag,rx_mod.(i) gt rxwl)
+        kstwo,rxwd,(rx_mod.(i))[where(iimod.(i) eq 1)],ks_stat,ks_prob
         ks[*,i] = [ks_stat,ks_prob]
-        adtwo,rxd,(rx_mod.(i))[where(iimod.(i) eq 1)],ad_stat,ad_crit
+        adtwo,rxwd,(rx_mod.(i))[where(iimod.(i) eq 1)],ad_stat,ad_crit
         ad[*,i] = [ad_stat,ad_crit]
     endfor
     ksv[n] = min(ks[0,*],iks)

@@ -6,16 +6,6 @@ common _nhobs
 common _rxnh
 common _ctfest
 
-;; STDDEV observed in LX-LMIR relation of Chen+17
-rx_scat = 0.2
-
-;; separate WISE AGN, detections and non-detections
-iixd = xdet ne '' and iiwac
-iixn = xnon ne '' and iiwac
-rxd = rldet[where(iixd,ndet)]
-e_rxd = e_rldet[where(iixd)]
-iwagn = where(iiwac,nsrc)
-rxl = rxlim[iwagn]
 
 ;; resample observed NH distribution to increase data density
 nsamp = nsrc*100.
@@ -29,8 +19,7 @@ fthin = nthin/nsamp
 nh_diff = 2.
 
 
-;; run for KS test
-
+;; RUN FOR KS TEST
 
 ;; scale the number of CT sources
 ;; consider fraction of CT sources rather than arbitrary number
@@ -66,17 +55,17 @@ for n = 0,niter-1 do begin
         re = execute('nh_resamp2 = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct*ctf24[0]),25.+randomu(seed,nct*ctf25[0])]}')
         re = execute('nh_mod2 = {'+tag2+':(nh_resamp2.(0))[randomi(nsrc,n_elements(nh_resamp2.(0)))]}')
         re = execute('rx_mod2 = {'+tag2+':rx2nh(nh_mod2.(0),/rx_out,scat=rx_scat)}')
-        re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxl}')
+        re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxwl}')
         ks2 = dblarr(2,nsplit)
-        kstwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ks_stat,ks_prob
+        kstwo,rxwd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ks_stat,ks_prob
         ks2[*,0] = [ks_stat,ks_prob]
         for j = 1,nsplit-1 do begin
             tag2 = 'split'+string(rnd(ctf24[j]*100,0),format='(i02)')+'_'+string(rnd(ctf25[j]*100,0),format='(i02)')
             nh_resamp2 = create_struct(nh_resamp2,tag2,[nh_samp[ithin],24.+randomu(seed,nct*ctf24[j]),25.+randomu(seed,nct*ctf25[j])])
             nh_mod2 = create_struct(nh_mod2,tag2,(nh_resamp2.(j))[randomi(nsrc,n_elements(nh_resamp2.(j)))])
             rx_mod2 = create_struct(rx_mod2,tag2,rx2nh(nh_mod2.(j),/rx_out,scat=rx_scat))
-            iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxl)
-            kstwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ks_stat,ks_prob
+            iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxwl)
+            kstwo,rxwd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ks_stat,ks_prob
             ks2[*,j] = [ks_stat,ks_prob]
         endfor
         ksm = min(ks2[0,*],imin)
@@ -90,9 +79,7 @@ sav_vars = ['XHKS','YHKS','CTF_KS','CT24_KSV','CT24_KSV','KS2V']
 sav_inds = []
 
 
-
-;; run for AD test
-
+;; RUN FOR KS TEST
 
 ;; range from NH=24 to end of nh_samp
 ;nh_diff = width([max(nh_samp),24.])
@@ -132,17 +119,17 @@ for n = 0,niter-1 do begin
         re = execute('nh_resamp2 = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct*ctf24[0]),25.+randomu(seed,nct*ctf25[0])]}')
         re = execute('nh_mod2 = {'+tag2+':(nh_resamp2.(0))[randomi(nsrc,n_elements(nh_resamp2.(0)))]}')
         re = execute('rx_mod2 = {'+tag2+':rx2nh(nh_mod2.(0),/rx_out,scat=rx_scat)}')
-        re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxl}')
+        re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxwl}')
         ad2 = dblarr(2,nsplit)
-        adtwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ad_stat,ad_crit
+        adtwo,rxwd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ad_stat,ad_crit
         ad2[*,0] = [ad_stat,ad_crit]
         for j = 1,nsplit-1 do begin
             tag2 = 'split'+string(rnd(ctf24[j]*100,0),format='(i02)')+'_'+string(rnd(ctf25[j]*100,0),format='(i02)')
             nh_resamp2 = create_struct(nh_resamp2,tag2,[nh_samp[ithin],24.+randomu(seed,nct*ctf24[j]),25.+randomu(seed,nct*ctf25[j])])
             nh_mod2 = create_struct(nh_mod2,tag2,(nh_resamp2.(j))[randomi(nsrc,n_elements(nh_resamp2.(j)))])
             rx_mod2 = create_struct(rx_mod2,tag2,rx2nh(nh_mod2.(j),/rx_out,scat=rx_scat))
-            iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxl)
-            adtwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ad_stat,ad_crit
+            iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxwl)
+            adtwo,rxwd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ad_stat,ad_crit
             ad2[*,j] = [ad_stat,ad_crit]
         endfor
         adm = min(ad2[0,*],imin)

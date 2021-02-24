@@ -25,16 +25,16 @@ surv = ['SIMRLW','WNH_POWER','WNH_BORUS']                   ;; surv_anal.sav
 stak = ['ENRANGEV','FLUXV','FLUX_ERRV','LXV']               ;; stack_output.sav
 
 ;; IDL save files containing above variables
-files = ['fits.sav','resamp.sav','detections_cha.sav','detections_wac.sav','src_luminosities.sav', $
+files = ['fits.sav','resamp.sav','detections_wac.sav','src_luminosities.sav', $
          'quality_src.sav','combined_lum.sav','surv_anal.sav','stack_output/stack_output.sav']
 ;; restore all data
 for i = 0,n_elements(files)-1 do restore,dir+files[i]
 
-;; extract hard (2-7 keV) and soft (0.5-2 keV) band flux for Chandra sources
-chandra_hard_soft,[[fpl90s],[fpl90s_err]],[[fpl90m],[fpl90m_err]],[[fpl90h],[fpl90h_err]],softx,hardx
-fxs_cha = softx[*,0] & e_fxs_cha = softx[*,1]
-fxh_cha = hardx[*,0] & e_fxh_cha = hardx[*,1]
-fits = [fits,'FXS_CHA','E_FXS_CHA','FXH_CHA','E_FXH_CHA']
+;;; extract hard (2-7 keV) and soft (0.5-2 keV) band flux for Chandra sources
+;chandra_hard_soft,[[fpl90s],[fpl90s_err]],[[fpl90m],[fpl90m_err]],[[fpl90h],[fpl90h_err]],softx,hardx
+;fxs_cha = softx[*,0] & e_fxs_cha = softx[*,1]
+;fxh_cha = hardx[*,0] & e_fxh_cha = hardx[*,1]
+;fits = [fits,'FXS_CHA','E_FXS_CHA','FXH_CHA','E_FXH_CHA']
 
 ;; correct RCH output to have BAGN then GAL
 isort = [0,1,2,3,5,4]       ;; sort on Carroll+20 Table 6 [WDET,WNON,RDET,RNON,BAGN,GAL]
@@ -61,13 +61,26 @@ stak  = ['XSUBG',stak]
 iq = where(iiqual)
 for i = 0,n_elements(fits)-1 do re = execute(fits[i]+' = '+fits[i]+'[iq]')
 ;; LL to RL
-rl = ['RLDET','E_RLDET','RLNON','E_RLNON']
+rx = ['RXDET','E_RXDET','RXNON','E_RXNON']
 ill = where(strmatch(fits,'*LL*'),llct)
 if (llct gt 0) then begin
-    for i = 0,llct-1 do re = execute(rl[i]+' = '+fits[ill[i]])
-    fits = [fits[0:ill[0]-1],rl,fits[ill[-1]+1:-1]]
+    for i = 0,llct-1 do re = execute(rx[i]+' = '+fits[ill[i]])
+    fits = [fits[0:ill[0]-1],rx,fits[ill[-1]+1:-1]]
 endif
 
+;; STDDEV observed in LX-LMIR relation of Chen+17
+rx_scat = 0.2
+;; separate WISE AGN, detections and non-detections
+iwac = where(iiwac,nsrc)
+iiwd = iiwac and xdet ne ''
+iiwn = iiwac and xnon ne ''
+rxwd = rxdet[where(iiwd,ndet)]
+e_rxwd = e_rxdet[where(iiwd)]
+rxwl = rxlim[where(iiwac)]
+;; add to variable list
+fits = [fits,'RX_SCAT','NSRC','IIWD','IIWN','RXWD','E_RXWD','RXWL']
+
+;; save
 var_str = strjoin([fits,surv,stak],',')
 re = execute('save,'+var_str+',file="carroll21_data.sav"')
 
