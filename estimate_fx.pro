@@ -11,12 +11,12 @@ common _rxmod
 ;; Follow procedure of Carroll+20 (XSTACK_OUTPUT, STACK_NONDET_FLUX, MC_NONDET_DIST)
 
 ;; use only Chandra sources to match Chandra X-ray stacking
-if keyword_set(cha) then ixn = where(iixn and xnon eq 'CHA',nnon) else $
-                         ixn = where(iixn,nnon)
+if keyword_set(cha) then iwn = where(iiwn and xnon eq 'CHA',nnon) else $
+                         iwn = where(iiwn,nnon)
 ;; data for non-detected sample
-loglxir_non = loglxir[ixn]
-z_non = z[ixn]
-dl2_non = dl2[ixn]
+loglxir_non = loglxir[iwn]
+z_non = z[iwn]
+dl2_non = dl2[iwn]
 ;; prep observed frame hard and soft conversion arrays
 iz = value_locate(zv,z_non)
 c_hard_non = c_hard[*,iz]
@@ -32,16 +32,16 @@ logfx_soft_ksv = dblarr(nnon,niter)
 ;; in Carroll+20, we take the model RL and subtract from it the observations
 ;; this doesn't work here as the observations are greater than the simulated observed
 ;; for now, subtracting the model detected 
-rx_modn_ks = (rx_mod2_ks.(iks2))[where(iimod2_ks.(iks2) eq 0,nmodn_ks)]
+inon = where(iimod2_ks[*,iks2] eq 0,nonct)
+if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
+rx_modn_ks = (rx_mod2_ks[*,iks2])[inon]
 
 ;; sample from model RL for each non-detected observation (NNON)
-print, 'KS: ESTIMATE_FX - 0%'
 for j = 0,niter-1 do begin    
     rx_samp_ks = mc_samp(rx_modn_ks,nnon)
     loglx_full_ks = rx_samp_ks + loglxir_non
     logfx_full_ks = loglx_full_ks - alog10(4.*!const.pi*dl2_non)
     logfx_full_ksv[*,j] = logfx_full_ks
-    if (j gt 0 and j mod (niter/2.) eq 0) then print, 'KS: ESTIMATE_FX - 50% COMPLETE'
     ;; convert 2-10keV to soft and hard fluxes
     logfx_hard_ks = logfx_full_ks
     logfx_soft_ks = logfx_full_ks
@@ -53,7 +53,6 @@ for j = 0,niter-1 do begin
     logfx_hard_ksv[*,j] = logfx_hard_ks
     logfx_soft_ksv[*,j] = logfx_soft_ks
 endfor
-print, 'KS: ESTIMATE_FX - 100% COMPLETE'
 
 sav_vars = ['LOGFX_FULL_KSV','LOGFX_HARD_KSV','LOGFX_SOFT_KSV']
 sav_inds = []
@@ -70,16 +69,16 @@ logfx_soft_adv = dblarr(nnon,niter)
 ;; in Carroll+20, we take the model RL and subtract from it the observations
 ;; this doesn't work here as the observations are greater than the simulated observed
 ;; for now, subtracting the model detected 
-rx_modn_ad = (rx_mod2_ad.(iad2))[where(iimod2_ad.(iad2) eq 0,nmodn_ad)]
+inon = where(iimod2_ad[*,iad2] eq 0,nonct)
+if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
+rx_modn_ad = (rx_mod2_ad[*,iad2])[inon]
 
 ;; sample from model RL for each non-detected observation (NNON)
-print, 'AD: ESTIMATE_FX - 0%'
 for j = 0,niter-1 do begin    
     rx_samp_ad = mc_samp(rx_modn_ad,nnon)
     loglx_full_ad = rx_samp_ad + loglxir_non
     logfx_full_ad = loglx_full_ad - alog10(4.*!const.pi*dl2_non)
     logfx_full_adv[*,j] = logfx_full_ad
-    if (j gt 0 and j mod (niter/2.) eq 0) then print, 'AD: ESTIMATE_FX - 50% COMPLETE'
     ;; convert 2-10keV to soft and hard fluxes
     logfx_hard_ad = logfx_full_ad
     logfx_soft_ad = logfx_full_ad
@@ -91,7 +90,6 @@ for j = 0,niter-1 do begin
     logfx_hard_adv[*,j] = logfx_hard_ad
     logfx_soft_adv[*,j] = logfx_soft_ad
 endfor
-print, 'AD: ESTIMATE_FX - 100% COMPLETE'
 
 sav_vars = [sav_vars,'LOGFX_FULL_ADV','LOGFX_HARD_ADV','LOGFX_SOFT_ADV']
 sav_inds = [sav_inds]

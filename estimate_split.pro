@@ -79,7 +79,7 @@ sav_vars = ['XHKS','YHKS','CTF_KS','CT24_KSV','CT25_KSV','KS2V']
 sav_inds = []
 
 
-;; RUN FOR KS TEST
+;; RUN FOR AD TEST
 
 ;; range from NH=24 to end of nh_samp
 ;nh_diff = width([max(nh_samp),24.])

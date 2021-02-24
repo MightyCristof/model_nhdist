@@ -10,7 +10,7 @@ common _fxest
 
 
 if keyword_set(postdoc_apps)
-    ymod = histogram(nh_mod2_ks.(iks2),locations=xmod,bin=1.,min=19.,max=27.)
+    ymod = histogram(nh_mod2_ks[*,iks2],locations=xmod,bin=1.,min=19.,max=27.)
     c_ana = total(nh_ana_lo.yh)
     c_me = c_ana/total(ymod)
 
@@ -19,7 +19,7 @@ if keyword_set(postdoc_apps)
          xtitle:'$log !8N!7_{H} [cm^{-2}]$', $
          stairstep:1,thick:4, $
          buffer:0}
-    im1 = image('data_prep/Ananna+2019_Fig10 LOW.jpg',transparency=60,dimension=[550,440],position=[50,65,530,415],/device)
+    im1 = image('../data_prep/Ananna+2019_Fig10 LOW.jpg',transparency=60,dimension=[550,440],position=[50,65,530,415],/device)
     ;p = plot(nh_ana_lo.xh,nh_ana_lo.yh,/stairstep,xra=,yra=[,col='orange',/current,position=im1.position)
     p = plot(xmod+width(xmod)/2.,ymod*c_me,'__',col='red',_extra=e,/current,position=im1.position,name='Carroll et al. (in prep.)')
     l = legend(target=p,/auto_text_color,position=[22.9,0.88],/data,HORIZONTAL_SPACING=0.06) 
