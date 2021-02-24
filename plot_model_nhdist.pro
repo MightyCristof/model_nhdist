@@ -31,10 +31,11 @@ endif
 if keyword_set(comp_nh) then begin
     yks = histogram(nh_mod2_ks.(iks2),location=xks,min=20.,max=26.,bin=1.)
     yad = histogram(nh_mod2_ad.(iad2),location=xad,min=20.,max=26.,bin=1.)
-    p = plot(nh_ana_lo.xh,nh_ana_lo.yh,/stairstep,xra=[20.,26.],yra=[0.,2.0],thick=4,xtitle='$N_H$')
+    p = plot(nh_ana_lo.xh,nh_ana_lo.yh,/stairstep,xra=[20.,26.],yra=[0.,1.6],thick=4,xtitle='$N_H$')
+    p = plot(nh_ana_hi.xh,nh_ana_hi.yh,/stairstep,'--',thick=4,/ov)
     p = plot(xks+0.5,yks/total(yks[where(xks lt 24.)]),/stairstep,col='teal','__',/ov,thick=4)
     p = plot(xad+0.5,yad/total(yad[where(xad lt 24.)]),/stairstep,col='purple','-.',/ov,thick=4)
-    t = text(21.,1.45,'Model: SCAT 0.005, RXz',/data)
+    t = text(21.,1.45,'Model: 1% scatter ',/data)
     t = text(21.,1.3,'$log F_X [KS]: '+string(median(logfx_med_ksv),format='(f6.2)')+'$',/data,col='teal')
     t = text(21.,1.15,'$log F_X [AD]: '+string(median(logfx_med_adv),format='(f6.2)')+'$',/data,col='purple')
 endif

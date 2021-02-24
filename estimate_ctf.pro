@@ -17,9 +17,11 @@ iwagn = where(iiwac,nsrc)
 rxl = rxlim[iwagn]
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 1000
+niter = 10000
 ctf_ksv = dblarr(niter)
 ctf_adv = dblarr(niter)
+ksv = dblarr(niter)
+adv = dblarr(niter)
 
 for n = 0,niter-1 do begin
     if n mod (niter/10) eq 0 then print, strtrim(n/(niter/100),2)+'% complete'
@@ -36,7 +38,7 @@ for n = 0,niter-1 do begin
     nh_diff = 2.
     ;; scale the number of CT sources
     ;; consider fraction of CT sources rather than arbitrary number
-    div = 50.
+    div = 100.
     ctf = dindgen(div-1,start=1)/div
     nfrac = n_elements(ctf)
     ;; NH_RESAMP: structure of increased CT sources. scale1_0 == nh_samp
@@ -70,14 +72,14 @@ for n = 0,niter-1 do begin
         adtwo,rxd,(rx_mod.(i))[where(iimod.(i) eq 1)],ad_stat,ad_crit
         ad[*,i] = [ad_stat,ad_crit]
     endfor
-    ks_min = min(ks[0,*],iks)
+    ksv[n] = min(ks[0,*],iks)
     ctf_ksv[n] = ctf[iks]
-    ad_min = min(ad[0,*],iad)
+    adv[n] = min(ad[0,*],iad)
     ctf_adv[n] = ctf[iad]
 endfor
 print, 'ESTIMATE_CTF - COMPLETE'
 
-sav_vars = ['CTF_KSV','CTF_ADV']
+sav_vars = ['CTF_KSV','KSV','CTF_ADV','ADV']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

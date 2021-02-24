@@ -1,6 +1,7 @@
 PRO xspec_model_rxz, SCAT = scat, $
                      XCM = xcm, $
-                     CALC = calc
+                     CALC = calc, $
+                     NHLIM = nhlim
 
 
 engv = ['0.5 2','2 7','2 10']

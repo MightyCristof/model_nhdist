@@ -27,15 +27,22 @@ fthin = nthin/nsamp
 ;nh_diff = width([max(nh_samp),24.])
 ;; range from NH=24-26
 nh_diff = 2.
+
+
+;; run for KS test
+
+
 ;; scale the number of CT sources
 ;; consider fraction of CT sources rather than arbitrary number
-yhks = cdf(ctf_ksv,bin=freedman(ctf_ksv),xloc=xhks)
-yhad = cdf(ctf_adv,bin=freedman(ctf_adv),xloc=xhad)
-div = 100.
-ctf2sig_ks = [rnd(xhks[value_locate(yhks,0.05)],2):rnd(xhks[value_locate(yhks,0.95)],2):1./div]
-ctf2sig_ad = [rnd(xhad[value_locate(yhad,0.05)],2):rnd(xhad[value_locate(yhad,0.95)],2):1./div]
-ctf2sig = [ctf2sig_ks[0]<ctf2sig_ad[0]:ctf2sig_ks[-1]>ctf2sig_ad[-1]:1./div]
-nfrac = n_elements(ctf2sig)
+yhks = edf(ctf_ksv,xloc=xhks)
+div = 100.d
+;; all, 3-,2-,1-sigma
+;ctf_ks = minmax(ctf_ksv)
+ctf_ks = [xhks[value_locate(yhks,0.01)]:xhks[value_locate(yhks,0.99)]:1./div]
+;ctf_ks = [xhks[value_locate(yhks,0.05)]:xhks[value_locate(yhks,0.95)]:1./div]
+;ctf_ks = [xhks[value_locate(yhks,0.32)]:xhks[value_locate(yhks,0.68)]:1./div]
+;; don't loops twice, just do it once
+nfrac_ks = n_elements(ctf_ks)
 
 ;; now do the same as above, but allow the range of NH to differ in bins
 ;; CTF must sum to 1 across bins
@@ -44,20 +51,17 @@ ctf25 = dindgen(div2-1,start=1)/div2
 ctf24 = 1.-ctf25
 nsplit = n_elements(ctf24)
 
-
-
-niter = 100
-ctf24_ksv = dblarr(nfrac,niter)
-ctf25_ksv = dblarr(nfrac,niter)
-ctf24_adv = dblarr(nfrac,niter)
-ctf25_adv = dblarr(nfrac,niter)
+niter = 1000
+ct24_ksv = dblarr(nfrac_ks,niter)
+ct24_ksv = dblarr(nfrac_ks,niter)
+ks2v = dblarr(nfrac_ks,niter)
 
 for n = 0,niter-1 do begin
     if n mod (niter/10) eq 0 then print, strtrim(n/(niter/100),2)+'% complete'
 
     ;print, 'MODEL_RXDIST FREE - 0% COMPLETE'
-    for i = 0,nfrac-1 do begin
-        nct = (nthin/(1.-ctf2sig[i]))*ctf2sig[i]
+    for i = 0,nfrac_ks-1 do begin
+        nct = (nthin/(1.-ctf_ks[i]))*ctf_ks[i]
         tag2 = 'split'+string(rnd(ctf24[0]*100,0),format='(i02)')+'_'+string(rnd(ctf25[0]*100,0),format='(i02)')
         re = execute('nh_resamp2 = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct*ctf24[0]),25.+randomu(seed,nct*ctf25[0])]}')
         re = execute('nh_mod2 = {'+tag2+':(nh_resamp2.(0))[randomi(nsrc,n_elements(nh_resamp2.(0)))]}')
@@ -66,6 +70,69 @@ for n = 0,niter-1 do begin
         ks2 = dblarr(2,nsplit)
         kstwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ks_stat,ks_prob
         ks2[*,0] = [ks_stat,ks_prob]
+        for j = 1,nsplit-1 do begin
+            tag2 = 'split'+string(rnd(ctf24[j]*100,0),format='(i02)')+'_'+string(rnd(ctf25[j]*100,0),format='(i02)')
+            nh_resamp2 = create_struct(nh_resamp2,tag2,[nh_samp[ithin],24.+randomu(seed,nct*ctf24[j]),25.+randomu(seed,nct*ctf25[j])])
+            nh_mod2 = create_struct(nh_mod2,tag2,(nh_resamp2.(j))[randomi(nsrc,n_elements(nh_resamp2.(j)))])
+            rx_mod2 = create_struct(rx_mod2,tag2,rx2nh(nh_mod2.(j),/rx_out,scat=rx_scat))
+            iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxl)
+            kstwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ks_stat,ks_prob
+            ks2[*,j] = [ks_stat,ks_prob]
+        endfor
+        ksm = min(ks2[0,*],imin)
+        ks2v[i,n] = ks2[0,imin]
+        ct24_ksv[i,n] = ctf24[imin]
+        ct24_ksv[i,n] = ctf25[imin]
+    endfor
+endfor
+
+sav_vars = ['XHKS','YHKS','CTF_KS','CT24_KSV','CT24_KSV','KS2V']            
+sav_inds = []
+
+
+
+;; run for AD test
+
+
+;; range from NH=24 to end of nh_samp
+;nh_diff = width([max(nh_samp),24.])
+;; range from NH=24-26
+nh_diff = 2.
+;; scale the number of CT sources
+;; consider fraction of CT sources rather than arbitrary number
+yhad = edf(ctf_adv,xloc=xhad)
+div = 100.d
+;; all, 3-,2-,1-sigma
+;ctf_ad = minmax(ctf_adv)
+ctf_ad = [xhad[value_locate(yhad,0.01)]:xhad[value_locate(yhad,0.99)]:1./div]
+;ctf_ad = [xhad[value_locate(yhad,0.05)]:xhad[value_locate(yhad,0.95)]:1./div]
+;ctf_ad = [xhad[value_locate(yhad,0.32)]:xhad[value_locate(yhad,0.68)]:1./div]
+;; don't loops twice, just do it once
+nfrac_ad = n_elements(ctf_ad)
+
+;; now do the same as above, but allow the range of NH to differ in bins
+;; CTF must sum to 1 across bins
+div2 = 100.
+ctf25 = dindgen(div2-1,start=1)/div2
+ctf24 = 1.-ctf25
+nsplit = n_elements(ctf24)
+
+niter = 1000
+ct24_adv = dblarr(nfrac_ad,niter)
+ct24_adv = dblarr(nfrac_ad,niter)
+ad2v = dblarr(nfrac_ad,niter)
+
+for n = 0,niter-1 do begin
+    if n mod (niter/10) eq 0 then print, strtrim(n/(niter/100),2)+'% complete'
+
+    ;print, 'MODEL_RXDIST FREE - 0% COMPLETE'
+    for i = 0,nfrac_ad-1 do begin
+        nct = (nthin/(1.-ctf_ad[i]))*ctf_ad[i]
+        tag2 = 'split'+string(rnd(ctf24[0]*100,0),format='(i02)')+'_'+string(rnd(ctf25[0]*100,0),format='(i02)')
+        re = execute('nh_resamp2 = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct*ctf24[0]),25.+randomu(seed,nct*ctf25[0])]}')
+        re = execute('nh_mod2 = {'+tag2+':(nh_resamp2.(0))[randomi(nsrc,n_elements(nh_resamp2.(0)))]}')
+        re = execute('rx_mod2 = {'+tag2+':rx2nh(nh_mod2.(0),/rx_out,scat=rx_scat)}')
+        re = execute('iimod2 = {'+tag2+':rx_mod2.(0) gt rxl}')
         ad2 = dblarr(2,nsplit)
         adtwo,rxd,(rx_mod2.(0))[where(iimod2.(0) eq 1)],ad_stat,ad_crit
         ad2[*,0] = [ad_stat,ad_crit]
@@ -75,37 +142,19 @@ for n = 0,niter-1 do begin
             nh_mod2 = create_struct(nh_mod2,tag2,(nh_resamp2.(j))[randomi(nsrc,n_elements(nh_resamp2.(j)))])
             rx_mod2 = create_struct(rx_mod2,tag2,rx2nh(nh_mod2.(j),/rx_out,scat=rx_scat))
             iimod2 = create_struct(iimod2,tag2,rx_mod2.(j) gt rxl)
-            kstwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ks_stat,ks_prob
-            ks2[*,j] = [ks_stat,ks_prob]
             adtwo,rxd,(rx_mod2.(j))[where(iimod2.(j) eq 1)],ad_stat,ad_crit
             ad2[*,j] = [ad_stat,ad_crit]
         endfor
-        ksm = min(ks2[0,*],imin)
-        ctf24_ksv[i,n] = ctf24[imin]
-        ctf25_ksv[i,n] = ctf25[imin]
         adm = min(ad2[0,*],imin)
-        ctf24_adv[i,n] = ctf24[imin]
-        ctf25_adv[i,n] = ctf25[imin]
+        ad2v[i,n] = ad2[0,imin]
+        ct24_adv[i,n] = ctf24[imin]
+        ct24_adv[i,n] = ctf25[imin]
     endfor
 endfor
 
-;; save full arrays and reduce to 2sigma per run
-ctf24_ksv_full = ctf24_ksv
-ctf25_ksv_full = ctf25_ksv
-ictf_ks = [value_locate(ctf2sig,ctf2sig_ks[0]):value_locate(ctf2sig,ctf2sig_ks[-1]):1]
-ctf24_ksv = ctf24_ksv[ictf_ks,*]
-ctf25_ksv = ctf25_ksv[ictf_ks,*]
-
-ctf24_adv_full = ctf24_adv
-ctf25_adv_full = ctf25_adv
-ictf_ad = [value_locate(ctf2sig,ctf2sig_ad[0]):value_locate(ctf2sig,ctf2sig_ad[-1]):1]
-ctf24_adv = ctf24_adv[ictf_ad,*]
-ctf25_adv = ctf25_adv[ictf_ad,*]
-
-sav_vars = ['CTF2SIG','CTF24_KSV_FULL','CTF25_KSV_FULL','CTF24_ADV_FULL','CTF25_ADV_FULL', $
-            'XHKS','YHKS','CTF2SIG_KS','CTF24_KSV','CTF25_KSV', $
-            'XHAD','YHAD','CTF2SIG_AD','CTF24_ADV','CTF25_ADV']            
+sav_vars = [sav_vars,'XHAD','YHAD','CTF_AD','CT24_ADV','CT24_ADV','AD2V']            
 sav_inds = []
+
 
 sav_str = strjoin([sav_vars,sav_inds],',')
 re = execute('save,'+sav_str+',/compress,file="split_estimate.sav"')

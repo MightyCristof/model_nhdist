@@ -34,8 +34,8 @@ nh_diff = 2.
 ;; scale the number of CT sources
 ;; consider fraction of CT sources rather than arbitrary number
 ;; reduce KS/AD to 2sigma separately (run was combined in previous step for computational time)
-ifrac_ks = value_locate(ctf2sig_ks,median(ctf_ksv))
-ctf_ks = ctf2sig_ks[ifrac_ks]
+ifrac_ks = value_locate(ctf_sig_ks,median(ctf_ksv))
+ctf_ks = ctf_sig_ks[ifrac_ks]
 ;; NH_RESAMP: structure of increased CT sources. scale1_0 == nh_samp
 ;; NH_RESAMP has different number of sources per tag, cannot use SOA2AOS
 ;; NH_MOD: draw (from NH_RESAMP) a number of sources == X-ray non-detections
@@ -65,7 +65,7 @@ ctf25_ks = 1.-ctf24_ks;rnd(median(ctf25_ksv[ifrac_ks,*]),2)
 niter = 1000
 fmt2 = 'i0'+strtrim(strlen(strtrim(niter,2)),2)
 
-print, 'KS: MODEL_RXDIST FREE - 0% COMPLETE'
+print, 'KS: MODEL_RXDIST - 0% COMPLETE'
 re = execute('tag2 = "iter"+string(0,format="('+fmt2+')")')
 re = execute('nh_resamp2_ks = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct_ks*ctf24_ks[0]),25.+randomu(seed,nct_ks*ctf25_ks[0])]}')
 re = execute('nh_mod2_ks = {'+tag2+':(nh_resamp2_ks.(0))[randomi(nsrc,n_elements(nh_resamp2_ks.(0)))]}')
@@ -82,9 +82,9 @@ for j = 1,niter-1 do begin
     iimod2_ks = create_struct(iimod2_ks,tag2,rx_mod2_ks.(j) gt rxl)
     kstwo,rxd,(rx_mod2_ks.(j))[where(iimod2_ks.(j) eq 1)],ks_stat,ks_prob
     ks2[*,j] = [ks_stat,ks_prob]
-    if (j mod (niter/2.) eq 0) then print, 'KS: MODEL_RXDIST FREE - 50% COMPLETE'
+    if (j mod (niter/2.) eq 0) then print, 'KS: MODEL_RXDIST - 50% COMPLETE'
 endfor
-print, 'KS: MODEL_RXDIST FREE - 100% COMPLETE'
+print, 'KS: MODEL_RXDIST - 100% COMPLETE'
 
 ks2med = median(ks2[0,*])
 isort = sort(ks2[0,*])
@@ -102,8 +102,8 @@ sav_inds = [sav_inds,'IIMOD2_KS','IKS2']
 ;; scale the number of CT sources
 ;; consider fraction of CT sources rather than arbitrary number
 ;; reduce KS/AD to 2sigma separately (run was combined in previous step for computational time)
-ifrac_ad = value_locate(ctf2sig_ad,median(ctf_adv))
-ctf_ad = ctf2sig_ad[ifrac_ad]
+ifrac_ad = value_locate(ctf_sig_ad,median(ctf_adv))
+ctf_ad = ctf_sig_ad[ifrac_ad]
 ;; NH_RESAMP: structure of increased CT sources. scale1_0 == nh_samp
 ;; NH_RESAMP has different number of sources per tag, cannot use SOA2AOS
 ;; NH_MOD: draw (from NH_RESAMP) a number of sources == X-ray non-detections
@@ -131,7 +131,7 @@ ctf25_ad = 1.-ctf24_ad;rnd(median(ctf25_adv[ifrac_ad,*]),2)
 niter = 1000
 fmt2 = 'i0'+strtrim(strlen(strtrim(niter,2)),2)
 
-print, 'AD: MODEL_RXDIST FREE - 0% COMPLETE'
+print, 'AD: MODEL_RXDIST - 0% COMPLETE'
 re = execute('tag2 = "iter"+string(0,format="('+fmt2+')")')
 re = execute('nh_resamp2_ad = {'+tag2+':[nh_samp[ithin],24.+randomu(seed,nct_ad*ctf24_ad[0]),25.+randomu(seed,nct_ad*ctf25_ad[0])]}')
 re = execute('nh_mod2_ad = {'+tag2+':(nh_resamp2_ad.(0))[randomi(nsrc,n_elements(nh_resamp2_ad.(0)))]}')
@@ -148,9 +148,9 @@ for j = 1,niter-1 do begin
     iimod2_ad = create_struct(iimod2_ad,tag2,rx_mod2_ad.(j) gt rxl)
     adtwo,rxd,(rx_mod2_ad.(j))[where(iimod2_ad.(j) eq 1)],ad_stat,ad_crit
     ad2[*,j] = [ad_stat,ad_crit]
-    if (j mod (niter/2.) eq 0) then print, 'AD: MODEL_RXDIST FREE - 50% COMPLETE'
+    if (j mod (niter/2.) eq 0) then print, 'AD: MODEL_RXDIST - 50% COMPLETE'
 endfor
-print, 'AD: MODEL_RXDIST FREE - 100% COMPLETE'
+print, 'AD: MODEL_RXDIST - 100% COMPLETE'
 
 ad2med = median(ad2[0,*])
 isort = sort(ad2[0,*])
