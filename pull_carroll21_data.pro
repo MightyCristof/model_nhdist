@@ -71,7 +71,7 @@ endif
 ;; STDDEV observed in LX-LMIR relation of Chen+17
 rx_scat = 0.2
 ;; separate WISE AGN, detections and non-detections
-iwac = where(iiwac,nsrc)
+iwac = where(iiwac)
 iiwd = iiwac and xdet ne ''
 iiwn = iiwac and xnon ne ''
 iisd = ~iiwac and xdet ne ''
@@ -79,10 +79,10 @@ iisn = ~iiwac and xnon ne ''
 ;; set variables for modeling
 ;rxd = rxdet[where(iiwd,ndet)]
 ;e_rxd = e_rxdet[where(iiwd)]
-;rxl = rxlim[where(iiwac)]
+;rxl = rxlim[where(iiwac,nsrc)]
 rxd = rxdet[where(iisd,ndet)]
 e_rxd = e_rxdet[where(iisd)]
-rxl = rxlim[where(~iiwac)]
+rxl = rxlim[where(~iiwac,nsrc)]
 ;; add to variable list
 fits = [fits,'RX_SCAT','NSRC','IIWD','IIWN','IISD','IISN','RXD','E_RXD','RXL']
 
