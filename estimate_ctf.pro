@@ -37,30 +37,27 @@ for n = 0,niter-1 do begin
     ;; RX_MOD: convert the NH model to RX with observed scatter in Chen+17 LX-LMIR
     ;; IIMOD: where rx_mod > RX non-detection from Carroll+20
     ;; KS: KS test between RX model detections and RX detections from Carroll+20
-    ;; AD: Anderson-Darling test statistic
-    nct = (nthin/(1.-ctf[0]))*ctf[0]
-    tag = 'frac'+string(rnd(ctf[0]*100,0),format='(i02)')
-    re = execute('nh_resamp = {'+tag+':[nh_samp[ithin],24.+randomu(seed,nct)*nh_diff]}')
-    re = execute('nh_mod = {'+tag+':(nh_resamp.(0))[randomi(nsrc,n_elements(nh_resamp.(0)))]}')
-    re = execute('rx_mod = {'+tag+':rx2nh(nh_mod.(0),/rx_out,scat=rx_scat)}')
-    re = execute('iimod = {'+tag+':rx_mod.(0) gt rxwl}')
+    ;; AD: Anderson-Darling test statistic    
+    nh_mod = dblarr(nsrc,nfrac)
+    rx_mod = dblarr(nsrc,nfrac)
+    iimod = bytarr(nsrc,nfrac)
     ks = dblarr(2,nfrac)
-    kstwo,rxwd,(rx_mod.(0))[where(iimod.(0) eq 1)],ks_stat,ks_prob
-    ks[*,0] = [ks_stat,ks_prob]
     ad = dblarr(2,nfrac)
-    adtwo,rxwd,(rx_mod.(0))[where(iimod.(0) eq 1)],ad_stat,ad_crit
-    ad[*,0] = [ad_stat,ad_crit]
-    for i = 1,nfrac-1 do begin
-        tag = 'frac'+string(rnd(ctf[i]*100,0),format='(i02)')
-        nct = (nthin/(1.-ctf[i]))*ctf[i]
-        nh_resamp = create_struct(nh_resamp,tag,[nh_samp[ithin],24.+randomu(seed,nct)*nh_diff])
-        nh_mod = create_struct(nh_mod,tag,(nh_resamp.(i))[randomi(nsrc,n_elements(nh_resamp.(i)))])
-        rx_mod = create_struct(rx_mod,tag,rx2nh(nh_mod.(i),/rx_out,scat=rx_scat))
-        iimod = create_struct(iimod,tag,rx_mod.(i) gt rxwl)
-        kstwo,rxwd,(rx_mod.(i))[where(iimod.(i) eq 1)],ks_stat,ks_prob
-        ks[*,i] = [ks_stat,ks_prob]
-        adtwo,rxwd,(rx_mod.(i))[where(iimod.(i) eq 1)],ad_stat,ad_crit
-        ad[*,i] = [ad_stat,ad_crit]
+    
+    for i = 0,nfrac-1 do begin
+        nct = round((nthin/(1.-ctf[i]))*ctf[i])
+        nh_resamp = [nh_samp[ithin],24.+randomu(seed,nct)*nh_diff]
+        nresamp = n_elements(nh_resamp)
+        nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
+        rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)
+        iimod[*,i] = rx_mod[*,i] gt rxl
+        idet = where(iimod[*,i] eq 1,detct)
+        if (detct gt 0) then begin
+            kstwo,rxd,rx_mod[idet,i],ks_stat,ks_prob
+            ks[*,i] = [ks_stat,ks_prob]
+            adtwo,rxd,rx_mod[idet,i],ad_stat,ad_crit
+            ad[*,i] = [ad_stat,ad_crit]
+        endif else message, 'NO MODELED DETECTIONS.'
     endfor
     ksv[n] = min(ks[0,*],iks)
     ctf_ksv[n] = ctf[iks]

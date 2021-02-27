@@ -42,11 +42,11 @@ nct_ks = (nthin/(1.-ctf_ksx))*ctf_ksx
 nh_resamp_ks = [nh_samp[ithin],24.+randomu(seed,nct_ks)*nh_diff]
 nh_mod_ks = (nh_resamp_ks)[randomi(nsrc,n_elements(nh_resamp_ks))]
 rx_mod_ks = rx2nh(nh_mod_ks,/rx_out,scat=rx_scat)
-iimod_ks = rx_mod_ks gt rxwl
-kstwo,rxwd,rx_mod_ks[where(iimod_ks eq 1)],ks_stat,ks_prob
+iimod_ks = rx_mod_ks gt rxl
+kstwo,rxd,rx_mod_ks[where(iimod_ks eq 1)],ks_stat,ks_prob
 ks = [ks_stat,ks_prob]
 
-sav_vars = [sav_vars,'CTF_KSX','NH_RESAMP_KS','NH_MOD_KS','RX_MOD_KS','KS']
+sav_vars = [sav_vars,'CTF_KSX','NH_MOD_KS','RX_MOD_KS','KS']
 sav_inds = [sav_inds,'ICTF_KSX','IIMOD_KS']
 
 
@@ -66,11 +66,11 @@ nct_ad = (nthin/(1.-ctf_adx))*ctf_adx
 nh_resamp_ad = [nh_samp[ithin],24.+randomu(seed,nct_ad)*nh_diff]
 nh_mod_ad = (nh_resamp_ad)[randomi(nsrc,n_elements(nh_resamp_ad))]
 rx_mod_ad = rx2nh(nh_mod_ad,/rx_out,scat=rx_scat)
-iimod_ad = rx_mod_ad gt rxwl
-adtwo,rxwd,rx_mod_ad[where(iimod_ad eq 1)],ad_stat,ad_crit
+iimod_ad = rx_mod_ad gt rxl
+adtwo,rxd,rx_mod_ad[where(iimod_ad eq 1)],ad_stat,ad_crit
 ad = [ad_stat,ad_crit]
 
-sav_vars = [sav_vars,'CTF_ADX','NH_RESAMP_AD','NH_MOD_AD','RX_MOD_AD','AD']
+sav_vars = [sav_vars,'CTF_ADX','NH_MOD_AD','RX_MOD_AD','AD']
 sav_inds = [sav_inds,'ICTF_ADX','IIMOD_AD']
 
 
@@ -81,13 +81,11 @@ sav_inds = [sav_inds,'ICTF_ADX','IIMOD_AD']
 
 ;; RUN FOR KS TEST
 
-mks2 = min(median(ks2v,dim=2),ictf2_ksx)
-ctf2_ksx = ctf_ks[ictf2_ksx]
+min_ks2 = min(median(ks2v,dim=2),ictf2_ksx)
+ctf2_ks = ctf_ks[ictf2_ksx]
 
 ;; now do the same as above, but allow the range of NH to differ in bins
 ;; CTF must sum to 1 across bins
-ct24_ks = ct24_ksv[ictf2_ksx,*]
-
 ct24_ks = median(ct24_ksv[ictf2_ksx,*])
 ct25_ks = 1.-ct24_ks
 
@@ -97,32 +95,35 @@ fmt2 = 'i0'+strtrim(strlen(strtrim(niter,2)),2)
 nh_resamp2_ks = [nh_samp[ithin],24.+randomu(seed,nct_ks*ct24_ks),25.+randomu(seed,nct_ks*ct25_ks)]
 nresamp = n_elements(nh_resamp2_ks)
 ;; create arrays
-nh_mod2_ks = dblarr(nsrc,niter)
-rx_mod2_ks = dblarr(nsrc,niter)
-iimod2_ks = bytarr(nsrc,niter)
+nh_mod2_ksv = dblarr(nsrc,niter)
+rx_mod2_ksv = dblarr(nsrc,niter)
+iimod2_ksv = bytarr(nsrc,niter)
 ks2 = dblarr(2,niter)
 ;; fill arrays
 for i = 0,niter-1 do begin
-    nh_mod2_ks[*,i] = nh_resamp2_ks[randomi(nsrc,nresamp)]
-    rx_mod2_ks[*,i] = rx2nh(nh_mod2_ks[*,i],/rx_out,scat=rx_scat)
-    iimod2_ks[*,i] = rx_mod2_ks[*,i] gt rxwl
-    idet = where(iimod2_ks[*,i] eq 1,detct)
+    nh_mod2_ksv[*,i] = nh_resamp2_ks[randomi(nsrc,nresamp)]
+    rx_mod2_ksv[*,i] = rx2nh(nh_mod2_ksv[*,i],/rx_out,scat=rx_scat)
+    iimod2_ksv[*,i] = rx_mod2_ksv[*,i] gt rxl
+    idet = where(iimod2_ksv[*,i] eq 1,detct)
     if (detct gt 0) then begin
-         kstwo,rxwd,rx_mod2_ks[idet,i],ks_stat,ks_prob
+         kstwo,rxd,rx_mod2_ksv[idet,i],ks_stat,ks_prob
          ks2[*,i] = [ks_stat,ks_prob]
     endif else message, 'NO MODELED DETECTIONS.'
 endfor
 ks2med = median(ks2[0,*])
 iks2 = where(ks2[0,*] eq ks2med)
+nh_mod2_ks = hist2d_avg(nh_mod2_ksv,2)
+rx_mod2_ks = hist2d_avg(rx_mod2_ksv,2)
 
-sav_vars = [sav_vars,'CTF2_KSX','CT24_KS','CT25_KS','NH_RESAMP2_KS','NH_MOD2_KS','RX_MOD2_KS','KS2']
-sav_inds = [sav_inds,'IIMOD2_KS','IKS2']
+sav_vars = [sav_vars,'CTF2_KS','CT24_KS','CT25_KS','NH_MOD2_KSV','RX_MOD2_KSV','KS2', $
+                     'NH_MOD2_KS','RX_MOD2_KS']
+sav_inds = [sav_inds,'IIMOD2_KSV','IKS2']
 
 
 ;; RUN FOR AD TEST
 
-mad2 = min(median(ad2v,dim=2),ictf2_adx)
-ctf2_adx = ctf_ad[ictf2_adx]
+min_ad2 = min(median(ad2v,dim=2),ictf2_adx)
+ctf2_ad = ctf_ad[ictf2_adx]
 
 ;; now do the same as above, but allow the range of NH to differ in bins
 ;; CTF must sum to 1 across bins
@@ -135,26 +136,30 @@ fmt2 = 'i0'+strtrim(strlen(strtrim(niter,2)),2)
 nh_resamp2_ad = [nh_samp[ithin],24.+randomu(seed,nct_ad*ct24_ad),25.+randomu(seed,nct_ad*ct25_ad)]
 nresamp = n_elements(nh_resamp2_ad)
 ;; create arrays
-nh_mod2_ad = dblarr(nsrc,niter)
-rx_mod2_ad = dblarr(nsrc,niter)
-iimod2_ad = bytarr(nsrc,niter)
+nh_mod2_adv = dblarr(nsrc,niter)
+rx_mod2_adv = dblarr(nsrc,niter)
+iimod2_adv = bytarr(nsrc,niter)
 ad2 = dblarr(2,niter)
 ;; fill arrays
 for i = 0,niter-1 do begin
-    nh_mod2_ad[*,i] = nh_resamp2_ad[randomi(nsrc,nresamp)]
-    rx_mod2_ad[*,i] = rx2nh(nh_mod2_ad[*,i],/rx_out,scat=rx_scat)
-    iimod2_ad[*,i] = rx_mod2_ad[*,i] gt rxwl
-    idet = where(iimod2_ad[*,i] eq 1,detct)
+    nh_mod2_adv[*,i] = nh_resamp2_ad[randomi(nsrc,nresamp)]
+    rx_mod2_adv[*,i] = rx2nh(nh_mod2_adv[*,i],/rx_out,scat=rx_scat)
+    iimod2_adv[*,i] = rx_mod2_adv[*,i] gt rxl
+    idet = where(iimod2_adv[*,i] eq 1,detct)
     if (detct gt 0) then begin
-         adtwo,rxwd,rx_mod2_ad[idet,i],ad_stat,ad_crit
+         adtwo,rxd,rx_mod2_adv[idet,i],ad_stat,ad_crit
          ad2[*,i] = [ad_stat,ad_crit]
     endif else message, 'NO MODELED DETECTIONS.'
 endfor
 ad2med = median(ad2[0,*])
 iad2 = where(ad2[0,*] eq ad2med)
+nh_mod2_ad = hist2d_avg(nh_mod2_adv,2)
+rx_mod2_ad = hist2d_avg(rx_mod2_adv,2)
 
-sav_vars = [sav_vars,'CTF2_ADX','CT24_AD','CT25_AD','NH_RESAMP2_AD','NH_MOD2_AD','RX_MOD2_AD','AD2']
-sav_inds = [sav_inds,'IIMOD2_AD','IAD2']
+
+sav_vars = [sav_vars,'CTF2_AD','CT24_AD','CT25_AD','NH_MOD2_ADV','RX_MOD2_ADV','AD2', $
+                     'NH_MOD2_AD','RX_MOD2_AD']
+sav_inds = [sav_inds,'IIMOD2_ADV','IAD2']
 
 sav_str = strjoin([sav_vars,sav_inds],',')
 re = execute('save,'+sav_str+',/compress,file="rx_model.sav"')

@@ -74,11 +74,17 @@ rx_scat = 0.2
 iwac = where(iiwac,nsrc)
 iiwd = iiwac and xdet ne ''
 iiwn = iiwac and xnon ne ''
-rxwd = rxdet[where(iiwd,ndet)]
-e_rxwd = e_rxdet[where(iiwd)]
-rxwl = rxlim[where(iiwac)]
+iisd = ~iiwac and xdet ne ''
+iisn = ~iiwac and xnon ne ''
+;; set variables for modeling
+;rxd = rxdet[where(iiwd,ndet)]
+;e_rxd = e_rxdet[where(iiwd)]
+;rxl = rxlim[where(iiwac)]
+rxd = rxdet[where(iisd,ndet)]
+e_rxd = e_rxdet[where(iisd)]
+rxl = rxlim[where(~iiwac)]
 ;; add to variable list
-fits = [fits,'RX_SCAT','NSRC','IIWD','IIWN','RXWD','E_RXWD','RXWL']
+fits = [fits,'RX_SCAT','NSRC','IIWD','IIWN','IISD','IISN','RXD','E_RXD','RXL']
 
 ;; save
 var_str = strjoin([fits,surv,stak],',')
