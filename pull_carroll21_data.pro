@@ -1,6 +1,9 @@
 PRO pull_carroll21_data, MODE = mode
 
 
+;; if not specified, use all sources
+if (n_elements(mode) eq 0) then mode = 'ALL'
+
 ;; Note 1: RXLIM: RX at flux limit, including detected sources. CMC 11-Dec-20 (after paper acceptace)
 ;dir = '/Users/ccarroll/Research/projects/xray_lack_agn/workspace/run_20201008_final_submission/'
 dir = '/Users/ccarroll/Research/projects/xray_lack_agn/workspace/run_20201008_final_updated/'
@@ -78,7 +81,7 @@ iisd = ~iiwac and xdet ne ''
 iisn = ~iiwac and xnon ne ''
 
 ;; set variables for modeling
-case mode of 
+case strupcase(mode) of 
     'WAGN': begin 
         rxd = rxdet[where(iiwd,ndet)]
         e_rxd = e_rxdet[where(iiwd)]
@@ -94,7 +97,6 @@ case mode of
         e_rxd = e_rxdet
         rxl = rxlim
         end
-    else: message, 'NO DATA MODE SPECIFIED.'
 endcase
 ;; full number of sources, detected and non-detected
 nsrc = n_elements(rxl)

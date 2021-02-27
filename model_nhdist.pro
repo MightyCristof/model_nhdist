@@ -22,7 +22,7 @@ if (n_elements(subdir) eq 0) then path = './' else $
 
 ;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
 if keyword_set(data) then begin
-    pull_carroll21_data
+    pull_carroll21_data,mode='sec'
     nkeys--
 endif
 load_vars,'carroll21_data.sav','_data'
