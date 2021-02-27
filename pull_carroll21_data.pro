@@ -1,4 +1,4 @@
-PRO pull_carroll21_data
+PRO pull_carroll21_data, MODE = mode
 
 
 ;; Note 1: RXLIM: RX at flux limit, including detected sources. CMC 11-Dec-20 (after paper acceptace)
@@ -76,15 +76,31 @@ iiwd = iiwac and xdet ne ''
 iiwn = iiwac and xnon ne ''
 iisd = ~iiwac and xdet ne ''
 iisn = ~iiwac and xnon ne ''
+
 ;; set variables for modeling
-;rxd = rxdet[where(iiwd,ndet)]
-;e_rxd = e_rxdet[where(iiwd)]
-;rxl = rxlim[where(iiwac,nsrc)]
-rxd = rxdet[where(iisd,ndet)]
-e_rxd = e_rxdet[where(iisd)]
-rxl = rxlim[where(~iiwac,nsrc)]
+case mode of 
+    'WAGN': begin 
+        rxd = rxdet[where(iiwd,ndet)]
+        e_rxd = e_rxdet[where(iiwd)]
+        rxl = rxlim[where(iiwac,nsrc)]
+        end
+    'SEC': begin
+        rxd = rxdet[where(iisd,ndet)]
+        e_rxd = e_rxdet[where(iisd)]
+        rxl = rxlim[where(~iiwac,nsrc)]
+        end
+    'ALL': begin
+        rxd = rxdet
+        e_rxd = e_rxdet
+        rxl = rxlim
+        end
+    else: message, 'NO DATA MODE SPECIFIED.'
+endcase
+;; full number of sources, detected and non-detected
+nsrc = n_elements(rxl)
+
 ;; add to variable list
-fits = [fits,'RX_SCAT','NSRC','IIWD','IIWN','IISD','IISN','RXD','E_RXD','RXL']
+fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','RXD','E_RXD','RXL','NSRC']
 
 ;; save
 var_str = strjoin([fits,surv,stak],',')
