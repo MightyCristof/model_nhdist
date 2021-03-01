@@ -4,6 +4,7 @@ PRO estimate_fx, CHA = cha
 common _data
 common _nhobs
 common _rxnh
+common _group
 common _ctfest
 common _split
 common _rxmod
@@ -11,12 +12,29 @@ common _rxmod
 ;; Follow procedure of Carroll+20 (XSTACK_OUTPUT, STACK_NONDET_FLUX, MC_NONDET_DIST)
 
 ;; use only Chandra sources to match Chandra X-ray stacking
-if keyword_set(cha) then iwn = where(iiwn and xnon eq 'CHA',nnon) else $
-                         iwn = where(iiwn,nnon)
-;; data for non-detected sample
-loglxir_non = loglxir[iwn]
-z_non = z[iwn]
-dl2_non = dl2[iwn]
+if keyword_set(cha) then iicha = xnon eq 'CHA'
+                         iicha = xnon ne ''
+
+;; data for non-detected sample        
+case mode of 
+    'WAC': begin 
+        loglxir_non = loglxir[where(iiwn and iicha,nnon)]
+        z_non = z[where(iiwn and iicha,nnon)]
+        dl2_non = dl2[where(iiwn and iicha,nnon)]
+        end
+    'SEC': begin
+        loglxir_non = loglxir[where(iisn and iicha,nnon)]
+        z_non = z[where(iisn and iicha,nnon)]
+        dl2_non = dl2[where(iisn and iicha,nnon)]
+        end
+    'ALL': begin
+        loglxir_non = loglxir[where(iicha,nnon)]
+        z_non = z[where(iicha,nnon)]
+        dl2_non = dl2[where(iicha,nnon)]
+        end
+    else: message, message, 'NO INPUT MODE SET FOR FXEST: WAC/SEC/ALL'
+endcase
+
 ;; prep observed frame hard and soft conversion arrays
 iz = value_locate(zv,z_non)
 c_hard_non = c_hard[*,iz]

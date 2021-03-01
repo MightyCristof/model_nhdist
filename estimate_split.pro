@@ -4,6 +4,7 @@ PRO estimate_split
 common _data
 common _nhobs
 common _rxnh
+common _group
 common _ctfest
 
 

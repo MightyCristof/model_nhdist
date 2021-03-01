@@ -1,4 +1,4 @@
-PRO pull_carroll21_data, MODE = mode
+PRO pull_carroll21_data
 
 
 ;; if not specified, use all sources
@@ -79,30 +79,11 @@ iiwd = iiwac and xdet ne ''
 iiwn = iiwac and xnon ne ''
 iisd = ~iiwac and xdet ne ''
 iisn = ~iiwac and xnon ne ''
-
-;; set variables for modeling
-case strupcase(mode) of 
-    'WAGN': begin 
-        rxd = rxdet[where(iiwd,ndet)]
-        e_rxd = e_rxdet[where(iiwd)]
-        rxl = rxlim[where(iiwac,nsrc)]
-        end
-    'SEC': begin
-        rxd = rxdet[where(iisd,ndet)]
-        e_rxd = e_rxdet[where(iisd)]
-        rxl = rxlim[where(~iiwac,nsrc)]
-        end
-    'ALL': begin
-        rxd = rxdet
-        e_rxd = e_rxdet
-        rxl = rxlim
-        end
-endcase
-;; full number of sources, detected and non-detected
-nsrc = n_elements(rxl)
+iiad = xdet ne ''
+iian = xnon ne ''
 
 ;; add to variable list
-fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','RXD','E_RXD','RXL','NSRC']
+fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','IIAD','IIAN']
 
 ;; save
 var_str = strjoin([fits,surv,stak],',')

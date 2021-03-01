@@ -4,6 +4,7 @@ PRO estimate_ctf
 common _data
 common _nhobs
 common _rxnh
+common _group
 
 
 ;; run this script NITER times and look at the distribution in CTF

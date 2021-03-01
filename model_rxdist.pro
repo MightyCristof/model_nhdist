@@ -4,6 +4,7 @@ PRO model_rxdist
 common _data
 common _nhobs
 common _rxnh
+common _group
 common _ctfest
 common _split
 
@@ -112,8 +113,8 @@ for i = 0,niter-1 do begin
 endfor
 ks2med = median(ks2[0,*])
 iks2 = where(ks2[0,*] eq ks2med)
-nh_mod2_ks = hist2d_avg(nh_mod2_ksv,2)
-rx_mod2_ks = hist2d_avg(rx_mod2_ksv,2)
+nh_mod2_ks = hist2d_avg(nh_mod2_ksv,nsrc)
+rx_mod2_ks = hist2d_avg(rx_mod2_ksv,nsrc)
 
 sav_vars = [sav_vars,'CTF2_KS','CT24_KS','CT25_KS','NH_MOD2_KSV','RX_MOD2_KSV','KS2', $
                      'NH_MOD2_KS','RX_MOD2_KS']
@@ -153,8 +154,8 @@ for i = 0,niter-1 do begin
 endfor
 ad2med = median(ad2[0,*])
 iad2 = where(ad2[0,*] eq ad2med)
-nh_mod2_ad = hist2d_avg(nh_mod2_adv,2)
-rx_mod2_ad = hist2d_avg(rx_mod2_adv,2)
+nh_mod2_ad = hist2d_avg(nh_mod2_adv,nsrc)
+rx_mod2_ad = hist2d_avg(rx_mod2_adv,nsrc)
 
 
 sav_vars = [sav_vars,'CTF2_AD','CT24_AD','CT25_AD','NH_MOD2_ADV','RX_MOD2_ADV','AD2', $

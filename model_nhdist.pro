@@ -1,15 +1,20 @@
 PRO model_nhdist, subdir, $
                   DATA = data, $
                   NHOBS = nhobs, $
+                  GROUP = group, $
                   CTFEST = ctfest, $
                   SPLIT = split, $
                   RXMOD = RXMOD, $
-                  FXEST = fxest
+                  FXEST = fxest, $
+                  MODE = mode
 
+
+if not keyword_set(mode) then message, 'PLEASE SELECT INPUT MODE: WAC/SEC/ALL'
 
 ;; check for keyword commands
 nkeys = n_elements(data) + $
         n_elements(nhobs) + $
+        n_elements(group) + $
         n_elements(ctfest) + $
         n_elements(split) + $
         n_elements(rxmod) + $
@@ -22,7 +27,7 @@ if (n_elements(subdir) eq 0) then path = './' else $
 
 ;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
 if keyword_set(data) then begin
-    pull_carroll21_data,mode='sec'
+    pull_carroll21_data
     nkeys--
 endif
 load_vars,'carroll21_data.sav','_data'
@@ -40,6 +45,13 @@ load_vars,'data_prep/rxz_scat01.sav','_rxnh'
 
 ;; directory for output
 pushd,path
+
+;; select data group WISE AGN, secondary sources, or all (WAC/SEC/ALL)
+if keyword_set(group) then begin
+    set_data_group,mode=mode
+    nkeys--
+endif
+load_vars,'select_group.sav','_group'
 
 ;; estimate the distribution of CTF for modeling
 if keyword_set(ctfest) then begin
