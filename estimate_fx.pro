@@ -51,9 +51,9 @@ logfx_soft_ksv = dblarr(nnon,niter)
 ;; in Carroll+20, we take the model RL and subtract from it the observations
 ;; this doesn't work here as the observations are greater than the simulated observed
 ;; for now, subtracting the model detected 
-inon = where(iimod2_ksv[*,iks2] eq 0,nonct)
-if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
-rx_modn_ks = (rx_mod2_ksv[*,iks2])[inon]
+;inon = where(iimod2_ks[*,iks2] eq 0,nonct)
+;if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
+;rx_modn_ks = (rx_mod2_ks[*,iks2])[inon]
 
 ;; sample from model RL for each non-detected observation (NNON)
 for j = 0,niter-1 do begin    
@@ -95,9 +95,9 @@ logfx_soft_adv = dblarr(nnon,niter)
 ;; in Carroll+20, we take the model RL and subtract from it the observations
 ;; this doesn't work here as the observations are greater than the simulated observed
 ;; for now, subtracting the model detected 
-inon = where(iimod2_adv[*,iad2] eq 0,nonct)
-if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
-rx_modn_ad = (rx_mod2_adv[*,iad2])[inon]
+;inon = where(iimod2_ad[*,iad2] eq 0,nonct)
+;if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
+;rx_modn_ad = (rx_mod2_ad[*,iad2])[inon]
 
 ;; sample from model RL for each non-detected observation (NNON)
 for j = 0,niter-1 do begin  
