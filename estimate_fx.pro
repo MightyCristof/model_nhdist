@@ -43,7 +43,8 @@ c_soft_non = c_soft[*,iz]
 ;; run for KS test
 
 ;; capture mean and median of the modeled log FX distribution 
-niter = 10000
+;niter = 10000
+niter = n_elements(rx_mod2_ksv[0,*])
 logfx_full_ksv = dblarr(nnon,niter)
 logfx_hard_ksv = dblarr(nnon,niter)
 logfx_soft_ksv = dblarr(nnon,niter)
@@ -56,6 +57,12 @@ rx_modn_ks = (rx_mod2_ksv[*,iks2])[inon]
 
 ;; sample from model RL for each non-detected observation (NNON)
 for j = 0,niter-1 do begin    
+    ;; test new method
+    inon = where(iimod2_ksv[*,j] eq 0,nonct)
+    if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
+    rx_modn_ks = (rx_mod2_ksv[*,j])[inon]    
+    ;;
+
     rx_samp_ks = mc_samp(rx_modn_ks,nnon)
     loglx_full_ks = rx_samp_ks + loglxir_non
     logfx_full_ks = loglx_full_ks - alog10(4.*!const.pi*dl2_non)
@@ -79,7 +86,8 @@ sav_inds = []
 ;; run for AD test
 
 ;; capture mean and median of the modeled log FX distribution 
-niter = 10000
+;niter = 10000
+niter = n_elements(rx_mod2_adv[0,*])
 logfx_full_adv = dblarr(nnon,niter)
 logfx_hard_adv = dblarr(nnon,niter)
 logfx_soft_adv = dblarr(nnon,niter)
@@ -92,7 +100,13 @@ if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
 rx_modn_ad = (rx_mod2_adv[*,iad2])[inon]
 
 ;; sample from model RL for each non-detected observation (NNON)
-for j = 0,niter-1 do begin    
+for j = 0,niter-1 do begin  
+    ;; test new method
+    inon = where(iimod2_adv[*,j] eq 0,nonct)
+    if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
+    rx_modn_ad = (rx_mod2_adv[*,j])[inon]
+    ;;
+  
     rx_samp_ad = mc_samp(rx_modn_ad,nnon)
     loglx_full_ad = rx_samp_ad + loglxir_non
     logfx_full_ad = loglx_full_ad - alog10(4.*!const.pi*dl2_non)
@@ -114,7 +128,7 @@ sav_inds = [sav_inds]
 
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',file="fx_estimate.sav"')
+re = execute('save,'+sav_str+',file="fx_estimate2.sav"')
 
 
 END

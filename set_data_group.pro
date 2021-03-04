@@ -24,6 +24,16 @@ case mode of
         e_rxd = e_rxdet[where(iiad)]
         rxl = rxlim
         end
+    'XHI': begin
+        rxd = rxdet[where(iiwd and iixh,ndet)]
+        e_rxd = e_rxdet[where(iiwd and iixh)]
+        rxl = rxlim[where(iiwac and iixh)]
+        end
+    'XLO': begin
+        rxd = rxdet[where(iiwd and iixl,ndet)]
+        e_rxd = e_rxdet[where(iiwd and iixl)]
+        rxl = rxlim[where(iiwac and iixl)]
+        end
 endcase
 ;; full number of sources, detected and non-detected
 nsrc = n_elements(rxl)

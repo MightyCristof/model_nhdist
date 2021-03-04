@@ -81,9 +81,11 @@ iisd = ~iiwac and xdet ne ''
 iisn = ~iiwac and xnon ne ''
 iiad = xdet ne ''
 iian = xnon ne ''
+iixh = loglxir gt 43.6
+iixl = loglxir lt 43.6
 
 ;; add to variable list
-fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','IIAD','IIAN']
+fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','IIAD','IIAN','IIXH','IIXL']
 
 ;; save
 var_str = strjoin([fits,surv,stak],',')

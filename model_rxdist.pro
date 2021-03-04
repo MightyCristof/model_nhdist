@@ -111,14 +111,16 @@ for i = 0,niter-1 do begin
          ks2[*,i] = [ks_stat,ks_prob]
     endif else message, 'NO MODELED DETECTIONS.'
 endfor
-ks2med = median(ks2[0,*])
-iks2 = where(ks2[0,*] eq ks2med)
+ks2mean = median(ks2[0,*])
+iks2sort = sort(ks2[0,*])
+iks2loc = value_locate(ks2[0,iks2sort],ks2mean)
+iks2 = iks2sort[iks2loc]
 nh_mod2_ks = hist2d_avg(nh_mod2_ksv,nsrc)
 rx_mod2_ks = hist2d_avg(rx_mod2_ksv,nsrc)
 
 sav_vars = [sav_vars,'CTF2_KS','CT24_KS','CT25_KS','NH_MOD2_KSV','RX_MOD2_KSV','KS2', $
                      'NH_MOD2_KS','RX_MOD2_KS']
-sav_inds = [sav_inds,'IIMOD2_KSV','IKS2']
+sav_inds = [sav_inds,'IIMOD2_KSV','IKS2SORT','IKS2LOC','IKS2']
 
 
 ;; RUN FOR AD TEST
@@ -152,15 +154,17 @@ for i = 0,niter-1 do begin
          ad2[*,i] = [ad_stat,ad_crit]
     endif else message, 'NO MODELED DETECTIONS.'
 endfor
-ad2med = median(ad2[0,*])
-iad2 = where(ad2[0,*] eq ad2med)
+ad2mean = mean(ad2[0,*])
+iad2sort = sort(ad2[0,*])
+iad2loc = value_locate(ad2[0,iad2sort],ad2mean)
+iad2 = iad2sort[iad2loc]
 nh_mod2_ad = hist2d_avg(nh_mod2_adv,nsrc)
 rx_mod2_ad = hist2d_avg(rx_mod2_adv,nsrc)
 
 
 sav_vars = [sav_vars,'CTF2_AD','CT24_AD','CT25_AD','NH_MOD2_ADV','RX_MOD2_ADV','AD2', $
                      'NH_MOD2_AD','RX_MOD2_AD']
-sav_inds = [sav_inds,'IIMOD2_ADV','IAD2']
+sav_inds = [sav_inds,'IIMOD2_ADV','IAD2SORT','IAD2LOC','IAD2']
 
 sav_str = strjoin([sav_vars,sav_inds],',')
 re = execute('save,'+sav_str+',/compress,file="rx_model.sav"')

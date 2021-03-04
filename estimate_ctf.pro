@@ -16,7 +16,7 @@ adv = dblarr(niter)
 
 for n = 0,niter-1 do begin
     if n mod (niter/10) eq 0 then print, strtrim(n/(niter/100),2)+'% complete'
-
+    
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.
     nh_samp = nh_mc(nh_lan_nst,nsamp)

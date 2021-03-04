@@ -9,8 +9,6 @@ PRO model_nhdist, subdir, $
                   MODE = mode
 
 
-if not keyword_set(mode) then message, 'PLEASE SELECT INPUT MODE: WAC/SEC/ALL'
-
 ;; check for keyword commands
 nkeys = n_elements(data) + $
         n_elements(nhobs) + $
@@ -48,6 +46,7 @@ pushd,path
 
 ;; select data group WISE AGN, secondary sources, or all (WAC/SEC/ALL)
 if keyword_set(group) then begin
+    if not keyword_set(mode) then message, 'PLEASE SELECT INPUT MODE: WAC/SEC/ALL'
     set_data_group,mode=mode
     nkeys--
 endif
