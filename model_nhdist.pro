@@ -5,8 +5,7 @@ PRO model_nhdist, subdir, $
                   CTFEST = ctfest, $
                   SPLIT = split, $
                   RXMOD = RXMOD, $
-                  FXEST = fxest, $
-                  MODE = mode
+                  FXEST = fxest
 
 
 ;; check for keyword commands
@@ -46,8 +45,8 @@ pushd,path
 
 ;; select data group WISE AGN, secondary sources, or all (WAC/SEC/ALL)
 if keyword_set(group) then begin
-    if not keyword_set(mode) then message, 'PLEASE SELECT INPUT MODE: WAC/SEC/ALL'
-    set_data_group,mode=mode
+    if (typename(group) ne 'STRING') then message, 'PLEASE SELECT INPUT GROUP: WAC/SEC/ALL/WAC_XHI/WAC_XLO'
+    set_data_group,group=group
     nkeys--
 endif
 load_vars,'select_group.sav','_group'

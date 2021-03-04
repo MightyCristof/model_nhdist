@@ -1,14 +1,14 @@
-PRO set_data_group, MODE = mode
+PRO set_data_group, GROUP = group
 
 
 common _data
 common _nhobs
 common _rxnh
 
-mode = strupcase(mode)
+group = strupcase(group)
 
 ;; set variables for modeling
-case mode of 
+case group of 
     'WAC': begin 
         rxd = rxdet[where(iiwd,ndet)]
         e_rxd = e_rxdet[where(iiwd)]
@@ -24,12 +24,12 @@ case mode of
         e_rxd = e_rxdet[where(iiad)]
         rxl = rxlim
         end
-    'XHI': begin
+    'WAC_XHI': begin
         rxd = rxdet[where(iiwd and iixh,ndet)]
         e_rxd = e_rxdet[where(iiwd and iixh)]
         rxl = rxlim[where(iiwac and iixh)]
         end
-    'XLO': begin
+    'WAC_XLO': begin
         rxd = rxdet[where(iiwd and iixl,ndet)]
         e_rxd = e_rxdet[where(iiwd and iixl)]
         rxl = rxlim[where(iiwac and iixl)]
@@ -38,7 +38,7 @@ endcase
 ;; full number of sources, detected and non-detected
 nsrc = n_elements(rxl)
 
-sav_vars = ['MODE','RXD','E_RXD','RXL','NSRC']
+sav_vars = ['GROUP','RXD','E_RXD','RXL','NSRC']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

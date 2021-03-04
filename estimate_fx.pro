@@ -16,7 +16,7 @@ if keyword_set(cha) then iicha = xnon eq 'CHA'
                          iicha = xnon ne ''
 
 ;; data for non-detected sample        
-case mode of 
+case group of 
     'WAC': begin 
         loglxir_non = loglxir[where(iiwn and iicha,nnon)]
         z_non = z[where(iiwn and iicha,nnon)]
