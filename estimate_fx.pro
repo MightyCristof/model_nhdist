@@ -32,6 +32,16 @@ case group of
         z_non = z[where(iicha,nnon)]
         dl2_non = dl2[where(iicha,nnon)]
         end
+    'WAC_HIX': begin 
+        loglxir_non = loglxir[where(iiwn and iihix and iicha,nnon)]
+        z_non = z[where(iiwn and iihix and iicha,nnon)]
+        dl2_non = dl2[where(iiwn and iihix and iicha,nnon)]
+        end
+    'WAC_LOX': begin 
+        loglxir_non = loglxir[where(iiwn and iilox and iicha,nnon)]
+        z_non = z[where(iiwn and iilox and iicha,nnon)]
+        dl2_non = dl2[where(iiwn and iilox and iicha,nnon)]
+        end
     else: message, message, 'NO INPUT MODE SET FOR FXEST: WAC/SEC/ALL'
 endcase
 
@@ -128,7 +138,7 @@ sav_inds = [sav_inds]
 
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',file="fx_estimate2.sav"')
+re = execute('save,'+sav_str+',file="fx_estimate.sav"')
 
 
 END

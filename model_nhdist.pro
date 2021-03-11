@@ -45,7 +45,7 @@ pushd,path
 
 ;; select data group WISE AGN, secondary sources, or all (WAC/SEC/ALL)
 if keyword_set(group) then begin
-    if (typename(group) ne 'STRING') then message, 'PLEASE SELECT INPUT GROUP: WAC/SEC/ALL/WAC_XHI/WAC_XLO'
+    if (typename(group) ne 'STRING') then message, 'PLEASE SELECT INPUT GROUP: WAC/SEC/ALL/WAC_HIX/WAC_LOX'
     set_data_group,group=group
     nkeys--
 endif

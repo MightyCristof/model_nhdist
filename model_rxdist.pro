@@ -106,9 +106,11 @@ for i = 0,niter-1 do begin
     rx_mod2_ksv[*,i] = rx2nh(nh_mod2_ksv[*,i],/rx_out,scat=rx_scat)
     iimod2_ksv[*,i] = rx_mod2_ksv[*,i] gt rxl
     idet = where(iimod2_ksv[*,i] eq 1,detct)
-    if (detct gt 0) then begin
-         kstwo,rxd,rx_mod2_ksv[idet,i],ks_stat,ks_prob
-         ks2[*,i] = [ks_stat,ks_prob]
+    if (detct ge 5) then begin
+        kstwo,rxd,rx_mod2_ksv[idet,i],ks_stat,ks_prob
+        ks2[*,i] = [ks_stat,ks_prob]
+    endif else if (detct gt 0) then begin
+        ks2[*,i] = [99.,99.]
     endif else message, 'NO MODELED DETECTIONS.'
 endfor
 ;ks2mean = median(ks2[0,*])
@@ -149,9 +151,11 @@ for i = 0,niter-1 do begin
     rx_mod2_adv[*,i] = rx2nh(nh_mod2_adv[*,i],/rx_out,scat=rx_scat)
     iimod2_adv[*,i] = rx_mod2_adv[*,i] gt rxl
     idet = where(iimod2_adv[*,i] eq 1,detct)
-    if (detct gt 0) then begin
-         adtwo,rxd,rx_mod2_adv[idet,i],ad_stat,ad_crit
-         ad2[*,i] = [ad_stat,ad_crit]
+    if (detct ge 5) then begin
+        adtwo,rxd,rx_mod2_adv[idet,i],ad_stat,ad_crit
+        ad2[*,i] = [ad_stat,ad_crit]
+    endif else if (detct gt 0) then begin
+        ad2[*,i] = [99.,99.]
     endif else message, 'NO MODELED DETECTIONS.'
 endfor
 ;ad2mean = mean(ad2[0,*])

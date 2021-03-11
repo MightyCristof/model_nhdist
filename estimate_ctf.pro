@@ -53,11 +53,14 @@ for n = 0,niter-1 do begin
         rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)
         iimod[*,i] = rx_mod[*,i] gt rxl
         idet = where(iimod[*,i] eq 1,detct)
-        if (detct gt 0) then begin
+        if (detct ge 5) then begin
             kstwo,rxd,rx_mod[idet,i],ks_stat,ks_prob
             ks[*,i] = [ks_stat,ks_prob]
             adtwo,rxd,rx_mod[idet,i],ad_stat,ad_crit
             ad[*,i] = [ad_stat,ad_crit]
+        endif else if (detct gt 0) then begin
+            ks[*,i] = [99.,99.]
+            ad[*,i] = [99.,99.]
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     ksv[n] = min(ks[0,*],iks)

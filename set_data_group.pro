@@ -24,15 +24,15 @@ case group of
         e_rxd = e_rxdet[where(iiad)]
         rxl = rxlim
         end
-    'WAC_XHI': begin
-        rxd = rxdet[where(iiwd and iixh,ndet)]
-        e_rxd = e_rxdet[where(iiwd and iixh)]
-        rxl = rxlim[where(iiwac and iixh)]
+    'WAC_HIX': begin
+        rxd = rxdet[where(iiwd and iihix,ndet)]
+        e_rxd = e_rxdet[where(iiwd and iihix)]
+        rxl = rxlim[where(iiwac and iihix)]
         end
-    'WAC_XLO': begin
-        rxd = rxdet[where(iiwd and iixl,ndet)]
-        e_rxd = e_rxdet[where(iiwd and iixl)]
-        rxl = rxlim[where(iiwac and iixl)]
+    'WAC_LOX': begin
+        rxd = rxdet[where(iiwd and iilox,ndet)]
+        e_rxd = e_rxdet[where(iiwd and iilox)]
+        rxl = rxlim[where(iiwac and iilox)]
         end
 endcase
 ;; full number of sources, detected and non-detected
