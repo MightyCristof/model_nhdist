@@ -33,14 +33,14 @@ case group of
         dl2_non = dl2[where(iicha,nnon)]
         end
     'WAC_HIX': begin 
-        loglxir_non = loglxir[where(iiwn and iihix and iicha,nnon)]
-        z_non = z[where(iiwn and iihix and iicha,nnon)]
-        dl2_non = dl2[where(iiwn and iihix and iicha,nnon)]
+        loglxir_non = loglxir[where(iiwn and iixh and iicha,nnon)]
+        z_non = z[where(iiwn and iixh and iicha,nnon)]
+        dl2_non = dl2[where(iiwn and iixh and iicha,nnon)]
         end
     'WAC_LOX': begin 
-        loglxir_non = loglxir[where(iiwn and iilox and iicha,nnon)]
-        z_non = z[where(iiwn and iilox and iicha,nnon)]
-        dl2_non = dl2[where(iiwn and iilox and iicha,nnon)]
+        loglxir_non = loglxir[where(iiwn and iixl and iicha,nnon)]
+        z_non = z[where(iiwn and iixl and iicha,nnon)]
+        dl2_non = dl2[where(iiwn and iixl and iicha,nnon)]
         end
     else: message, message, 'NO INPUT MODE SET FOR FXEST: WAC/SEC/ALL'
 endcase
@@ -88,8 +88,28 @@ for j = 0,niter-1 do begin
     logfx_hard_ksv[*,j] = logfx_hard_ks
     logfx_soft_ksv[*,j] = logfx_soft_ks
 endfor
+logfx_full_ks = median(logfx_full_ksv,dim=2)
+logfx_hard_ks = median(logfx_hard_ksv,dim=2)
+logfx_soft_ks = median(logfx_soft_ksv,dim=2)
+logfx_full_ksx = median(logfx_full_ks)
+logfx_hard_ksx = median(logfx_hard_ks)
+logfx_soft_ksx = median(logfx_soft_ks)
+e_logfx_full_ksx = stddev(logfx_full_ks)
+e_logfx_hard_ksx = stddev(logfx_hard_ks)
+e_logfx_soft_ksx = stddev(logfx_soft_ks)
+fx_full_ksx = 10.^logfx_full_ksx
+fx_hard_ksx = 10.^logfx_hard_ksx
+fx_soft_ksx = 10.^logfx_soft_ksx
+e_fx_full_ksx = e_logfx_full_ksx * alog(10.) * fx_full_ksx
+e_fx_hard_ksx = e_logfx_hard_ksx * alog(10.) * fx_hard_ksx
+e_fx_soft_ksx = e_logfx_soft_ksx * alog(10.) * fx_soft_ksx
 
-sav_vars = ['LOGFX_FULL_KSV','LOGFX_HARD_KSV','LOGFX_SOFT_KSV']
+sav_vars = ['LOGFX_FULL_KSV','LOGFX_HARD_KSV','LOGFX_SOFT_KSV', $
+            'LOGFX_FULL_KS','LOGFX_HARD_KS','LOGFX_SOFT_KS', $
+            'LOGFX_FULL_KSX','LOGFX_HARD_KSX','LOGFX_SOFT_KSX', $
+            'E_LOGFX_FULL_KSX','E_LOGFX_HARD_KSX','E_LOGFX_SOFT_KSX', $
+            'FX_FULL_KSX','FX_HARD_KSX','FX_SOFT_KSX', $
+            'E_FX_FULL_KSX','E_FX_HARD_KSX','E_FX_SOFT_KSX']
 sav_inds = []
 
 
@@ -132,10 +152,30 @@ for j = 0,niter-1 do begin
     logfx_hard_adv[*,j] = logfx_hard_ad
     logfx_soft_adv[*,j] = logfx_soft_ad
 endfor
+logfx_full_ad = median(logfx_full_adv,dim=2)
+logfx_hard_ad = median(logfx_hard_adv,dim=2)
+logfx_soft_ad = median(logfx_soft_adv,dim=2)
+logfx_full_adx = median(logfx_full_ad)
+logfx_hard_adx = median(logfx_hard_ad)
+logfx_soft_adx = median(logfx_soft_ad)
+e_logfx_full_adx = stddev(logfx_full_ad)
+e_logfx_hard_adx = stddev(logfx_hard_ad)
+e_logfx_soft_adx = stddev(logfx_soft_ad)
+fx_full_adx = 10.^logfx_full_adx
+fx_hard_adx = 10.^logfx_hard_adx
+fx_soft_adx = 10.^logfx_soft_adx
+e_fx_full_adx = e_logfx_full_adx * alog(10.) * fx_full_adx
+e_fx_hard_adx = e_logfx_hard_adx * alog(10.) * fx_hard_adx
+e_fx_soft_adx = e_logfx_soft_adx * alog(10.) * fx_soft_adx
 
-sav_vars = [sav_vars,'LOGFX_FULL_ADV','LOGFX_HARD_ADV','LOGFX_SOFT_ADV']
+sav_vars = [sav_vars, $
+            'LOGFX_FULL_ADV','LOGFX_HARD_ADV','LOGFX_SOFT_ADV', $
+            'LOGFX_FULL_AD','LOGFX_HARD_AD','LOGFX_SOFT_AD', $
+            'LOGFX_FULL_ADX','LOGFX_HARD_ADX','LOGFX_SOFT_ADX', $
+            'E_LOGFX_FULL_ADX','E_LOGFX_HARD_ADX','E_LOGFX_SOFT_ADX', $
+            'FX_FULL_ADX','FX_HARD_ADX','FX_SOFT_ADX', $
+            'E_FX_FULL_ADX','E_FX_HARD_ADX','E_FX_SOFT_ADX']
 sav_inds = [sav_inds]
-
 
 sav_str = strjoin([sav_vars,sav_inds],',')
 re = execute('save,'+sav_str+',file="fx_estimate.sav"')

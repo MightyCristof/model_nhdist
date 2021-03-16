@@ -20,7 +20,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; assume current directory unless specified
 if (n_elements(subdir) eq 0) then path = './' else $
-                                  path = subdir+'/' & file_mkdir,path
+                                  path = strlowcase(subdir)+'/' & file_mkdir,path
 
 ;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
 if keyword_set(data) then begin
@@ -38,7 +38,7 @@ load_vars,'nhdist_obs.sav','_nhobs'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; load RX-NH conversions
-load_vars,'data_prep/rxz_scat01.sav','_rxnh'
+load_vars,'data_prep/rxz_scat01_nh20.sav','_rxnh'
 
 ;; directory for output
 pushd,path

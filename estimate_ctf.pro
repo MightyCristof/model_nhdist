@@ -19,7 +19,7 @@ for n = 0,niter-1 do begin
     
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.
-    nh_samp = nh_mc(nh_lan_nst,nsamp)
+    nh_samp = nh_mc(nh_lan,nsamp)
     ;; number of CT sources
     ithin = where(nh_samp le 24.,nthin);,complement=ithick,ncomplement=nthick)
     fthin = nthin/nsamp
