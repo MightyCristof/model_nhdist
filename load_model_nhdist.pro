@@ -6,14 +6,14 @@ if (n_elements(subdir) eq 0) then path = './' else $
                                   path = subdir+'/'
 
 load_vars,'carroll21_data.sav','_data'
-load_vars,'nhdist_obs.sav','_nhobs'
-load_vars,'data_prep/rxz_scat01.sav','_rxnh'
+load_vars,'observed_nhdist.sav','_nhdist'
 pushd,path
+load_vars,'select_nhobs.sav','_nhobs'
+load_vars,'rx_conversion.sav','_rxnh'
 load_vars,'select_group.sav','_group'
-load_vars,'ctf_estimate.sav','_ctfest'
-load_vars,'split_estimate.sav','_split'
-load_vars,'rx_model.sav','_rxmod'
-load_vars,'fx_estimate.sav','_fxest'
+load_vars,'ctf_fixed.sav','_fixed'
+load_vars,'ctf_free.sav','_free'
+load_vars,'rx_model.sav','_model'
 
 
 END

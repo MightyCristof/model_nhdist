@@ -49,16 +49,19 @@ lxv = lxv[isort,*]
 ;; remember RCH scaled 2-7 to 2-10 keV for comparison
 ;; 2-10 to 2-7 keV = 6.888E-01
 ien = [1,0,2]
-enrangev = enrangev[ien]
-enrangev[1] = '27'
-enrangev[2] = '210'
-fluxv = fluxv[*,ien]
-fluxv[*,1] = fluxv[*,2]*6.888E-01
-flux_errv = flux_errv[*,ien]
-flux_errv[*,1] = flux_errv[*,2]*6.888E-01
-lxv = lxv[*,ien]
-lxv[*,1] = lxv[*,2]*6.888E-01
-stak  = ['XSUBG',stak]
+estak = enrangev[ien]
+estak[1] = '27'
+estak[2] = '210'
+fxstak = fluxv[*,ien]
+fxstak[*,1] = fxstak[*,2]*6.888E-01
+e_fxstak = flux_errv[*,ien]
+e_fxstak[*,1] = e_fxstak[*,2]*6.888E-01
+logfxstak = alog10(fxstak)
+e_logfxstak = e_fxstak/(alog(10.)*fxstak)
+lxstak = lxv[*,ien]
+lxstak[*,1] = lxstak[*,2]*6.888E-01
+;stak  = ['XSUBG',stak]
+stak = ['XSUBG','ESTAK','FXSTAK','E_FXSTAK','LOGFXSTAK','E_LOGFXSTAK']
 
 ;; trim analysis subset
 iq = where(iiqual)

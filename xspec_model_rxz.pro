@@ -1,5 +1,6 @@
 PRO xspec_model_rxz, SCAT = scat, $
                      XCM = xcm, $
+                     POWER = power, $
                      CALC = calc, $
                      NHLIM = nhlim, $
                      HOWLOWCANYOUGO = howlowcanyougo
@@ -10,88 +11,113 @@ prefv = ['052','27','210']
 model = 'rxz'
 zv = [0.:0.8:0.01]
 suffix = ''
+if keyword_set(power) then suffix += '_power'
+
+;; prep NH array
+if keyword_set(howlowcanyougo) then begin
+    nhlo = strtrim(10.^[20.5:21.75:0.25]/1e22,2)
+    suffix = '_nh20.5_25'
+    nh = [20.5:25.5:0.25]
+endif else begin
+    nhlo = strtrim(10.^[21.:21.75:0.25]/1e22,2)
+    nh = [21.:25.5:0.25]
+endelse
+nhhi = string([22.:25.5:0.25],format='(f5.2)')
 
 ;; create XSPEC model
-if keyword_set(howlowcanyougo) then begin
-    nhlo = strtrim(10.^[20.:21.75:0.25]/1e22,2)
-    suffix = '_nh20'
-endif else nhlo = strtrim(10.^[21.:21.75:0.25]/1e22,2)
-nhhi = string([22.:25.5:0.25],format='(f5.2)')
 if keyword_set(xcm) then begin
-    openw,1,'model_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.xcm'
-    printf,1,'abund angr'
-    printf,1,'cosmo 70 0 0.73'
-    printf,1,'method leven 10 0.01'
-    printf,1,'xsect vern'
-    printf,1,'xset delta 0.01'
-    for i = 0,n_elements(engv)-1 do begin
-        eng = engv[i]
-        pref = prefv[i]
-        if (pref eq '210') then zra = zv[0] else zra = zv
-        printf,1,'set id [open spectra_'+pref+'_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.dat a]'
-        for z = 0,n_elements(zra)-1 do begin
-            printf,1,'model  constant*phabs*zphabs(atable{/Users/ccarroll/heasoft-6.25/localmodels/borus/borus02_v170323a.fits} + zphabs*cabs*cutoffpl + constant*cutoffpl)'
-            printf,1,'              1         -1          0          0      1e+10      1e+10'
-            printf,1,'           0.01         -1          0          0     100000      1e+06'
-            printf,1,'           0.01         -1          0          0     100000      1e+06'
-            printf,1,'            0.0      -0.01     -0.999     -0.999         10         10'
-            printf,1,'            1.8       0.05        1.4       1.45       2.55        2.6'
-            printf,1,'            300         -1         20         50        500       2000'
-            printf,1,'             22        0.1         22      22.25         25       25.5'
-            printf,1,'/'
-            printf,1,'           0.05         -1'
-            printf,1,'              1         -1'
-            printf,1,'= p4'
-            printf,1,'              1       0.01          0          0      1e+20      1e+24'
-            printf,1,'              1      0.001          0          0     100000      1e+06'
-            printf,1,'= p4'
-            printf,1,'= p13'
-            printf,1,'= p5'
-            printf,1,'= p6'
-            printf,1,'= p12'
-            printf,1,'           '+scat+'       '+scat+'          0          0      1e+10      1e+10'
-            printf,1,'= p5'
-            printf,1,'= p6'
-            printf,1,'= p12'
-            printf,1,'new 4 '+string(zra[z],format='(f0.2)')
-            printf,1,'puts $id "[tcloutr param 4]"'
-            for n = 0,n_elements(nhlo)-1 do begin
-                printf,1,'new 13 '+nhlo[n]
-                printf,1,'flux '+eng
-                printf,1,'puts $id "[tcloutr flux 2]"'
+    if keyword_set(power) then begin
+        nhval = strtrim(10.^nh/1e22,2)
+        openw,1,'model_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.xcm'
+        printf,1,'abund angr'
+        printf,1,'cosmo 70 0 0.73'
+        printf,1,'method leven 10 0.01'
+        printf,1,'xsect vern'
+        printf,1,'xset delta 0.01'
+        for i = 0,n_elements(engv)-1 do begin
+            eng = engv[i]
+            pref = prefv[i]
+            if (pref eq '210') then zra = zv[0] else zra = zv
+            printf,1,'set id [open spectra_'+pref+'_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.dat a]'
+            for z = 0,n_elements(zra)-1 do begin
+                printf,1,'model  constant*phabs*zphabs(zphabs*cabs*cutoffpl + constant*cutoffpl)'
+                printf,1,'              1         -1          0          0      1e+10      1e+10'
+                printf,1,'           0.01         -1          0          0     100000      1e+06'
+                printf,1,'           0.01         -1          0          0     100000      1e+06'
+                printf,1,'            0.0      -0.01     -0.999     -0.999         10         10'
+                printf,1,'           0.01         -1          0          0     100000      1e+06'
+                printf,1,'= p4'
+                printf,1,'= p5'
+                printf,1,'            1.8       0.05        1.4       1.45       2.55        2.6'
+                printf,1,'            300         -1         20         50        500       2000'
+                printf,1,'              1       0.01          0          0      1e+20      1e+24'
+                printf,1,'           '+scat+'       '+scat+'          0          0      1e+10      1e+10'
+                printf,1,'= p8'
+                printf,1,'= p9'
+                printf,1,'= p10'
+                printf,1,'new 4 '+string(zra[z],format='(f0.2)')
+                printf,1,'puts $id "[tcloutr param 4]"'
+                for n = 0,n_elements(nhval)-1 do begin
+                    printf,1,'new 5 '+nhval[n]
+                    printf,1,'flux '+eng
+                    printf,1,'puts $id "[tcloutr flux 2]"'
+                endfor
             endfor
-            printf,1,'model  constant*phabs*zphabs(atable{/Users/ccarroll/heasoft-6.25/localmodels/borus/borus02_v170323a.fits} + zphabs*cabs*cutoffpl + constant*cutoffpl)'
-            printf,1,'              1         -1          0          0      1e+10      1e+10'
-            printf,1,'           0.01         -1          0          0     100000      1e+06'
-            printf,1,'           0.01         -1          0          0     100000      1e+06'
-            printf,1,'            0.0      -0.01     -0.999     -0.999         10         10'
-            printf,1,'            1.8       0.05        1.4       1.45       2.55        2.6'
-            printf,1,'            300         -1         20         50        500       2000'
-            printf,1,'             22        0.1         22      22.25         25       25.5'
-            printf,1,'/'
-            printf,1,'           0.05         -1'
-            printf,1,'              1         -1'
-            printf,1,'= p4'
-            printf,1,'              1       0.01          0          0      1e+20      1e+24'
-            printf,1,'= 1.0e-22*10.0^p7'
-            printf,1,'= p4'
-            printf,1,'= p13'
-            printf,1,'= p5'
-            printf,1,'= p6'
-            printf,1,'= p12'
-            printf,1,'           '+scat+'       '+scat+'          0          0      1e+10      1e+10'
-            printf,1,'= p5'
-            printf,1,'= p6'
-            printf,1,'= p12'
-            printf,1,'new 4 '+string(zra[z],format='(f0.2)')
-            for n = 0,n_elements(nhhi)-1 do begin
-                printf,1,'new 7 '+nhhi[n]
-                printf,1,'flux '+eng
-                printf,1,'puts $id "[tcloutr flux 2]"'
+            printf,1,'close $id'
+        endfor    
+    endif else begin
+        openw,1,'model_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.xcm'
+        printf,1,'abund angr'
+        printf,1,'cosmo 70 0 0.73'
+        printf,1,'method leven 10 0.01'
+        printf,1,'xsect vern'
+        printf,1,'xset delta 0.01'
+        for i = 0,n_elements(engv)-1 do begin
+            eng = engv[i]
+            pref = prefv[i]
+            if (pref eq '210') then zra = zv[0] else zra = zv
+            printf,1,'set id [open spectra_'+pref+'_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.dat a]'
+            for z = 0,n_elements(zra)-1 do begin
+                printf,1,'model  constant*phabs*zphabs(atable{/Users/ccarroll/heasoft-6.25/localmodels/borus/borus02_v170323a.fits} + zphabs*cabs*cutoffpl + constant*cutoffpl)'
+                printf,1,'              1         -1          0          0      1e+10      1e+10'
+                printf,1,'           0.01         -1          0          0     100000      1e+06'
+                printf,1,'           0.01         -1          0          0     100000      1e+06'
+                printf,1,'            0.0      -0.01     -0.999     -0.999         10         10'
+                printf,1,'            1.8       0.05        1.4       1.45       2.55        2.6'
+                printf,1,'            300         -1         20         50        500       2000'
+                printf,1,'             22        0.1         22      22.25         25       25.5'
+                printf,1,'/'
+                printf,1,'           0.05         -1'
+                printf,1,'              1         -1'
+                printf,1,'= p4'
+                printf,1,'              1       0.01          0          0      1e+20      1e+24'
+                printf,1,'              1      0.001          0          0     100000      1e+06'
+                printf,1,'= p4'
+                printf,1,'= p13'
+                printf,1,'= p5'
+                printf,1,'= p6'
+                printf,1,'= p12'
+                printf,1,'           '+scat+'       '+scat+'          0          0      1e+10      1e+10'
+                printf,1,'= p5'
+                printf,1,'= p6'
+                printf,1,'= p12'
+                printf,1,'new 4 '+string(zra[z],format='(f0.2)')
+                printf,1,'puts $id "[tcloutr param 4]"'
+                for n = 0,n_elements(nhlo)-1 do begin
+                    printf,1,'new 13 '+nhlo[n]
+                    printf,1,'flux '+eng
+                    printf,1,'puts $id "[tcloutr flux 2]"'
+                endfor
+                printf,1,'new 13 = 1.0e-22*10.0^p7'
+                for n = 0,n_elements(nhhi)-1 do begin
+                    printf,1,'new 7 '+nhhi[n]
+                    printf,1,'flux '+eng
+                    printf,1,'puts $id "[tcloutr flux 2]"'
+                endfor
             endfor
+            printf,1,'close $id'
         endfor
-        printf,1,'close $id'
-    endfor
+    endelse
     close,1
 endif
 
@@ -107,11 +133,10 @@ if keyword_set(calc) then begin
     readcol,files[isoft],soft,dsoft,format='d,d'
     ;; create NH array
     inh = where(dfull eq 0.,num_nh)
-    if keyword_set(howlowcanyougo) then nh = [20.:21.+0.25*(num_nh-1):0.25] else $
-                                        nh = [21.:21.+0.25*(num_nh-1):0.25]
     ;; create restframe 2-10keV flux ratio
     full = full[inh]
     rx = alog10(full/full[0])
+    stop
     ;; prepare conversion arrays
     iz = where(dhard lt 0.,zlen)
     if (n_elements(zv) ne zlen) then stop
@@ -129,10 +154,15 @@ if keyword_set(calc) then begin
         c_hard = c_hard[ilim,*]
         c_soft = c_soft[ilim,*]
     endif
-    c_hard = alog10(c_hard)
-    c_soft = alog10(c_soft)
-    
-    save,zv,nh,rx,c_hard,c_soft,file=model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.sav'
+    ;; interpolate to increase sample density
+    rx_fine = [rx[0]:rx[-1]:-0.001]
+    c_hard_fine = dblarr(n_elements(rx_fine),zlen)
+    c_soft_fine = dblarr(n_elements(rx_fine),zlen)
+    for i = 0,zlen-1 do begin
+        c_hard_fine[*,i] = interpol(c_hard[*,i],rx,rx_fine)
+        c_soft_fine[*,i] = interpol(c_soft[*,i],rx,rx_fine)
+    endfor
+    save,zv,nh,rx,c_hard,c_soft,rx_fine,c_hard_fine,c_soft_fine,file=model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.sav'
 endif
 
 
