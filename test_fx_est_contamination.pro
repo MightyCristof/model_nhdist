@@ -1,4 +1,4 @@
-FUNCTION estimate_fx, rx_model, $
+FUNCTION test_fx_est_contamination, rx_model, $
                       iidet, $
                       CHA = cha, $
                       ITERATE = iterate
@@ -67,9 +67,10 @@ nmod = product(sz[2:sz[0]])
 rx_modd = reform(rx_model,sz[1],nmod)
 ii_modd = reform(iidet,sz[1],nmod)
 lin_vars = 'FX_'+['FULL','HARD','SOFT']
-clin_vars = 'C'+lin_vars
+clin_vars = 'CFX_'+['FULL','HARD','SOFT']
+log_vars = 'LOG'+lin_vars
 lin_vars = [lin_vars,'E_'+lin_vars]
-clin_vars = [clin_vars,'E_'+clin_vars]
+clin_vars = [clin_vars,'CE_'+lin_vars]
 for i = 0,n_elements(lin_vars)-1 do re = execute(lin_vars[i]+' = dblarr(nmod)')
 for i = 0,n_elements(clin_vars)-1 do re = execute(clin_vars[i]+' = dblarr(nmod)')
 
@@ -103,11 +104,23 @@ for i = 0,nmod-1 do begin
         cfullv[*,n] = fullv[*,n]
         chardv[*,n] = hardv[*,n]
         csoftv[*,n] = softv[*,n]
+        ;; cut on redshift
         izlo = where(z_non lt median(z_non),nzlo)
         irand = randomi(nnon*0.10,nzlo,/nodup)
         cfullv[izlo[irand],n] = !values.f_nan
         chardv[izlo[irand],n] = !values.f_nan
         csoftv[izlo[irand],n] = !values.f_nan                        
+        ;; cut on luminosity
+        ;ilhi = where(lx_non gt median(lx_non),nlhi)
+        ;irand = randomi(nnon*0.10,nlhi,/nodup)
+        ;cfullv[ilhi[irand],n] = !values.f_nan
+        ;chardv[ilhi[irand],n] = !values.f_nan
+        ;csoftv[ilhi[irand],n] = !values.f_nan                        
+        ;; random draw
+        ;irand = randomi(nnon*0.10,nnon,/nodup)
+        ;cfullv[irand,n] = !values.f_nan
+        ;chardv[irand,n] = !values.f_nan
+        ;csoftv[irand,n] = !values.f_nan                        
     endfor
     ;; find the mean flux over all sources
     full = mean(fullv,dim=1,/nan)
@@ -116,12 +129,15 @@ for i = 0,nmod-1 do begin
     e_full = medabsdev(fullv,dim=1)
     e_hard = medabsdev(hardv,dim=1)
     e_soft = medabsdev(softv,dim=1)
+    
     cfull = mean(cfullv,dim=1,/nan)
     chard = mean(chardv,dim=1,/nan)
     csoft = mean(csoftv,dim=1,/nan)
-    e_cfull = medabsdev(cfullv,dim=1)
-    e_chard = medabsdev(chardv,dim=1)
-    e_csoft = medabsdev(csoftv,dim=1)
+    ce_full = medabsdev(cfullv,dim=1)
+    ce_hard = medabsdev(chardv,dim=1)
+    ce_soft = medabsdev(csoftv,dim=1)
+
+    
     ;; and the mode of the 
     if (niter gt 1) then begin
         full = median(mode(full,bin=kde_bandwidth(full)),/even)
@@ -130,12 +146,16 @@ for i = 0,nmod-1 do begin
         e_full = median(mode(e_full,bin=kde_bandwidth(e_full)),/even)
         e_hard = median(mode(e_hard,bin=kde_bandwidth(e_hard)),/even)
         e_soft = median(mode(e_soft,bin=kde_bandwidth(e_soft)),/even)
+        
+        
         cfull = median(mode(cfull,bin=kde_bandwidth(cfull)),/even)
         chard = median(mode(chard,bin=kde_bandwidth(chard)),/even)
         csoft = median(mode(csoft,bin=kde_bandwidth(csoft)),/even)
-        e_cfull = median(mode(e_cfull,bin=kde_bandwidth(e_cfull)),/even)
-        e_chard = median(mode(e_chard,bin=kde_bandwidth(e_chard)),/even)
-        e_csoft = median(mode(e_csoft,bin=kde_bandwidth(e_csoft)),/even)
+        ce_full = median(mode(ce_full,bin=kde_bandwidth(ce_full)),/even)
+        ce_hard = median(mode(ce_hard,bin=kde_bandwidth(ce_hard)),/even)
+        ce_soft = median(mode(ce_soft,bin=kde_bandwidth(ce_soft)),/even)
+        
+        
     endif
     fx_full[i] = full
     fx_hard[i] = hard
@@ -143,23 +163,38 @@ for i = 0,nmod-1 do begin
     e_fx_full[i] = e_full
     e_fx_hard[i] = e_hard
     e_fx_soft[i] = e_soft
+
     cfx_full[i] = cfull
     cfx_hard[i] = chard
     cfx_soft[i] = csoft
-    e_cfx_full[i] = e_cfull
-    e_cfx_hard[i] = e_chard
-    e_cfx_soft[i] = e_csoft
+    ce_fx_full[i] = ce_full
+    ce_fx_hard[i] = ce_hard
+    ce_fx_soft[i] = ce_soft
+
+
+
 endfor
 ;; reconstruct original array if greater than 2D
 dim = strjoin(strtrim(sz[2:sz[0]],2),',')
 for i = 0,n_elements(lin_vars)-1 do re = execute(lin_vars[i]+' = reform('+lin_vars[i]+','+dim+')')
+
+;; reconstruct original array if greater than 2D
+dim = strjoin(strtrim(sz[2:sz[0]],2),',')
 for i = 0,n_elements(clin_vars)-1 do re = execute(clin_vars[i]+' = reform('+clin_vars[i]+','+dim+')')
+
+
+
+
+
 
 ;; save to structure
 eng = ['FULL','HARD','SOFT']
 lin = [eng,'E_'+eng]
+
 ceng = ['CFULL','CHARD','CSOFT']
 clin = [ceng,'E_'+ceng]
+
+
 
 str = strjoin([lin+':'+lin_vars,clin+':'+clin_vars],',')
 re = execute('fxest = soa2aos({'+str+'})')

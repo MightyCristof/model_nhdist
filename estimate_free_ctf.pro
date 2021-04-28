@@ -12,12 +12,12 @@ common _group
 if (n_elements(test) eq 0) then message, 'NO TEST STAT SPECIFIED.'
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 10;0;0
+niter = 1000
 fctv1 = dblarr(niter)
 stat_fctv1 = dblarr(6,niter)
 
 ;; fixed CT fraction
-step = 0.05d
+step = 0.01d
 fct = [step:1.-step:step]
 nfrac = n_elements(fct)
 
@@ -120,7 +120,7 @@ f25v2 = dblarr(niter)
 stat_fctv2 = dblarr(6,niter)
 
 ;; CT fraction
-fct = mode(fctv1,bin=0.01d)
+fct = mode(fctv1,bin=kde_bandwidth(fctv1))
 for n = 0,niter-1 do begin
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.

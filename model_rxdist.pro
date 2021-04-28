@@ -24,13 +24,13 @@ sav_vars = ['NSAMP','NH_SAMP','NTHIN']
 sav_inds = ['ITHIN']
 
 ;; number of iterations for each test
-niter = 10;0;0
+niter = 10000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RUN FOR FIXED CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct = mode(fctv,bin=0.01d)
+fct = mode(fctv,bin=kde_bandwidth(fctv))
 nsr = round(nthin/(1.-fct))
 nct = round(nsr*fct)
 ;; NH_RESAMP: structure of increased CT sources
@@ -81,13 +81,14 @@ sav_inds = [sav_inds,'IIMODV']
 ;; RUN FOR SPLIT CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct_ = mode(fctv1,bin=0.01d)
+fct_ = mode(fctv1,bin=kde_bandwidth(fctv1))
 nsr_ = round(nthin/(1.-fct_))
 nct_ = round(nsr_*fct_)
-f25_ = mode(f25v2,bin=0.01d)*fct_
-n25_ = round(nsr_*f25_)
-f24_ = mode(f24v2,bin=0.01d)*fct_
-n24_ = nct_-n25_;round(nsr_*f24_)
+f24_ = mode(f24v2,bin=kde_bandwidth(f24v2))*fct_
+n24_ = round(nsr_*f24_)
+f25_ = mode(f25v2,bin=kde_bandwidth(f25v2))*fct_
+;n25_ = round(nsr_*f25_)
+n25_ = nct_-n24_
 ;; NH_RESAMP: structure of increased CT sources
 ;; NH_MOD: draw N sources from NH_RESAMP
 ;; RX_MOD: convert the model NH model to model RX with observed scatter in Chen+17 LX-LMIR

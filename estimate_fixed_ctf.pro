@@ -57,15 +57,18 @@ for n = 0,niter-1 do begin
     a2 = reform(ad[0,*])
     p_a2 = reform(ad[1,*])
     ;; estimate model fluxes
+    stop
     fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
+    stop
+    
     ;; compare to X-ray stacked fluxes
-    ;x2_soft = ((fxstak[1,0]-fx_est.soft)/e_fxstak[1,0])^2.
-    ;x2_hard = ((fxstak[1,1]-fx_est.hard)/e_fxstak[1,1])^2.
+    x2_soft = ((fxstak[1,0]-fx_est.soft)/e_fxstak[1,0])^2.
+    x2_hard = ((fxstak[1,1]-fx_est.hard)/e_fxstak[1,1])^2.
     ;; uncertainties in quadrature
-    unc_soft = abs(fxstak[1,0] * sqrt((e_fxstak[1,0]/fxstak[1,0])^2. + (fx_est.e_soft/fx_est.soft)^2.))
-    unc_hard = abs(fxstak[1,1] * sqrt((e_fxstak[1,1]/fxstak[1,1])^2. + (fx_est.e_hard/fx_est.hard)^2.))
-    x2_soft = ((fxstak[1,0]-fx_est.soft)/unc_soft)^2.
-    x2_hard = ((fxstak[1,1]-fx_est.hard)/unc_hard)^2.
+    ;unc_soft = abs(fxstak[1,0] * sqrt((e_fxstak[1,0]/fxstak[1,0])^2. + (fx_est.e_soft/fx_est.soft)^2.))
+    ;unc_hard = abs(fxstak[1,1] * sqrt((e_fxstak[1,1]/fxstak[1,1])^2. + (fx_est.e_hard/fx_est.hard)^2.))
+    ;x2_soft = ((fxstak[1,0]-fx_est.soft)/unc_soft)^2.
+    ;x2_hard = ((fxstak[1,1]-fx_est.hard)/unc_hard)^2.
     x2 = x2_soft+x2_hard
     p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
     ;; correct for p-value == 1
@@ -85,6 +88,7 @@ for n = 0,niter-1 do begin
     ;; combined test statistic
     x2_joint = -2.*(alog(p_a2)+alog(p_x2))
     p_joint = 1.-chisqr_pdf(x2_joint,4.) ;; dof = 2k, where k is the number of tests being combined
+    stop
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 

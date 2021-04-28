@@ -30,7 +30,7 @@ for i = 0,sz[1]-1 do begin
 endfor
 ;; XH is bin start, but PLOT() assumes centered abscissa values.
 ;; need XH to normalize histogram (i.e., Ananna+2019)
-tags = 'xh:xh,xhoff:xh+width(xh)/2.,yh:mean(yh,dim=2),sig:stddev(yh,dim=2)'
+tags = 'xh:xh,xhoff:xh+width(xh,/med)/2.,yh:mean(yh,dim=2),sig:stddev(yh,dim=2)'
 if keyword_set(iidet) then tags = tags+',yh_det:mean(yh_det,dim=2),sig_det:stddev(yh_det,dim=2),yh_non:mean(yh_non,dim=2),sig_non:stddev(yh_non,dim=2)'
 re = execute('struct = soa2aos({'+tags+'})')
 
