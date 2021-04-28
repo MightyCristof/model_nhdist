@@ -105,22 +105,11 @@ for i = 0,nmod-1 do begin
         chardv[*,n] = hardv[*,n]
         csoftv[*,n] = softv[*,n]
         ;; cut on redshift
-        izlo = where(z_non lt median(z_non),nzlo)
-        irand = randomi(nnon*0.10,nzlo,/nodup)
-        cfullv[izlo[irand],n] = !values.f_nan
-        chardv[izlo[irand],n] = !values.f_nan
-        csoftv[izlo[irand],n] = !values.f_nan                        
-        ;; cut on luminosity
-        ;ilhi = where(lx_non gt median(lx_non),nlhi)
-        ;irand = randomi(nnon*0.10,nlhi,/nodup)
-        ;cfullv[ilhi[irand],n] = !values.f_nan
-        ;chardv[ilhi[irand],n] = !values.f_nan
-        ;csoftv[ilhi[irand],n] = !values.f_nan                        
         ;; random draw
-        ;irand = randomi(nnon*0.10,nnon,/nodup)
-        ;cfullv[irand,n] = !values.f_nan
-        ;chardv[irand,n] = !values.f_nan
-        ;csoftv[irand,n] = !values.f_nan                        
+        irand = randomi(nnon*0.10,nnon,/nodup)
+        cfullv[irand,n] = 0.
+        chardv[irand,n] = 0.
+        csoftv[irand,n] = 0.                        
     endfor
     ;; find the mean flux over all sources
     full = mean(fullv,dim=1,/nan)

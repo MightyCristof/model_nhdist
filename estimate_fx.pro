@@ -103,11 +103,10 @@ for i = 0,nmod-1 do begin
         cfullv[*,n] = fullv[*,n]
         chardv[*,n] = hardv[*,n]
         csoftv[*,n] = softv[*,n]
-        izlo = where(z_non lt median(z_non),nzlo)
-        irand = randomi(nnon*0.10,nzlo,/nodup)
-        cfullv[izlo[irand],n] = !values.f_nan
-        chardv[izlo[irand],n] = !values.f_nan
-        csoftv[izlo[irand],n] = !values.f_nan                        
+        irand = randomi(nnon*0.10,nnon,/nodup)
+        cfullv[irand,n] = 0.
+        chardv[irand,n] = 0.
+        csoftv[irand,n] = 0.                        
     endfor
     ;; find the mean flux over all sources
     full = mean(fullv,dim=1,/nan)

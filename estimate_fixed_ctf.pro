@@ -22,6 +22,10 @@ nfrac = n_elements(fct)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
+
+imin1 = lonarr(100)
+imin2 = lonarr(100)
+
 for n = 0,niter-1 do begin
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.
@@ -57,38 +61,26 @@ for n = 0,niter-1 do begin
     a2 = reform(ad[0,*])
     p_a2 = reform(ad[1,*])
     ;; estimate model fluxes
-    stop
     fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
-    stop
-    
-    ;; compare to X-ray stacked fluxes
-    x2_soft = ((fxstak[1,0]-fx_est.soft)/e_fxstak[1,0])^2.
-    x2_hard = ((fxstak[1,1]-fx_est.hard)/e_fxstak[1,1])^2.
-    ;; uncertainties in quadrature
-    ;unc_soft = abs(fxstak[1,0] * sqrt((e_fxstak[1,0]/fxstak[1,0])^2. + (fx_est.e_soft/fx_est.soft)^2.))
-    ;unc_hard = abs(fxstak[1,1] * sqrt((e_fxstak[1,1]/fxstak[1,1])^2. + (fx_est.e_hard/fx_est.hard)^2.))
-    ;x2_soft = ((fxstak[1,0]-fx_est.soft)/unc_soft)^2.
-    ;x2_hard = ((fxstak[1,1]-fx_est.hard)/unc_hard)^2.
+    ;; X-ray stack data-model
+    del_soft = fxstak[1,0]-fx_est.csoft
+    del_hard = fxstak[1,1]-fx_est.chard
+    ;; uncertainties
+    ;sig_soft = e_fxstak[1,0]
+    ;sig_hard = e_fxstak[1,1]
+    sig_soft = abs(fxstak[1,0] * sqrt((e_fxstak[1,0]/fxstak[1,0])^2. + (fx_est.e_csoft/fx_est.csoft)^2.))
+    sig_hard = abs(fxstak[1,1] * sqrt((e_fxstak[1,1]/fxstak[1,1])^2. + (fx_est.e_chard/fx_est.chard)^2.))
+    ;; chi-square
+    x2_soft = (del_soft/sig_soft)^2.
+    x2_hard = (del_hard/sig_hard)^2.    
     x2 = x2_soft+x2_hard
     p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
     ;; correct for p-value == 1
     pmin = min(p_x2[where(p_x2,null)])
     p_x2 = p_x2 > (pmin/10.)
-    ;; combined test array
-    if keyword_set(brown) then begin
-        p_tests = [[p_a2],[p_x2]]
-        x2k = -2.*alog([[p_a2],[p_x2]])
-        mom = moment(x2k,dim=2)
-        c = mom[*,1]/(2.*mom[*,0])
-        kp = 2.*(mom[*,0]^2.)/mom[*,1]
-        ;; rescaling (BROWN METHOD)
-        cxkp = c*total(x2k,2)
-        p_cxkp = 1.-chisqr_pdf(cxkp,kp)
-    endif
     ;; combined test statistic
     x2_joint = -2.*(alog(p_a2)+alog(p_x2))
-    p_joint = 1.-chisqr_pdf(x2_joint,4.) ;; dof = 2k, where k is the number of tests being combined
-    stop
+    p_joint = 1.-chisqr_pdf(x2_joint,4.)  ;; dof = 2k, where k == 2, the number of tests being combined
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 

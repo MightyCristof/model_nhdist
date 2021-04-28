@@ -17,7 +17,7 @@ fctv1 = dblarr(niter)
 stat_fctv1 = dblarr(6,niter)
 
 ;; fixed CT fraction
-step = 0.01d
+step = 0.02d
 fct = [step:1.-step:step]
 nfrac = n_elements(fct)
 
