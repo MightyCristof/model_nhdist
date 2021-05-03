@@ -8,6 +8,7 @@ PRO model_nhdist, sub_dir, $
                   POSTMOD = postmod, $
                   FIXED = fixed, $
                   FREE = free, $
+                  SPLIT = split, $
                   MODEL = model
 
 
@@ -19,6 +20,7 @@ nkeys = n_elements(data) + $
         n_elements(group) + $
         n_elements(fixed) + $
         n_elements(free) + $
+        n_elements(split) + $
         n_elements(model)
 if (nkeys eq 0) then GOTO, NO_KEYS
 
@@ -83,23 +85,30 @@ load_vars,'select_group.sav','_group'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; set method for model comparison: use AD test or JOINT (Fisher method)
-;test = 'AD'
-;test = 'JOINT'
+test = strupcase(test)
 
-;; estimate the distribution of CTF for modeling
+;; estimate the distribution of fixed CTF
 if keyword_set(fixed) then begin
-    estimate_fixed_ctf,test=test;_update
+    estimate_fixed_ctf,test=strupcase(test);_update
     nkeys--
 endif
 load_vars,'ctf_fixed.sav','_fixed'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
-;; estimate the distribution of NH=24-25 split for modeling
+;; estimate the distribution of free CTF
 if keyword_set(free) then begin
-    estimate_free_ctf,test=test;_update
+    estimate_free_ctf,test=strupcase(test);_update
     nkeys--
 endif
 load_vars,'ctf_free.sav','_free'
+if (nkeys eq 0) then GOTO, NO_KEYS
+
+;; estimate the distribution of NH=24-25 split
+if keyword_set(split) then begin
+    estimate_split_nh,test=strupcase(test)
+    nkeys--
+endif
+load_vars,'nh_split.sav','_split'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; simulate the NH and RL distributions
