@@ -4,13 +4,12 @@ PRO model_nhdist, sub_dir, $
                   SETNH = setnh, $
                   SETRX = setrx, $
                   GROUP = group, $
-                  TEST = test, $
-                  POSTMOD = postmod, $
                   FIXED = fixed, $
                   FREE = free, $
                   SPLIT = split, $
-                  MODEL = model
-
+                  MODEL = model, $
+                  TEST = test, $
+                  POSTMOD = postmod
 
 ;; check for keyword commands
 nkeys = n_elements(data) + $
@@ -97,7 +96,7 @@ if keyword_set(free) then begin
     estimate_free_ctf;_update
     nkeys--
 endif
-load_vars,'ctf_free.sav','_free'
+;load_vars,'ctf_free.sav','_free'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of NH=24-25 split
@@ -110,9 +109,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; simulate the NH and RL distributions
 if keyword_set(model) then begin
-    if keyword_set(postmod) then postmod = 1 else $
-                                 postmod = 0
-    model_rxdist,postmod=postmod;_update;,/postmod
+    model_rxdist,postmod=postmod;_update
     nkeys--
 endif
 load_vars,'rx_model.sav','_model'
