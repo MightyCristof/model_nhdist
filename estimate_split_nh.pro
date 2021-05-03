@@ -1,4 +1,4 @@
-PRO estimate_split_nh, TEST = test
+PRO estimate_split_nh
 
 
 common _data
@@ -9,9 +9,6 @@ common _group
 ;common _fixed
 common _free
 
-
-;; AD test or JOINT (Fisher method)
-if (n_elements(test) eq 0) then message, 'NO TEST STAT SPECIFIED.'
 
 ;; run this script NITER times 
 niter = 1000

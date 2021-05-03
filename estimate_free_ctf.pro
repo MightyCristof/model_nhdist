@@ -1,4 +1,4 @@
-PRO estimate_free_ctf, TEST = test
+PRO estimate_free_ctf
 
 
 common _data
@@ -8,8 +8,6 @@ common _rxnh
 common _group
 ;common _fixed
 
-;; AD test or JOINT (Fisher method)
-if (n_elements(test) eq 0) then message, 'NO TEST STAT SPECIFIED.'
 
 ;; run this script NITER times and look at the distribution in CTF
 niter = 1000

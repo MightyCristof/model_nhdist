@@ -78,18 +78,15 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 ;; select data group WISE AGN, secondary sources, or all (WAC/SEC/ALL)
 if keyword_set(group) then begin
     if (typename(group) ne 'STRING') then message, 'PLEASE SELECT INPUT GROUP: WAC/SEC/ALL/WAC_HIX/WAC_LOX/OFFSET'
-    set_data_group,group=group
+    set_data_group,group=group,test=test
     nkeys--
 endif
 load_vars,'select_group.sav','_group'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
-;; set method for model comparison: use AD test or JOINT (Fisher method)
-test = strupcase(test)
-
 ;; estimate the distribution of fixed CTF
 if keyword_set(fixed) then begin
-    estimate_fixed_ctf,test=strupcase(test);_update
+    estimate_fixed_ctf;_update
     nkeys--
 endif
 load_vars,'ctf_fixed.sav','_fixed'
@@ -97,7 +94,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of free CTF
 if keyword_set(free) then begin
-    estimate_free_ctf,test=strupcase(test);_update
+    estimate_free_ctf;_update
     nkeys--
 endif
 load_vars,'ctf_free.sav','_free'
@@ -105,7 +102,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of NH=24-25 split
 if keyword_set(split) then begin
-    estimate_split_nh,test=strupcase(test)
+    estimate_split_nh
     nkeys--
 endif
 load_vars,'nh_split.sav','_split'

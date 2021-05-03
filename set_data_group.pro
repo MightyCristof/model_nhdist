@@ -1,4 +1,5 @@
-PRO set_data_group, GROUP = group
+PRO set_data_group, GROUP = group, $
+                    TEST = test
                     
 
 common _data
@@ -6,6 +7,10 @@ common _nhdist
 common _nhobs
 common _rxnh
 
+
+;; AD test or JOINT (Fisher method)
+if (n_elements(test) eq 0) then message, 'NO TEST STAT SPECIFIED.' else $
+                                test = strupcase(test)
 
 group = strupcase(group)
 
@@ -57,7 +62,7 @@ endcase
 ;; full number of sources, detected and non-detected
 nsrc = n_elements(rxl)
 
-sav_vars = ['GROUP','RXD','E_RXD','RXL','FRAC_HIX','FRAC_LOX','NSRC']
+sav_vars = ['GROUP','RXD','E_RXD','RXL','FRAC_HIX','FRAC_LOX','NSRC','TEST']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
