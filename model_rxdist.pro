@@ -53,7 +53,7 @@ for n = 0,niter-1 do begin
     iimodv[*,n] = rx_modv[*,n] gt rxl
     idet = where(iimodv[*,n] eq 1,detct)
     if (detct ge 5) then begin
-        ad[*,n] = ad_test(rxd,rx_modv[idet,n],/prob)
+        ad[*,n] = ad_test(rxd,rx_modv[idet,n],prob=(test eq 'JOINT'))
     endif else if (detct gt 0) then begin
         ad[*,n] = [-1.,-1.]
     endif else message, 'NO MODELED DETECTIONS.'
@@ -108,7 +108,7 @@ for n = 0,niter-1 do begin
     iimodv_[*,n] = rx_modv_[*,n] gt rxl
     idet = where(iimodv_[*,n] eq 1,detct)
     if (detct ge 5) then begin
-        ad[*,n] = ad_test(rxd,rx_modv[idet,n],/prob)
+        ad[*,n] = ad_test(rxd,rx_modv[idet,n],prob=(test eq 'JOINT'))
     endif else if (detct gt 0) then begin
         ad[*,n] = [-1.,-1.]
     endif else message, 'NO MODELED DETECTIONS.'

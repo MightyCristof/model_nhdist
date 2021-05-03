@@ -58,7 +58,7 @@ for n = 0,niter-1 do begin
             iimod[*,i,j] = rx_mod[*,i,j] gt rxl
             idet = where(iimod[*,i,j] eq 1,detct)
             if (detct ge 5) then begin
-                ad[*,i,j] = ad_test(rxd,rx_mod[idet,i,j],/prob)
+                ad[*,i,j] = ad_test(rxd,rx_mod[idet,i,j],prob=(test eq 'JOINT'))
             endif else if (detct gt 0) then begin
                 ad[*,i,j] = [-1.,-1.,-1.]
             endif else message, 'NO MODELED DETECTIONS.'
