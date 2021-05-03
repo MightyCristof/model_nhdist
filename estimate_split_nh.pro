@@ -11,7 +11,7 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 1000
+niter = 100;0
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 stat_fctv2 = dblarr(6,niter)
@@ -26,6 +26,7 @@ nfree = n_elements(f24)
 fct = mode(fctv1,bin=kde_bandwidth(fctv1))
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
+nrej2 = 0l
 for n = 0,niter-1 do begin
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.
@@ -61,15 +62,14 @@ for n = 0,niter-1 do begin
     endfor    
     a2 = reform(ad[0,*])
     p_a2 = reform(ad[1,*])
+    iia2 = p_a2 gt min(p_a2)
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case test of 
         'AD': begin
-            x2 = dblarr(nfree)
-            p_x2 = dblarr(nfree)
-            x2_joint = dblarr(nfree)
-            p_joint = dblarr(nfree)
             ibest = where(a2 eq min(a2[where(a2 gt 0,/null)]),nbest)
+            if (nbest gt 1) then stop            
+            stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
             end
         'JOINT': begin
             ;; constraints by X-ray stacked fluxes
@@ -84,17 +84,28 @@ for n = 0,niter-1 do begin
             x2_hard = ((fxstak[1,1]-fx_est.hard)/unc_hard)^2.
             x2 = x2_soft+x2_hard
             p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
+            ;; correct for p-value == 1
+            p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
+            iix2 = p_x2 gt min(p_x2)
             ;; combined test statistic
             x2_joint = -2.*(alog(p_a2)+alog(p_x2))<99.
-            p_joint = 1.-chisqr_pdf(x2_joint,4.) ;; dof = 2k, where k is the number of tests being combined
-            ibest = where(x2_joint eq min(x2_joint) and a2 ge 0.,nbest)
+            p_joint = 1.-chisqr_pdf(x2_joint,4.) ;; dof = 2k, where k is the number of tests being combined            
+            ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
+            if (nbest gt 1) then stop
+            stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
             end
         else: message, 'IMPROPER INPUT OF TEST METHOD.'
     endcase
-    if (nbest gt 0) then ibest = ibest[where(f25[ibest] eq median(f25[ibest]))]
-    f25v2[n] = f25[ibest]
-    f24v2[n] = f24[ibest]
-    stat_fctv2[*,n] = [ad[*,ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
+    ;; skip if no good fits during iteration
+    if (nbest eq 0) then begin
+        nrej2++
+        continue
+    ;; record best fit statistics
+    endif else begin
+        f24v2[n] = f24[ibest]
+        f25v2[n] = f25[ibest]
+        stat_fctv2[*,n] = stat
+    endelse
     ;; progress alert
     if (n eq 0) then begin
         print, '=============================================='
@@ -104,7 +115,7 @@ endfor
 print, 'END   - NH SPLIT'
 print, '=============================================='
 
-sav_vars = ['F24V2','F25V2','STAT_FCTV2']
+sav_vars = ['F24V2','F25V2','STAT_FCTV2','NREJ2']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

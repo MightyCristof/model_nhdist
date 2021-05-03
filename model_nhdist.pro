@@ -96,7 +96,7 @@ if keyword_set(free) then begin
     estimate_free_ctf;_update
     nkeys--
 endif
-;load_vars,'ctf_free.sav','_free'
+load_vars,'ctf_free.sav','_free'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of NH=24-25 split

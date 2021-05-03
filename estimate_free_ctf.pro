@@ -10,7 +10,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 1000
+niter = 100;0
 fctv1 = dblarr(niter)
 f24v1 = dblarr(niter)
 f25v1 = dblarr(niter)
@@ -28,6 +28,7 @@ nfree = n_elements(f24)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
+nrej = 0l
 for n = 0,niter-1 do begin
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.
@@ -67,16 +68,14 @@ for n = 0,niter-1 do begin
     sz = size(ad)
     re = execute('a2 = reform(ad['+strjoin(['0',strarr(sz[0]-1)+'*'],',')+'])')
     re = execute('p_a2 = reform(ad['+strjoin(['1',strarr(sz[0]-1)+'*'],',')+'])')
+    iia2 = p_a2 gt min(p_a2)
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
         'AD': begin
-            dim = size(a2,/dim)
-            x2 = dblarr(dim)
-            p_x2 = dblarr(dim)
-            x2_joint = dblarr(dim)
-            p_joint = dblarr(dim)
             ibest = where(a2 eq min(a2[where(a2 gt 0,/null)]),nbest)
+            if (nbest gt 1) then stop            
+            stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
             end
         'JOINT': begin
             ;; constraints by X-ray stacked fluxes
@@ -91,27 +90,31 @@ for n = 0,niter-1 do begin
             x2_hard = ((fxstak[1,1]-fx_est.hard)/unc_hard)^2.
             x2 = x2_soft+x2_hard
             p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
+            ;; correct for p-value == 1
+            p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
+            iix2 = p_x2 gt min(p_x2)
             ;; combined test statistic
             x2_joint = -2.*(alog(p_a2)+alog(p_x2))<99.
-            p_joint = 1.-chisqr_pdf(x2_joint,4.) ;; dof = 2k, where k is the number of tests being combined
-            ibest = where(x2_joint eq min(x2_joint) and a2 ge 0.,nbest)
+            p_joint = 1.-chisqr_pdf(x2_joint,4.) ;; dof = 2k, where k is the number of tests being combined            
+            ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
+            if (nbest gt 1) then stop
+            stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
             end
         else: message, 'IMPROPER INPUT OF TEST METHOD.'
-    endcase
-    if (nbest gt 1) then ibest = ibest[where(fct[ibest] eq median(fct[ibest]))]
-    ;; account for extra dimensions
-    ind = array_indices(x2_joint,ibest)
-    if (nbest gt 1) then begin
-        ii = where(fct[ind[0,*]] eq median(fct[ind[0,*]]))
-        ibest = ibest[ii]
-        ind = ind[*,ii]
-    endif
-    ;; QUESTION: method to determine best-fit?
-    ;; take minimum joint chi-square? median of FCT for p>0.05? maximum p[>0.05]?
-    fctv1[n] = fct[ind[0]]
-    f24v1[n] = f24[ind[1]]
-    f25v1[n] = f25[ind[1]]
-    stat_fctv1[*,n] = [ad[*,ind[0],ind[1]],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
+    endcase    
+    ;; skip if no good fits during iteration
+    if (nbest eq 0) then begin
+        nrej1++
+        continue
+    ;; record best fit statistics
+    endif else begin
+        ;; account for extra dimensions
+        ind = array_indices(a2,ibest)
+        fctv1[n] = fct[ind[0]]
+        f24v1[n] = f24[ind[1]]
+        f25v1[n] = f25[ind[1]]
+        stat_fctv1[*,n] = stat
+    endelse
     ;; progress alert
     if (n eq 0) then begin
         print, '=============================================='
@@ -121,7 +124,7 @@ endfor
 print, 'END   - FREE FCT, ROUND 1'
 print, '=============================================='
 
-sav_vars = ['FCTV1','F24V1','F25V1','STAT_FCTV1']            
+sav_vars = ['FCTV1','F24V1','F25V1','STAT_FCTV1','NREJ1']            
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

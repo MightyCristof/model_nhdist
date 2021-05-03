@@ -20,10 +20,7 @@ nfrac = n_elements(fct)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
-
-imin1 = lonarr(100)
-imin2 = lonarr(100)
-
+nrej = 0l
 for n = 0,niter-1 do begin
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.
@@ -52,21 +49,21 @@ for n = 0,niter-1 do begin
         idet = where(iimod[*,i] eq 1,detct)
         if (detct ge 5) then begin
             ;; if comparing test statistics, need p_a2
-            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=1);prob=(test eq 'JOINT'))
+            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=(test eq 'JOINT'))
         endif else if (detct gt 0) then begin
             ad[*,i] = [-1.,-1.]
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     a2 = reform(ad[0,*])
     p_a2 = reform(ad[1,*])
+    iia2 = p_a2 gt min(p_a2)
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
         'AD': begin
-            ibest = where(a2 eq min(a2[where(a2 gt 0,/null)]),nbest)
-            if (nbest gt 1) then ibest = ibest[where(fct[ibest] eq median(fct[ibest]))]
-            fctv[n] = fct[ibest]
-            stat_fctv[0:1,n] = ad[*,ibest]
+            ibest = where(a2 eq min(a2[where(iia2,/null)]),nbest)
+            if (nbest gt 1) then stop
+            stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
             end
         'JOINT': begin
             ;; estimate model fluxes
@@ -85,18 +82,26 @@ for n = 0,niter-1 do begin
             x2 = x2_soft+x2_hard
             p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
             ;; correct for p-value == 1
-            pmin = min(p_x2[where(p_x2,null)])
-            p_x2 = p_x2 > (pmin/10.)
+            p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
+            iix2 = p_x2 gt min(p_x2)
             ;; combined test statistic
             x2_joint = -2.*(alog(p_a2)+alog(p_x2))
             p_joint = 1.-chisqr_pdf(x2_joint,4.)  ;; dof = 2k, where k == 2, the number of tests being combined
-            ibest = where(x2_joint eq min(x2_joint) and a2 ge 0.,nbest)
-            if (nbest gt 1) then ibest = ibest[where(fct[ibest] eq median(fct[ibest]))]
-            fctv[n] = fct[ibest]
-            stat_fctv[*,n] = [ad[*,ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
+            ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
+            if (nbest gt 1) then stop
+            stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
             end
         else: message, 'IMPROPER INPUT OF TEST METHOD.'
     endcase
+    ;; skip if no good fits during iteration
+    if (nbest eq 0) then begin
+        nrej++
+        continue
+    ;; record best fit statistics
+    endif else begin
+        fctv[n] = fct[ibest]
+        stat_fctv[*,n] = stat
+    endelse
     ;; progress alert
     if (n eq 0) then begin
         print, '=============================================='
@@ -106,7 +111,7 @@ endfor
 print, 'END   - FIXED FCT'
 print, '=============================================='
 
-sav_vars = ['FCTV','STAT_FCTV']
+sav_vars = ['FCTV','STAT_FCTV','NREJ']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

@@ -3,7 +3,7 @@ FUNCTION ad_test, data, $
                   PROB = prob
 
                   
-FORWARD_FUNCTION ad_test
+;FORWARD_FUNCTION ad_test
 
 sz = n_elements(data)
 if sz lt 2 then message, 'data must contain at least two elements'
@@ -34,6 +34,7 @@ if keyword_set(prob) then begin
     njoint = n_elements(joint)
     ;for i = 0,nreps-1 do ad_perm[i] = ad_test(data,joint[randomi(nmodel,njoint,/nodup)])
 
+    ;; permutation test (well, my quick approximation of one anyway)
     for i = 0,nreps-1 do begin
         pjoint = joint[randomi(njoint,njoint,/nodup)]
         pdata = pjoint[0:ndata-1]

@@ -16,7 +16,7 @@ if keyword_set(cha) then iicha = xnon eq 'CHA' else $
                          iicha = xnon ne ''
                          
 ;; iterate over each object, or run single case
-if keyword_set(iterate) then niter = 1000 else $
+if keyword_set(iterate) then niter = 100 else $
                              niter = 1
 
 ;; data for non-detected sample        
