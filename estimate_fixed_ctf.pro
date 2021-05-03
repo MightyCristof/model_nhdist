@@ -51,7 +51,8 @@ for n = 0,niter-1 do begin
         iimod[*,i] = rx_mod[*,i] gt rxl
         idet = where(iimod[*,i] eq 1,detct)
         if (detct ge 5) then begin
-            ad[*,i] = ad_test(rxd,rx_mod[idet,i],/prob)
+            ;; if comparing test statistics, need p_a2
+            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=1);prob=(test eq 'JOINT'))
         endif else if (detct gt 0) then begin
             ad[*,i] = [-1.,-1.]
         endif else message, 'NO MODELED DETECTIONS.'
@@ -62,11 +63,10 @@ for n = 0,niter-1 do begin
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
         'AD': begin
-            x2 = dblarr(nfrac)
-            p_x2 = dblarr(nfrac)
-            x2_joint = dblarr(nfrac)
-            p_joint = dblarr(nfrac)
             ibest = where(a2 eq min(a2[where(a2 gt 0,/null)]),nbest)
+            if (nbest gt 1) then ibest = ibest[where(fct[ibest] eq median(fct[ibest]))]
+            fctv[n] = fct[ibest]
+            stat_fctv[0:1,n] = ad[*,ibest]
             end
         'JOINT': begin
             ;; estimate model fluxes
@@ -91,13 +91,12 @@ for n = 0,niter-1 do begin
             x2_joint = -2.*(alog(p_a2)+alog(p_x2))
             p_joint = 1.-chisqr_pdf(x2_joint,4.)  ;; dof = 2k, where k == 2, the number of tests being combined
             ibest = where(x2_joint eq min(x2_joint) and a2 ge 0.,nbest)
+            if (nbest gt 1) then ibest = ibest[where(fct[ibest] eq median(fct[ibest]))]
+            fctv[n] = fct[ibest]
+            stat_fctv[*,n] = [ad[*,ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
             end
         else: message, 'IMPROPER INPUT OF TEST METHOD.'
     endcase
-    if n eq 4 then stop
-    if (nbest gt 0) then ibest = ibest[where(fct[ibest] eq median(fct[ibest]))]
-    fctv[n] = fct[ibest]
-    stat_fctv[*,n] = [ad[*,ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
     ;; progress alert
     if (n eq 0) then begin
         print, '=============================================='
