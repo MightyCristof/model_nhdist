@@ -79,7 +79,7 @@ if keyword_set(fixed) then begin
     ;; CT fraction
     ctad = text(25.,0.35,'$!8f!7_{CT} = '+string(fct,format='(d4.2)')+'$',/data,font_size=16,font_name='Times',alignment=0.5)
     ;; add legend
-    l = legend(target=[pavg,pad],position=[0.125,0.61],/normal,horizontal_alignment=0.,font_size=12,font_name='Times')
+    leg = legend(target=[pavg,pad],position=[0.125,0.61],/normal,horizontal_alignment=0.,font_size=12,font_name='Times')
     ;; add X-ray stacked images
     psoft = plot(xy,xy,/nodata,xra=ra,yra=ra,pos=pos[*,0],/current,/device,ytitle='offset in Decl. [arcsec.]',font_name='Times')
     imsoft = image(soft,pos=pos[*,0],/current,/device)    
@@ -179,7 +179,7 @@ if keyword_set(free) then begin
     ;; CT fraction
     ctad = text(25.,0.35,'$!8f!7_{CT} = '+string(fct_,format='(d4.2)')+'$',/data,font_size=16,font_name='Times',alignment=0.5)
     ;; add legend
-    l = legend(target=[pavg,pad],position=[0.125,0.61],/normal,horizontal_alignment=0.,font_size=12,font_name='Times')
+    leg = legend(target=[pavg,pad],position=[0.125,0.61],/normal,horizontal_alignment=0.,font_size=12,font_name='Times')
     ;; add X-ray stacked images
     psoft = plot(xy,xy,/nodata,xra=ra,yra=ra,pos=pos[*,0],/current,/device,ytitle='offset in Decl. [arcsec.]',font_name='Times')
     imsoft = image(soft,pos=pos[*,0],/current,/device)    
