@@ -123,18 +123,18 @@ for i = 0,nmod-1 do begin
     e_csoft = medabsdev(csoftv,dim=1)
     ;; and the mode of the 
     if (niter gt 1) then begin
-        full = median(mode(full,bin=kde_bandwidth(full)),/even)
-        hard = median(mode(hard,bin=kde_bandwidth(hard)),/even)
-        soft = median(mode(soft,bin=kde_bandwidth(soft)),/even)
-        e_full = median(mode(e_full,bin=kde_bandwidth(e_full)),/even)
-        e_hard = median(mode(e_hard,bin=kde_bandwidth(e_hard)),/even)
-        e_soft = median(mode(e_soft,bin=kde_bandwidth(e_soft)),/even)
-        cfull = median(mode(cfull,bin=kde_bandwidth(cfull)),/even)
-        chard = median(mode(chard,bin=kde_bandwidth(chard)),/even)
-        csoft = median(mode(csoft,bin=kde_bandwidth(csoft)),/even)
-        e_cfull = median(mode(e_cfull,bin=kde_bandwidth(e_cfull)),/even)
-        e_chard = median(mode(e_chard,bin=kde_bandwidth(e_chard)),/even)
-        e_csoft = median(mode(e_csoft,bin=kde_bandwidth(e_csoft)),/even)
+        full = median(mode(full,kde=kde_bandwidth(full)),/even)
+        hard = median(mode(hard,kde=kde_bandwidth(hard)),/even)
+        soft = median(mode(soft,kde=kde_bandwidth(soft)),/even)
+        e_full = median(mode(e_full,kde=kde_bandwidth(e_full)),/even)
+        e_hard = median(mode(e_hard,kde=kde_bandwidth(e_hard)),/even)
+        e_soft = median(mode(e_soft,kde=kde_bandwidth(e_soft)),/even)
+        cfull = median(mode(cfull,kde=kde_bandwidth(cfull)),/even)
+        chard = median(mode(chard,kde=kde_bandwidth(chard)),/even)
+        csoft = median(mode(csoft,kde=kde_bandwidth(csoft)),/even)
+        e_cfull = median(mode(e_cfull,kde=kde_bandwidth(e_cfull)),/even)
+        e_chard = median(mode(e_chard,kde=kde_bandwidth(e_chard)),/even)
+        e_csoft = median(mode(e_csoft,kde=kde_bandwidth(e_csoft)),/even)
     endif
     fx_full[i] = full
     fx_hard[i] = hard

@@ -11,10 +11,11 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 100;0
+niter = 1000
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 stat_fctv2 = dblarr(6,niter)
+nh_modv2 = dblarr(nsrc,niter)
 
 ;; free CT fraction split between NH=24-25 and 25-26
 step = 0.02d
@@ -105,6 +106,7 @@ for n = 0,niter-1 do begin
         f24v2[n] = f24[ibest]
         f25v2[n] = f25[ibest]
         stat_fctv2[*,n] = stat
+        nh_modv2[*,n] = nh_mod[*,ibest]
     endelse
     ;; progress alert
     if (n eq 0) then begin
@@ -115,7 +117,12 @@ endfor
 print, 'END   - NH SPLIT'
 print, '=============================================='
 
-sav_vars = ['F24V2','F25V2','STAT_FCTV2','NREJ2']
+;; uncertainties on NH bins
+nh_mod = hist2d_avg(nh_modv2,1.)
+sig_nhv2 = nh_mod.sig
+mad_nhv2 = nh_mod.mad
+
+sav_vars = ['F24V2','F25V2','STAT_FCTV2','NREJ2','SIG_NHV2','MAD_NHV2']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

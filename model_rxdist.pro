@@ -30,7 +30,7 @@ niter = 10000
 ;; RUN FOR FIXED CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct = mode(fctv,bin=kde_bandwidth(fctv))
+fct = mode(fctv,kde=kde_bandwidth(fctv))
 nsr = round(nthin/(1.-fct))
 nct = round(nsr*fct)
 ;; NH_RESAMP: structure of increased CT sources
@@ -66,8 +66,8 @@ endfor
 print, 'END   - FIXED FCT MODELING'
 print, '=============================================='
 
-rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv)
-nh_mod = hist2d_avg(nh_modv,1d,iidet=iimodv)
+nh_mod = hist2d_avg(nh_modv,1.,iidet=iimodv)
+rx_mod = hist2d_avg(rx_modv,0.2,iidet=iimodv)
 fx_est = estimate_fx(rx_modv,iimodv,/cha)
 
 sav_vars = [sav_vars,'NSR', $
@@ -81,12 +81,12 @@ sav_inds = [sav_inds,'IIMODV']
 ;; RUN FOR SPLIT CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct_ = mode(fctv1,bin=kde_bandwidth(fctv1))
+fct_ = mode(fctv1,kde=kde_bandwidth(fctv1))
 nsr_ = round(nthin/(1.-fct_))
 nct_ = round(nsr_*fct_)
-f24_ = mode(f24v2,bin=kde_bandwidth(f24v2))*fct_
+f24_ = mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
 n24_ = round(nsr_*f24_)
-f25_ = mode(f25v2,bin=kde_bandwidth(f25v2))*fct_
+f25_ = mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
 ;n25_ = round(nsr_*f25_)
 n25_ = nct_-n24_
 ;; NH_RESAMP: structure of increased CT sources
@@ -121,8 +121,8 @@ endfor
 print, 'END   - FREE FCT MODELING'
 print, '=============================================='
 
-nh_mod_ = hist2d_avg(nh_modv_,1d,iidet=iimodv_)
-rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_)
+nh_mod_ = hist2d_avg(nh_modv_,1.,iidet=iimodv_)
+rx_mod_ = hist2d_avg(rx_modv_,0.2,iidet=iimodv_)
 fx_est_ = estimate_fx(rx_modv_,iimodv_,/cha)
 
 sav_vars = [sav_vars,'NSR_', $

@@ -12,6 +12,7 @@ common _group
 niter = 1000
 fctv = dblarr(niter)
 stat_fctv = dblarr(6,niter)
+nh_modv = dblarr(nsrc,niter)
 
 ;; fixed CT fraction
 step = 0.02d
@@ -101,6 +102,7 @@ for n = 0,niter-1 do begin
     endif else begin
         fctv[n] = fct[ibest]
         stat_fctv[*,n] = stat
+        nh_modv[*,n] = nh_mod[*,ibest]
     endelse
     ;; progress alert
     if (n eq 0) then begin
@@ -111,7 +113,12 @@ endfor
 print, 'END   - FIXED FCT'
 print, '=============================================='
 
-sav_vars = ['FCTV','STAT_FCTV','NREJ']
+;; uncertainties on NH bins
+nh_mod = hist2d_avg(nh_modv,1.)
+sig_nhv = nh_mod.sig
+mad_nhv = nh_mod.mad
+
+sav_vars = ['FCTV','STAT_FCTV','NREJ','SIG_NHV','MAD_NHV']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
