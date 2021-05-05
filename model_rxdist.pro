@@ -66,8 +66,8 @@ endfor
 print, 'END   - FIXED FCT MODELING'
 print, '=============================================='
 
-nh_mod = hist2d_avg(nh_modv,1.,iidet=iimodv)
-rx_mod = hist2d_avg(rx_modv,0.2,iidet=iimodv)
+nh_mod = hist2d_avg(nh_modv,1.d,iidet=iimodv)
+rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv)
 fx_est = estimate_fx(rx_modv,iimodv,/cha)
 
 sav_vars = [sav_vars,'NSR', $
@@ -121,8 +121,8 @@ endfor
 print, 'END   - FREE FCT MODELING'
 print, '=============================================='
 
-nh_mod_ = hist2d_avg(nh_modv_,1.,iidet=iimodv_)
-rx_mod_ = hist2d_avg(rx_modv_,0.2,iidet=iimodv_)
+nh_mod_ = hist2d_avg(nh_modv_,1.d,iidet=iimodv_)
+rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_)
 fx_est_ = estimate_fx(rx_modv_,iimodv_,/cha)
 
 sav_vars = [sav_vars,'NSR_', $
