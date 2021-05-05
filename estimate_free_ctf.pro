@@ -10,7 +10,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 1000
+niter = 100;0
 fctv1 = dblarr(niter)
 f24v1 = dblarr(niter)
 f25v1 = dblarr(niter)
@@ -127,11 +127,11 @@ print, 'END   - FREE FCT, ROUND 1'
 print, '=============================================='
 
 ;; uncertainties on NH bins
-nh_mod = hist2d_avg(nh_modv1,1.)
-sig_nhv1 = nh_mod.sig
-mad_nhv1 = nh_mod.mad
+nhmv1 = hist2d_avg(nh_modv1,1.)
+;sig_nhv1 = nh_mod.sig
+;mad_nhv1 = nh_mod.mad
 
-sav_vars = ['FCTV1','F24V1','F25V1','STAT_FCTV1','NREJ1','SIG_NHV1','MAD_NHV1']
+sav_vars = ['FCTV1','F24V1','F25V1','STAT_FCTV1','NREJ1','NHMV1'];'SIG_NHV1','MAD_NHV1']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

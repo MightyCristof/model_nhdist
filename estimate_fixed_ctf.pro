@@ -114,11 +114,11 @@ print, 'END   - FIXED FCT'
 print, '=============================================='
 
 ;; uncertainties on NH bins
-nh_mod = hist2d_avg(nh_modv,1.)
-sig_nhv = nh_mod.sig
-mad_nhv = nh_mod.mad
+nhmv = hist2d_avg(nh_modv,1.)
+;sig_nhv = nh_mod.sig
+;mad_nhv = nh_mod.mad
 
-sav_vars = ['FCTV','STAT_FCTV','NREJ','SIG_NHV','MAD_NHV']
+sav_vars = ['FCTV','STAT_FCTV','NREJ','NHMV'];'SIG_NHV','MAD_NHV']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

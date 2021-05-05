@@ -11,7 +11,7 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 1000
+niter = 100;0
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 stat_fctv2 = dblarr(6,niter)
@@ -118,11 +118,11 @@ print, 'END   - NH SPLIT'
 print, '=============================================='
 
 ;; uncertainties on NH bins
-nh_mod = hist2d_avg(nh_modv2,1.)
-sig_nhv2 = nh_mod.sig
-mad_nhv2 = nh_mod.mad
+nhmv2 = hist2d_avg(nh_modv2,1.)
+;sig_nhv2 = nh_mod.sig
+;mad_nhv2 = nh_mod.mad
 
-sav_vars = ['F24V2','F25V2','STAT_FCTV2','NREJ2','SIG_NHV2','MAD_NHV2']
+sav_vars = ['F24V2','F25V2','STAT_FCTV2','NREJ2','NHMV2'];'SIG_NHV2','MAD_NHV2']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
