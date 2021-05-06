@@ -62,14 +62,6 @@ for n = 0,niter-1 do begin
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
         'AD': begin
-        
-            ;; estimate model fluxes
-            fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
-            if n eq 0 then begin
-                fx_estv = dup_struct(fx_est)
-                fx_estv = replicate(fx_estv[0],niter)
-            endif
-        
             ibest = where(a2 eq min(a2[where(iia2,/null)]),nbest)
             if (nbest gt 1) then stop
             stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
@@ -77,10 +69,6 @@ for n = 0,niter-1 do begin
         'JOINT': begin
             ;; estimate model fluxes
             fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
-            if n eq 0 then begin
-                fx_estv = dup_struct(fx_est)
-                fx_estv = replicate(fx_estv[0],niter)
-            endif
             ;; X-ray stack data-model
             del_soft = fxstak[1,0]-fx_est.csoft
             del_hard = fxstak[1,1]-fx_est.chard
@@ -115,7 +103,6 @@ for n = 0,niter-1 do begin
         fctv[n] = fct[ibest]
         stat_fctv[*,n] = stat
         nh_modv[*,n] = nh_mod[*,ibest]
-        fx_estv[n] = fx_est[ibest]
     endelse
     ;; progress alert
     if (n eq 0) then begin
@@ -128,8 +115,6 @@ print, '=============================================='
 
 ;; uncertainties on NH bins
 nhmv = hist2d_avg(nh_modv,1.)
-stop
-;fxmv = hist2d_avg(fx_estv)
 ;sig_nhv = nh_mod.sig
 ;mad_nhv = nh_mod.mad
 
