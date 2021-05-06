@@ -35,6 +35,7 @@ if keyword_set(fixed) then begin
     
     ;; anything NH<20, add to NH=20-21 bin
     inhlt20 = where(nh_mod.xh lt 20.,nnhlt20)
+    inhgt24 = where(nh_mod.xh ge 24.)
     if (nnhlt20 eq 1) then begin
         nh_mod[inhlt20+1].yh += total(total(nh_mod[inhlt20].yh))
         nh_mod[inhlt20].yh = 0.
@@ -58,7 +59,7 @@ if keyword_set(fixed) then begin
     gap = 40
     pos = [[80,540,80+sq,540+sq],[80+sq+gap,540,80+2.*sq+gap,540+sq],[560,540,800,540+sq],$
                             [80,70,800,480]]
-    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod.yh),1)+0.1>1.0],$
+    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod.yh),1)+0.1>1.1],$
          stairstep:1, $
          xtitle:'$log !8N!7_{H} [cm^{-2}]$',ytitle:'Frequency', $
          font_name:'Times', $
@@ -71,8 +72,10 @@ if keyword_set(fixed) then begin
     ;; AD TEST
     ;e.yra=[0.,1.]
     
-    pad = errorplot(nh_mod.xhoff,nh_mod.yh,nhmv.mad, $
-                   '-',thick=4,_extra=e,pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work')
+    pade = errorplot(nh_mod[inhgt24].xhoff,nh_mod[inhgt24].yh,nhmv[inhgt24].mad, $
+                   '-',_extra=e,pos=pos[*,3],errorbar_color='black',errorbar_linestyle='-.')
+    pad = errorplot(nh_mod.xhoff,nh_mod.yh,nh_mod.mad, $
+                   '-',thick=4,errorbar_thick=4,_extra=e,pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work',/ov)
     pavg = plot(nh_ana_lox.xh,nh_ana_lox.yh*frac_lox+nh_ana_hix.yh*frac_hix,'--',thick=2,_extra=e,/ov,name='$Ananna+2019 (averaged)$')
     ;; CT fraction
     ctad = text(25.,0.35,'$!8f!7_{CT} = '+string(fct,format='(d4.2)')+'$',/data,font_size=16,font_name='Times',alignment=0.5)
@@ -133,6 +136,7 @@ if keyword_set(free) then begin
     
     ;; anything NH<20, add to NH=20-21 bin
     inhlt20 = where(nh_mod_.xh lt 20.,nnhlt20)
+    inhgt24 = where(nh_mod_.xh ge 24.)
     if (nnhlt20 eq 1) then begin
         nh_mod_[inhlt20+1].yh += total(total(nh_mod_[inhlt20].yh))
         nh_mod_[inhlt20].yh = 0.
@@ -156,7 +160,7 @@ if keyword_set(free) then begin
     gap = 40
     pos = [[80,540,80+sq,540+sq],[80+sq+gap,540,80+2.*sq+gap,540+sq],[560,540,800,540+sq],$
                             [80,70,800,480]]
-    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod_.yh),1)+0.1>0.8],$
+    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod_.yh),1)+0.1>1.1],$
          stairstep:1, $
          xtitle:'$log !8N!7_{H} [cm^{-2}]$',ytitle:'$Frequency [normalized log !8N!7_{H} < 24.0]$', $
          font_name:'Times', $
@@ -169,8 +173,10 @@ if keyword_set(free) then begin
     ;; AD TEST
     ;e.yra=[0.,1.]
     
-    pad = errorplot(nh_mod_.xhoff,nh_mod_.yh,nh_mod_.sig, $
-                   '-',thick=4,_extra=e,pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work')
+    pade = errorplot(nh_mod_[inhgt24].xhoff,nh_mod_[inhgt24].yh,nhmv2[inhgt24].mad, $
+                   '-',_extra=e,pos=pos[*,3],errorbar_color='black',errorbar_linestyle='-.')
+    pad = errorplot(nh_mod_.xhoff,nh_mod_.yh,nh_mod_.mad, $
+                   '-',thick=4,errorbar_thick=4,_extra=e,pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work',/ov)
     pavg = plot(nh_ana_lox.xh,nh_ana_lox.yh*frac_lox+nh_ana_hix.yh*frac_hix,'--',thick=2,_extra=e,/ov,name='$Ananna+2019 (averaged)$')
     ;; CT fraction
     ctad = text(25.,0.35,'$!8f!7_{CT} = '+string(fct_,format='(d4.2)')+'$',/data,font_size=16,font_name='Times',alignment=0.5)

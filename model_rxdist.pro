@@ -13,25 +13,23 @@ common _split
 ;; use observed NH dist with added unobscured sources after modeling without it to find
 if keyword_set(postmod) then nh_obs = nh_lan_cor
 
-;; resample observed NH distribution to increase data density
-nsamp = nsrc*100.
-nh_samp = nh_mc(nh_obs,nsamp)
-;; number of Compton-thin sources
-ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
-fthin = nthin/nsamp
-
-sav_vars = ['NSAMP','NH_SAMP','NTHIN']
-sav_inds = ['ITHIN']
-
 ;; number of iterations for each test
 niter = 10000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RUN FOR FIXED CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; resample observed NH distribution to increase data density
+nsamp = nsrc*100.
+nh_samp = nh_mc(nh_obs,nsamp)
+;; number of Compton-thin sources
+ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
+
 ;; fraction and source numbers
-fct = mode(fctv,kde=kde_bandwidth(fctv))
-nsr = round(nthin/(1.-fct))
+fct = mode(fctv,kde=kde_bandwidth(fctv));mean([mode(fctv,bin=scott(fctv)),mode(fctv,bin=freedman(fctv)),mode(fctv,kde=kde_bandwidth(fctv))])
+fcn = 1.-fct
+ncn = nthin
+nsr = round(ncn/fcn)
 nct = round(nsr*fct)
 ;; NH_RESAMP: structure of increased CT sources
 ;; NH_MOD: draw N sources from NH_RESAMP
@@ -70,25 +68,26 @@ nh_mod = hist2d_avg(nh_modv,1.d,iidet=iimodv)
 rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv)
 fx_est = estimate_fx(rx_modv,iimodv,/cha)
 
-sav_vars = [sav_vars,'NSR', $
-                     'NCT','FCT', $
-                     'NH_MODV','RX_MODV','AD', $
-                     'NH_MOD','RX_MOD','FX_EST']
-sav_inds = [sav_inds,'IIMODV']
+sav_vars = ['NSR','NTHIN','FTHIN','NCT','FCT', $
+            'NH_MODV','RX_MODV','AD', $
+            'NH_MOD','RX_MOD','FX_EST']
+sav_inds = ['IIMODV']
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RUN FOR SPLIT CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct_ = mode(fctv1,kde=kde_bandwidth(fctv1))
-nsr_ = round(nthin/(1.-fct_))
+fct_ = mode(fctv1,kde=kde_bandwidth(fctv1));mean([mode(fctv1,bin=scott(fctv1)),mode(fctv1,bin=freedman(fctv1)),mode(fctv1,kde=kde_bandwidth(fctv1))])
+fcn_ = 1.-fct_
+ncn_ = nthin
+nsr_ = round(ncn_/fcn_)
 nct_ = round(nsr_*fct_)
-f24_ = mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
+f24_ = mean(f24v2)*fct_;mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
 n24_ = round(nsr_*f24_)
-f25_ = mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
-;n25_ = round(nsr_*f25_)
-n25_ = nct_-n24_
+f25_ = mean(f25v2)*fct_;mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
+n25_ = round(nsr_*f25_)
+;n25_ = nct_-n24_
 ;; NH_RESAMP: structure of increased CT sources
 ;; NH_MOD: draw N sources from NH_RESAMP
 ;; RX_MOD: convert the model NH model to model RX with observed scatter in Chen+17 LX-LMIR
@@ -125,9 +124,8 @@ nh_mod_ = hist2d_avg(nh_modv_,1.d,iidet=iimodv_)
 rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_)
 fx_est_ = estimate_fx(rx_modv_,iimodv_,/cha)
 
-sav_vars = [sav_vars,'NSR_', $
-                     'NCT_','N24_','N25_', $
-                     'FCT_','F24_','F25_', $
+sav_vars = [sav_vars,'NSR_','NTHIN_','FTHIN' $
+                     'NCT_','FCT_','N24_','F24_','N25_','F25_', $
                      'NH_MODV_','RX_MODV_','AD_', $
                      'NH_MOD_','RX_MOD_','FX_EST_']
 sav_inds = [sav_inds,'IIMODV_']

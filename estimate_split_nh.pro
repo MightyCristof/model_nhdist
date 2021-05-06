@@ -11,7 +11,7 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 100;0
+niter = 1000
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 stat_fctv2 = dblarr(6,niter)
@@ -24,7 +24,7 @@ f24 = 1.-f25
 nfree = n_elements(f24)
 
 ;; set CT fraction from CTF FREE modeling
-fct = mode(fctv1,bin=kde_bandwidth(fctv1))
+fct = mode(fctv1,kde=kde_bandwidth(fctv1))
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
 nrej2 = 0l

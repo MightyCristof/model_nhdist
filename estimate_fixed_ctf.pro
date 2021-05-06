@@ -129,7 +129,13 @@ END
 
 
 
-
-
-
+;; difference in uncertainties on model flux estimates is negligible
+;; each == by iteration
+;; all  == during end model step
+;; IDL> print, all
+;;    8.5602696e-16   2.7436724e-16   6.5425218e-16
+;; IDL> print, each
+;;   8.86112e-16  2.76988e-16  6.73984e-16
+;; IDL> print, each/all
+;;        1.0351454       1.0095526       1.0301591
 
