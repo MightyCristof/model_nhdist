@@ -2,14 +2,15 @@
 
 model_nhdist,'variant_models/lan_ad',setnh='nh_lan_nst',/setrx,group='wac',test='AD',/fixed,/free,/split,/model
 popd
-file_copy,'variant_models/lan_ad','variant_models/lan_ad_postmod',/recursive
-stop
+file_copy,'variant_models/lan_ad','variant_models/lan_ad_postmod',/recursive,/overwrite
+pushd,'variant_models/lan_ad_postmod'
 model_rxdist,/postmod
 popd
 
 model_nhdist,'variant_models/lan_joint',setnh='nh_lan_nst',/setrx,group='wac',test='JOINT',/fixed,/free,/split,/model
 popd
-file_copy,'variant_models/lan_joint','variant_models/lan_joint_postmod',/recursive
+file_copy,'variant_models/lan_joint','variant_models/lan_joint_postmod',/recursive,/overwrite
+pushd,'variant_models/lan_joint_postmod'
 model_rxdist,/postmod
 popd
 
@@ -26,3 +27,9 @@ popd
 
 
 END
+
+
+
+
+
+

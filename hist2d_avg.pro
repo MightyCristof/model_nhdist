@@ -4,7 +4,7 @@ FUNCTION hist2d_avg, arr, $
 
 
 sz = size(arr,/dim)
-xh = [floor(min(arr)):ceil(max(arr)):binsz]
+xh = [floor(min(arr)-binsz):ceil(max(arr)+binsz):binsz]
 nbins = n_elements(xh)
 xhoff = xh+binsz/2.
 yh = dblarr(nbins,sz[1])
