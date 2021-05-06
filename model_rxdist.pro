@@ -68,7 +68,8 @@ nh_mod = hist2d_avg(nh_modv,1.d,iidet=iimodv)
 rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv)
 fx_est = estimate_fx(rx_modv,iimodv,/cha)
 
-sav_vars = ['NSR','NTHIN','FTHIN','NCT','FCT', $
+sav_vars = ['NSR','NCN','FCN', $
+            'NCT','FCT', $
             'NH_MODV','RX_MODV','AD', $
             'NH_MOD','RX_MOD','FX_EST']
 sav_inds = ['IIMODV']
@@ -124,8 +125,9 @@ nh_mod_ = hist2d_avg(nh_modv_,1.d,iidet=iimodv_)
 rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_)
 fx_est_ = estimate_fx(rx_modv_,iimodv_,/cha)
 
-sav_vars = [sav_vars,'NSR_','NTHIN_','FTHIN' $
-                     'NCT_','FCT_','N24_','F24_','N25_','F25_', $
+sav_vars = [sav_vars,'NSR_','NCN_','FCN_', $
+                     'NCT_','FCT_', $
+                     'N24_','F24_','N25_','F25_', $
                      'NH_MODV_','RX_MODV_','AD_', $
                      'NH_MOD_','RX_MOD_','FX_EST_']
 sav_inds = [sav_inds,'IIMODV_']
