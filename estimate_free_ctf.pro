@@ -29,7 +29,7 @@ nfree = n_elements(f24)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
-nrej = 0l
+nrej1 = 0l
 for n = 0,niter-1 do begin
     ;; resample observed NH distribution to increase data density
     nsamp = nsrc*100.

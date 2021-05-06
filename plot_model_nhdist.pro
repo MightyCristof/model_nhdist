@@ -33,8 +33,6 @@ if keyword_set(fixed) then begin
     soft = file_search(prep_dir+'/nodet_wagn_052_stack.png')
     hard = file_Search(prep_dir+'/nodet_wagn_27_stack.png')
     
-    ;; histogram normalization to match Ananna+2019
-    nhnorm = total(nh_mod[where(nh_mod.xh lt 24.)].yh)
     ;; anything NH<20, add to NH=20-21 bin
     inhlt20 = where(nh_mod.xh lt 20.,nnhlt20)
     if (nnhlt20 eq 1) then begin
@@ -60,7 +58,7 @@ if keyword_set(fixed) then begin
     gap = 40
     pos = [[80,540,80+sq,540+sq],[80+sq+gap,540,80+2.*sq+gap,540+sq],[560,540,800,540+sq],$
                             [80,70,800,480]]
-    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod.yh/nhnorm),1)+0.1>0.8],$
+    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod.yh),1)+0.1>1.0],$
          stairstep:1, $
          xtitle:'$log !8N!7_{H} [cm^{-2}]$',ytitle:'Frequency', $
          font_name:'Times', $
@@ -73,7 +71,7 @@ if keyword_set(fixed) then begin
     ;; AD TEST
     ;e.yra=[0.,1.]
     
-    pad = errorplot(nh_mod.xhoff,nh_mod.yh/nhnorm,nh_mod.sig/nhnorm, $
+    pad = errorplot(nh_mod.xhoff,nh_mod.yh,nhmv.mad, $
                    '-',thick=4,_extra=e,pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work')
     pavg = plot(nh_ana_lox.xh,nh_ana_lox.yh*frac_lox+nh_ana_hix.yh*frac_hix,'--',thick=2,_extra=e,/ov,name='$Ananna+2019 (averaged)$')
     ;; CT fraction
@@ -133,8 +131,6 @@ if keyword_set(free) then begin
     soft = file_search(prep_dir+'/nodet_wagn_052_stack.png')
     hard = file_Search(prep_dir+'/nodet_wagn_27_stack.png')
     
-    ;; histogram normalization to match Ananna+2019
-    nhnorm = total(nh_mod_[where(nh_mod_.xh lt 24.)].yh)
     ;; anything NH<20, add to NH=20-21 bin
     inhlt20 = where(nh_mod_.xh lt 20.,nnhlt20)
     if (nnhlt20 eq 1) then begin
@@ -152,15 +148,15 @@ if keyword_set(free) then begin
     ra = minmax(xy)
 
     ;; flux estimates
-    fx_mod = [median(fx_est.soft),median(fx_est.hard)]
-    e_fx_mod = [median(fx_est.e_soft),median(fx_est.e_hard)]
+    fx_mod = [mode(fx_est.soft,bin=freedman(fx_est.soft)),mode(fx_est.hard,bin=freedman(fx_est.hard))]
+    e_fx_mod = [mode(fx_est.e_soft,bin=freedman(fx_est.e_soft)),mode(fx_est.e_hard,bin=freedman(fx_est.e_hard))]
 
     dim = [840,740]
     sq = 180
     gap = 40
     pos = [[80,540,80+sq,540+sq],[80+sq+gap,540,80+2.*sq+gap,540+sq],[560,540,800,540+sq],$
                             [80,70,800,480]]
-    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod_.yh/nhnorm),1)+0.1>0.8],$
+    e = {xra:[20.,26.],yra:[0.,rnd(max(nh_mod_.yh),1)+0.1>0.8],$
          stairstep:1, $
          xtitle:'$log !8N!7_{H} [cm^{-2}]$',ytitle:'$Frequency [normalized log !8N!7_{H} < 24.0]$', $
          font_name:'Times', $
@@ -173,7 +169,7 @@ if keyword_set(free) then begin
     ;; AD TEST
     ;e.yra=[0.,1.]
     
-    pad = errorplot(nh_mod_.xhoff,nh_mod_.yh/nhnorm,nh_mod_.sig/nhnorm, $
+    pad = errorplot(nh_mod_.xhoff,nh_mod_.yh,nh_mod_.sig, $
                    '-',thick=4,_extra=e,pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work')
     pavg = plot(nh_ana_lox.xh,nh_ana_lox.yh*frac_lox+nh_ana_hix.yh*frac_hix,'--',thick=2,_extra=e,/ov,name='$Ananna+2019 (averaged)$')
     ;; CT fraction
