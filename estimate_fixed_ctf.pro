@@ -39,7 +39,6 @@ for n = 0,niter-1 do begin
     rx_mod = dblarr(nsrc,nfrac)
     iimod = bytarr(nsrc,nfrac)
     ad = dblarr(2,nfrac)
-    ac = dblarr(7,nfrac)
     for i = 0,nfrac-1 do begin
         nct = round((nthin/(1.-fct[i]))*fct[i])
         nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]
