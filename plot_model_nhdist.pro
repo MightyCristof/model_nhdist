@@ -40,13 +40,13 @@ if keyword_set(nhdist) then begin
     xnho = nh_mod.xhoff
     ynh = nh_mod.yh
     enh = nh_mod.sig
-    mnh = (hist2d_avg(nhmv,1.0d,normalize='where(xh lt 24.,/null)')).mad
+    ;mnh = (hist2d_avg(nhmv,1.0d,normalize='where(xh lt 24.,/null)')).mad
     ;; FREE
     xnh_ = nh_mod_.xh
     xnho_ = nh_mod_.xhoff
     ynh_ = nh_mod_.yh
     enh_ = nh_mod_.sig
-    mnh_ = (hist2d_avg(nhmv2,1.0d,normalize='where(xh lt 24.,/null)')).mad
+    ;mnh_ = (hist2d_avg(nhmv2,1.0d,normalize='where(xh lt 24.,/null)')).mad
 
     i20 = where(xnh lt 20.,n20)
     i24 = where(xnh ge 24.,n24)
@@ -90,23 +90,23 @@ if keyword_set(nhdist) then begin
             xxnh = xnho
             yynh = ynh
             eenh = enh
-            mmnh = mnh
-            cctf = fct
+            ;mmnh = mnh
+            cctf = string(fct,format='(d4.2)')+'\pm'+string(e_fct,format='(d4.2)')
         endif else begin
             xxnh = xnho_
             yynh = ynh_
             eenh = enh_
-            mmnh = mnh_
-            cctf = fct_
+            ;mmnh = mnh_
+            cctf = string(fct_,format='(d4.2)')+'\pm'+string(e_fct_,format='(d4.2)')
         endelse
-        pad = errorplot(xxnh[i24],yynh[i24],mmnh[i24],linestyle='',_extra=e, $
-                        pos=pos[*,3],errorbar_color='black',errorbar_linestyle='-.')
+        ;pad = errorplot(xxnh[i24],yynh[i24],mmnh[i24],linestyle='',_extra=e, $
+        ;                pos=pos[*,3],errorbar_color='black',errorbar_linestyle='-.')
         pad = errorplot(xxnh,yynh,eenh,'-',thick=4,errorbar_thick=4,_extra=e, $
-                        pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work',/ov)
+                        pos=pos[*,3],fill_background=1,fill_color=adcol,fill_transparency=40,name='This work')
     
         pavg = plot(nh_ana_lox.xh,nh_ana_lox.yh*frac_lox+nh_ana_hix.yh*frac_hix,'--',thick=2,_extra=e,/ov,name='$Ananna+2019 (weighted)$')
         ;; CT fraction
-        ctad = text(25.,0.35,'$!8f!7_{CT} = '+string(cctf,format='(d4.2)')+'$',/data,font_size=16,font_name='Times',alignment=0.5)
+        ctad = text(25.,(e.yra[1]+max(yynh+eenh))/2.,'$!8f!7_{CT} = '+cctf+'$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=1.)
         ;; add legend
         leg = legend(target=[pavg,pad],position=[0.125,0.61],/normal,horizontal_alignment=0.,font_size=12,font_name='Times')
         ;; add X-ray stacked images

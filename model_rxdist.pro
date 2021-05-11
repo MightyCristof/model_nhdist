@@ -27,6 +27,7 @@ ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
 
 ;; fraction and source numbers
 fct = mode(fctv,kde=kde_bandwidth(fctv));mean([mode(fctv,bin=scott(fctv)),mode(fctv,bin=freedman(fctv)),mode(fctv,kde=kde_bandwidth(fctv))])
+e_fct = stddev(fctv)
 fcn = 1.-fct
 ncn = nthin
 nsr = round(ncn/fcn)
@@ -69,7 +70,7 @@ rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv,/normalize)
 fx_est = estimate_fx(rx_modv,iimodv,/cha)
 
 sav_vars = ['NSR','NCN','FCN', $
-            'NCT','FCT', $
+            'NCT','FCT','E_FCT', $
             'NH_MODV','RX_MODV','AD', $
             'NH_MOD','RX_MOD','FX_EST']
 sav_inds = ['IIMODV','POSTMOD']
@@ -80,6 +81,7 @@ sav_inds = ['IIMODV','POSTMOD']
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
 fct_ = mode(fctv1,kde=kde_bandwidth(fctv1));mean([mode(fctv1,bin=scott(fctv1)),mode(fctv1,bin=freedman(fctv1)),mode(fctv1,kde=kde_bandwidth(fctv1))])
+e_fct_ = stddev(fctv1)
 fcn_ = 1.-fct_
 ncn_ = nthin
 nsr_ = round(ncn_/fcn_)
@@ -126,7 +128,7 @@ rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_,/normalize)
 fx_est_ = estimate_fx(rx_modv_,iimodv_,/cha)
 
 sav_vars = [sav_vars,'NSR_','NCN_','FCN_', $
-                     'NCT_','FCT_', $
+                     'NCT_','FCT_','E_FCT_', $
                      'N24_','F24_','N25_','F25_', $
                      'NH_MODV_','RX_MODV_','AD_', $
                      'NH_MOD_','RX_MOD_','FX_EST_']
