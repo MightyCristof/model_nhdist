@@ -64,15 +64,15 @@ endfor
 print, 'END   - FIXED FCT MODELING'
 print, '=============================================='
 
-nh_mod = hist2d_avg(nh_modv,1.d,iidet=iimodv)
-rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv)
+nh_mod = hist2d_avg(nh_modv,1.d,iidet=iimodv,normalize='where(xh lt 24.,/null)')
+rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv,/normalize)
 fx_est = estimate_fx(rx_modv,iimodv,/cha)
 
 sav_vars = ['NSR','NCN','FCN', $
             'NCT','FCT', $
             'NH_MODV','RX_MODV','AD', $
             'NH_MOD','RX_MOD','FX_EST']
-sav_inds = ['IIMODV']
+sav_inds = ['IIMODV','POSTMOD']
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -121,8 +121,8 @@ endfor
 print, 'END   - FREE FCT MODELING'
 print, '=============================================='
 
-nh_mod_ = hist2d_avg(nh_modv_,1.d,iidet=iimodv_)
-rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_)
+nh_mod_ = hist2d_avg(nh_modv_,1.d,iidet=iimodv_,normalize='where(xh lt 24.,/null)')
+rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_,/normalize)
 fx_est_ = estimate_fx(rx_modv_,iimodv_,/cha)
 
 sav_vars = [sav_vars,'NSR_','NCN_','FCN_', $
