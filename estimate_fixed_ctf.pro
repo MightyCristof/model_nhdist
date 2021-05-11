@@ -9,10 +9,12 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in fct
-niter = 10000
+niter = 1000;0
 fctv = dblarr(niter)
-stat_fctv = dblarr(6,niter)
-nh_modv = dblarr(nsrc,niter)
+statv = dblarr(6,niter)
+nhmv = dblarr(nsrc,niter)
+rxmv = dblarr(nsrc,niter)
+iimv = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
 step = 0.02d
@@ -100,8 +102,10 @@ for n = 0,niter-1 do begin
     ;; record best fit statistics
     endif else begin
         fctv[n] = fct[ibest]
-        stat_fctv[*,n] = stat
-        nh_modv[*,n] = nh_mod[*,ibest]
+        statv[*,n] = stat
+        nhmv[*,n] = nh_mod[*,ibest]
+        rxmv[*,n] = rx_mod[*,ibest]
+        iimv[*,n] = iimod[*,ibest]
     endelse
     ;; progress alert
     if (n eq 0) then begin
@@ -112,12 +116,7 @@ endfor
 print, 'END   - FIXED FCT'
 print, '=============================================='
 
-;; uncertainties on NH bins
-nhmv = hist2d_avg(nh_modv,1.)
-;sig_nhv = nh_mod.sig
-;mad_nhv = nh_mod.mad
-
-sav_vars = ['FCTV','STAT_FCTV','NREJ','NHMV'];'SIG_NHV','MAD_NHV']
+sav_vars = ['FCTV','STATV','NREJ','NHMV','RXMV','IIMV']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

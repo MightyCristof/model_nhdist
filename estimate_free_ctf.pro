@@ -10,12 +10,14 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 10000
+niter = 1000;0
 fctv1 = dblarr(niter)
 f24v1 = dblarr(niter)
 f25v1 = dblarr(niter)
-stat_fctv1 = dblarr(6,niter)
-nh_modv1 = dblarr(nsrc,niter)
+statv1 = dblarr(6,niter)
+nhmv1 = dblarr(nsrc,niter)
+rxmv1 = dblarr(nsrc,niter)
+iimv1 = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
 step = 0.02d
@@ -114,8 +116,10 @@ for n = 0,niter-1 do begin
         fctv1[n] = fct[ind[0]]
         f24v1[n] = f24[ind[1]]
         f25v1[n] = f25[ind[1]]
-        stat_fctv1[*,n] = stat
-        nh_modv1[*,n] = nh_mod[*,ind[0],ind[1]]
+        statv1[*,n] = stat
+        nhmv1[*,n] = nh_mod[*,ind[0],ind[1]]
+        rxmv1[*,n] = rx_mod[*,ind[0],ind[1]]
+        iimv1[*,n] = iimod[*,ind[0],ind[1]]
     endelse
     ;; progress alert
     if (n eq 0) then begin
@@ -126,12 +130,7 @@ endfor
 print, 'END   - FREE FCT, ROUND 1'
 print, '=============================================='
 
-;; uncertainties on NH bins
-nhmv1 = hist2d_avg(nh_modv1,1.)
-;sig_nhv1 = nh_mod.sig
-;mad_nhv1 = nh_mod.mad
-
-sav_vars = ['FCTV1','F24V1','F25V1','STAT_FCTV1','NREJ1','NHMV1'];'SIG_NHV1','MAD_NHV1']
+sav_vars = ['FCTV1','F24V1','F25V1','STATV1','NREJ1','NHMV1','RXMV1','IIMV1']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

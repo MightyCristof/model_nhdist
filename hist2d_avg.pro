@@ -1,5 +1,6 @@
 FUNCTION hist2d_avg, arr, $
                      binsz, $
+                     NORMALIZE = normalize, $
                      IIDET = iidet
 
 
@@ -9,10 +10,12 @@ nbins = n_elements(xh)
 xhoff = xh+binsz/2.
 yh = dblarr(nbins,sz[1])
 for i = 0,sz[1]-1 do yh[*,i] = histogram(arr[*,i],bin=binsz,min=xh[0],max=xh[-1])
-nm = total(yh[where(xh lt 24.),*],1)
-nm = rebin(transpose(nm),nbins,sz[1])
-yh /= nm
-
+if keyword_set(normalize) then begin
+    if (typename(normalize) eq 'STRING') then re = execute('nm = total(yh['+normalize+',*],1)') else $
+                                              nm = total(yh,1)
+    nm = rebin(transpose(nm),nbins,sz[1])
+    yh /= nm
+endif
 tags = 'xh:xh,xhoff:xh+width(xh,/med)/2.,yh:mean(yh,dim=2),sig:stddev(yh,dim=2),mad:medabsdev(yh,dim=2)'
 
 if keyword_set(iidet) then begin
@@ -22,8 +25,10 @@ if keyword_set(iidet) then begin
         yh_det[*,i] = histogram(arr[where(iidet[*,i] eq 1),i],bin=binsz,min=xh[0],max=xh[-1])
         yh_non[*,i] = histogram(arr[where(iidet[*,i] eq 0),i],bin=binsz,min=xh[0],max=xh[-1])
     endfor
-    yh_det /= nm
-    yh_non /= nm
+    if keyword_set(normalize) then begin
+        yh_det /= nm
+        yh_non /= nm
+    endif
     tags = tags+',yh_det:mean(yh_det,dim=2),sig_det:stddev(yh_det,dim=2),mad_det:medabsdev(yh_det,dim=2),' $
                 +'yh_non:mean(yh_non,dim=2),sig_non:stddev(yh_non,dim=2),mad_non:medabsdev(yh_non,dim=2)'
 endif
