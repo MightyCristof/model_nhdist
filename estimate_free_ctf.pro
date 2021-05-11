@@ -10,7 +10,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 1000;0
+niter = 10000
 fctv1 = dblarr(niter)
 f24v1 = dblarr(niter)
 f25v1 = dblarr(niter)

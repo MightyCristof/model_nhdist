@@ -11,7 +11,8 @@ common _free
 common _split
 
 ;; use observed NH dist with added unobscured sources after modeling without it to find
-if keyword_set(postmod) then nh_obs = nh_lan_cor
+if keyword_set(postmod) then nh_obs = nh_lan_cor else $
+                             postmod = 0
 
 ;; number of iterations for each test
 niter = 10000

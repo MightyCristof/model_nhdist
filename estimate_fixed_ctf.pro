@@ -9,7 +9,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in fct
-niter = 1000;0
+niter = 10000
 fctv = dblarr(niter)
 statv = dblarr(6,niter)
 nhmv = dblarr(nsrc,niter)

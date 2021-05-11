@@ -11,7 +11,7 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 1000;0
+niter = 10000
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 statv2 = dblarr(6,niter)
