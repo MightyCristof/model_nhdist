@@ -9,7 +9,7 @@ if (n_elements(mode) eq 0) then mode = 'ALL'
 dir = '/Users/ccarroll/Research/projects/xray_lack_agn/workspace/run_20201008_final_updated/'
 
 ;; variables for MODEL_NHDIST
-fits = ['OBJID','RA','DEC','Z','ZERR', $                    ;; fits.sav
+fits = ['OBJID','RA','DEC','Z','ZERR','ZTYPE', $            ;; fits.sav
         'PERC_AGN', $                                       ;; resamp.sav
         'IIWAC', $                                          ;; detections_wac.sav
         'EBV','E_EBV','DL2', $                              ;; src_luminosities.sav
