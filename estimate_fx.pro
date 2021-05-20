@@ -63,7 +63,7 @@ for i = 0,n_elements(clin_vars)-1 do re = execute(clin_vars[i]+' = dblarr(nmod)'
 ;; sample from model RL for each group observation (ngrp)
 for i = 0,nmod-1 do begin  
     ;; "flagged" model sources
-    iflg = where(ii_flag[*,i] eq 0,flgct)
+    iflg = where(ii_flag[*,i],flgct)
     if (flgct eq 0) then message, 'NO FLAGGED SOURCES IN MODEL.'
     rx_modn = (rx_modd[*,i])[iflg]
     fullv = dblarr(ngrp,niter)
