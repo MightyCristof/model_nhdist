@@ -7,7 +7,7 @@ common _nhobs
 common _rxnh
 common _group
 
-
+tic
 ;; run this script NITER times and look at the distribution in fct
 niter = 10000
 fctv = dblarr(niter)
@@ -66,6 +66,9 @@ for n = 0,niter-1 do begin
             ibest = where(a2 eq min(a2[where(iia2,/null)]),nbest)
             if (nbest gt 1) then stop
             stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
+            ;; estimate model fluxes
+            fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
+            if (n eq 0) then fxmv = replicate(dup_struct((fx_est)[0]),niter)
             end
         'JOINT': begin
             ;; estimate model fluxes
@@ -106,6 +109,7 @@ for n = 0,niter-1 do begin
         nhmv[*,n] = nh_mod[*,ibest]
         rxmv[*,n] = rx_mod[*,ibest]
         iimv[*,n] = iimod[*,ibest]
+        fxmv[n] = fx_est[ibest]
     endelse
     ;; progress alert
     if (n eq 0) then begin
@@ -115,12 +119,13 @@ for n = 0,niter-1 do begin
 endfor
 print, 'END   - FIXED FCT'
 print, '=============================================='
+toc
 
 sav_vars = ['FCTV','STATV','NREJ','NHMV','RXMV','IIMV']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',/compress,file="ctf_fixed.sav"')
+re = execute('save,'+sav_str+',/compress,file="ctf_fixed2.sav"')
 
 
 END
@@ -128,12 +133,4 @@ END
 
 
 ;; difference in uncertainties on model flux estimates is negligible
-;; each == by iteration
-;; all  == final model errors
-;; IDL> print, all
-;;    8.5602696e-16   2.7436724e-16   6.5425218e-16
-;; IDL> print, each
-;;   8.86112e-16  2.76988e-16  6.73984e-16
-;; IDL> print, each/all
-;;        1.0351454       1.0095526       1.0301591
 
