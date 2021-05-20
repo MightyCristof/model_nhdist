@@ -68,12 +68,13 @@ print, '=============================================='
 
 nh_mod = hist2d_avg(nh_modv,1.d,iidet=iimodv,normalize='where(xh lt 24.,/null)')
 rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv,/normalize)
-fx_est = estimate_fx(rx_modv,iimodv,/cha)
+fx_non = estimate_fx(rx_modv,iimodv)
+fx_det = estimate_fx(rx_modv,iimodv,/detections)
 
 sav_vars = ['NSR','NCN','FCN', $
             'NCT','FCT','E_FCT', $
             'NH_MODV','RX_MODV','AD', $
-            'NH_MOD','RX_MOD','FX_EST']
+            'NH_MOD','RX_MOD','FX_NON','FX_DET']
 sav_inds = ['IIMODV','POSTMOD']
 
 
@@ -126,13 +127,14 @@ print, '=============================================='
 
 nh_mod_ = hist2d_avg(nh_modv_,1.d,iidet=iimodv_,normalize='where(xh lt 24.,/null)')
 rx_mod_ = hist2d_avg(rx_modv_,0.2d,iidet=iimodv_,/normalize)
-fx_est_ = estimate_fx(rx_modv_,iimodv_,/cha)
+fx_non_ = estimate_fx(rx_modv_,iimodv_)
+fx_det_ = estimate_fx(rx_modv_,iimodv_,/detections)
 
 sav_vars = [sav_vars,'NSR_','NCN_','FCN_', $
                      'NCT_','FCT_','E_FCT_', $
                      'N24_','F24_','N25_','F25_', $
                      'NH_MODV_','RX_MODV_','AD_', $
-                     'NH_MOD_','RX_MOD_','FX_EST_']
+                     'NH_MOD_','RX_MOD_','FX_NON_','FX_DET_']
 sav_inds = [sav_inds,'IIMODV_']
 
 sav_str = strjoin([sav_vars,sav_inds],',')

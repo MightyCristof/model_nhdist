@@ -67,12 +67,12 @@ for n = 0,niter-1 do begin
             if (nbest gt 1) then stop
             stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
             ;; estimate model fluxes
-            fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
+            fx_est = estimate_fx(rx_mod,iimod,/iterate)
             if (n eq 0) then fxmv = replicate(dup_struct((fx_est)[0]),niter)
             end
         'JOINT': begin
             ;; estimate model fluxes
-            fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
+            fx_est = estimate_fx(rx_mod,iimod,/iterate)
             ;; X-ray stack data-model
             del_soft = fxstak[1,0]-fx_est.csoft
             del_hard = fxstak[1,1]-fx_est.chard

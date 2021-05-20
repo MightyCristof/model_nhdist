@@ -1,7 +1,7 @@
 FUNCTION estimate_fx, rx_model, $
                       iidet, $
-                      CHA = cha, $
-                      ITERATE = iterate
+                      ITERATE = iterate, $
+                      DETECTIONS = detections
 
 
 common _data
@@ -10,62 +10,49 @@ common _nhobs
 common _rxnh
 common _group
 
-
-;; use only Chandra sources to match Chandra X-ray stacking
-if keyword_set(cha) then iicha = xnon eq 'CHA' else $
-                         iicha = xnon ne ''
                          
 ;; iterate over each object, or run single case
 if keyword_set(iterate) then niter = 100 else $
                              niter = 1
 
+;; use only Chandra sources to match Chandra X-ray stacking
+;; set detections vs non-detections
+if keyword_set(detections) then begin
+    iicha = xdet eq 'CHA'
+    iiflg = iidet eq 1
+endif else begin
+    iicha = xnon eq 'CHA'
+    iiflg = iidet eq 0
+endelse
+
 ;; data for non-detected sample        
 case group of 
-    'WAC': begin 
-        loglxir_non = loglxir[where(iiwn and iicha,nnon)]
-        z_non = z[where(iiwn and iicha,nnon)]
-        dl2_non = dl2[where(iiwn and iicha,nnon)]
-        end
-    'SEC': begin
-        loglxir_non = loglxir[where(iisn and iicha,nnon)]
-        z_non = z[where(iisn and iicha,nnon)]
-        dl2_non = dl2[where(iisn and iicha,nnon)]
-        end
-    'ALL': begin
-        loglxir_non = loglxir[where(iicha,nnon)]
-        z_non = z[where(iicha,nnon)]
-        dl2_non = dl2[where(iicha,nnon)]
-        end
-    'WAC_HIX': begin 
-        loglxir_non = loglxir[where(iiwn and iixh and iicha,nnon)]
-        z_non = z[where(iiwn and iixh and iicha,nnon)]
-        dl2_non = dl2[where(iiwn and iixh and iicha,nnon)]
-        end
-    'WAC_LOX': begin 
-        loglxir_non = loglxir[where(iiwn and iixl and iicha,nnon)]
-        z_non = z[where(iiwn and iixl and iicha,nnon)]
-        dl2_non = dl2[where(iiwn and iixl and iicha,nnon)]
-        end
-    'OFFSET': begin
-        loglxir_non = loglxir[where(iiwn and iicha,nnon)]
-        z_non = z[where(iiwn and iicha,nnon)]
-        dl2_non = dl2[where(iiwn and iicha,nnon)]
-        end
+    'WAC': if keyword_set(detections) then iigrp = iiwd else iigrp = iiwn
+    'SEC': if keyword_set(detections) then iigrp = iisd else iigrp = iisn
+    'ALL': if keyword_set(detections) then iigrp = iiad else iigrp = iian
+    'WAC_HIX': if keyword_set(detections) then iigrp = iiwd and iixh else iigrp = iiwn and iixh
+    'WAC_LOX': if keyword_set(detections) then iigrp = iiwd and iixl else iigrp = iiwn and iixl
+    'OFFSET': if keyword_set(detections) then iigrp = iiwd else iigrp = iiwn
     else: message, message, 'NO INPUT MODE SET FOR FXEST: WAC/SEC/ALL'
 endcase
+;; set variables for chosen group
+igrp = where(iigrp and iicha,ngrp)
+loglxir_grp = loglxir[igrp]
+z_grp = z[igrp]
+dl2_grp = dl2[igrp]
 
 ;; prep hard and soft conversion arrays
-iz = value_locate(zv,z_non)
-;c_hard_non = c_hard[*,iz]
-;c_soft_non = c_soft[*,iz]
-c_hard_non = c_hard_fine[*,iz]
-c_soft_non = c_soft_fine[*,iz]
+iz = value_locate(zv,z_grp)
+;c_hard_grp = c_hard[*,iz]
+;c_soft_grp = c_soft[*,iz]
+c_hard_grp = c_hard_fine[*,iz]
+c_soft_grp = c_soft_fine[*,iz]
 
 ;; reform to 2D array if needed
 sz = size(rx_model)
 nmod = product(sz[2:sz[0]])
 rx_modd = reform(rx_model,sz[1],nmod)
-ii_modd = reform(iidet,sz[1],nmod)
+ii_flag = reform(iiflg,sz[1],nmod)
 lin_vars = 'FX_'+['FULL','HARD','SOFT']
 clin_vars = 'C'+lin_vars
 lin_vars = [lin_vars,'E_'+lin_vars]
@@ -73,37 +60,37 @@ clin_vars = [clin_vars,'E_'+clin_vars]
 for i = 0,n_elements(lin_vars)-1 do re = execute(lin_vars[i]+' = dblarr(nmod)')
 for i = 0,n_elements(clin_vars)-1 do re = execute(clin_vars[i]+' = dblarr(nmod)')
 
-;; sample from model RL for each non-detected observation (NNON)
+;; sample from model RL for each group observation (ngrp)
 for i = 0,nmod-1 do begin  
-    ;; "non-detected" model sources
-    inon = where(ii_modd[*,i] eq 0,nonct)
-    if (nonct eq 0) then message, 'NO NON-DETECTIONS IN MODEL.'
-    rx_modn = (rx_modd[*,i])[inon]
-    fullv = dblarr(nnon,niter)
-    hardv = dblarr(nnon,niter)
-    softv = dblarr(nnon,niter)    
-    cfullv = dblarr(nnon,niter)
-    chardv = dblarr(nnon,niter)
-    csoftv = dblarr(nnon,niter)    
+    ;; "flagged" model sources
+    iflg = where(ii_flag[*,i] eq 0,flgct)
+    if (flgct eq 0) then message, 'NO FLAGGED SOURCES IN MODEL.'
+    rx_modn = (rx_modd[*,i])[iflg]
+    fullv = dblarr(ngrp,niter)
+    hardv = dblarr(ngrp,niter)
+    softv = dblarr(ngrp,niter)    
+    cfullv = dblarr(ngrp,niter)
+    chardv = dblarr(ngrp,niter)
+    csoftv = dblarr(ngrp,niter)    
     for n = 0,niter-1 do begin
-        ;; random draw from model to match number of non-detected sources
-        rx_samp = mc_samp(rx_modn,nnon)
+        ;; random draw from model to match number of sources
+        rx_samp = mc_samp(rx_modn,ngrp)
         ;; estimate flux
-        lx_non = 10.^(rx_samp+loglxir_non)
-        fullv[*,n] = lx_non/(4.*!const.pi*dl2_non)
+        lx_grp = 10.^(rx_samp+loglxir_grp)
+        fullv[*,n] = lx_grp/(4.*!const.pi*dl2_grp)
         hardv[*,n] = fullv[*,n]
         softv[*,n] = fullv[*,n]
         ;; bounded indices
         ibnd = where(rx_samp ge min(rx),nbnd,complement=iunb,ncomplement=nunb)
-        hardv[ibnd,n] *= c_hard_non[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
-        softv[ibnd,n] *= c_soft_non[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
-        hardv[iunb,n] *= c_hard_non[-1,iunb]
-        softv[iunb,n] *= c_soft_non[-1,iunb]
+        hardv[ibnd,n] *= c_hard_grp[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
+        softv[ibnd,n] *= c_soft_grp[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
+        hardv[iunb,n] *= c_hard_grp[-1,iunb]
+        softv[iunb,n] *= c_soft_grp[-1,iunb]
         ;; simulate contamination
         cfullv[*,n] = fullv[*,n]
         chardv[*,n] = hardv[*,n]
         csoftv[*,n] = softv[*,n]
-        irand = randomi(nnon*0.10,nnon,/nodup)
+        irand = randomi(ngrp*0.10,ngrp,/nodup)
         cfullv[irand,n] = 0.
         chardv[irand,n] = 0.
         csoftv[irand,n] = 0.                        

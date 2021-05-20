@@ -82,7 +82,7 @@ for n = 0,niter-1 do begin
             end
         'JOINT': begin
             ;; constraints by X-ray stacked fluxes
-            fx_est = estimate_fx(rx_mod,iimod,/cha,/iterate)
+            fx_est = estimate_fx(rx_mod,iimod,/iterate)
             ;; compare to X-ray stacked fluxes
             ;x2_soft = ((fxstak[1,0]-fx_est.soft)/e_fxstak[1,0])^2.
             ;x2_hard = ((fxstak[1,1]-fx_est.hard)/e_fxstak[1,1])^2.
