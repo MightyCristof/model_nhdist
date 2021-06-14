@@ -10,6 +10,7 @@ dir = '/Users/ccarroll/Research/projects/xray_lack_agn/workspace/run_20201008_fi
 
 ;; variables for MODEL_NHDIST
 fits = ['OBJID','RA','DEC','Z','ZERR','ZTYPE', $            ;; fits.sav
+        'MAG','E_MAG', $
         'PERC_AGN', $                                       ;; resamp.sav
         'IIWAC', $                                          ;; detections_wac.sav
         'EBV','E_EBV','DL2', $                              ;; src_luminosities.sav
@@ -65,7 +66,11 @@ stak = ['XSUBG','ESTAK','FXSTAK','E_FXSTAK','LOGFXSTAK','E_LOGFXSTAK']
 
 ;; trim analysis subset
 iq = where(iiqual)
-for i = 0,n_elements(fits)-1 do re = execute(fits[i]+' = '+fits[i]+'[iq]')
+for i = 0,n_elements(fits)-1 do begin
+    re = execute('ndim = size('+fits[i]+',/n_dim)')
+    if (ndim eq 1) then re = execute(fits[i]+' = '+fits[i]+'[iq]') else $
+    if (ndim eq 2) then re = execute(fits[i]+' = '+fits[i]+'[*,iq]')
+endfor
 ;; LL to RL
 rx = ['RXDET','E_RXDET','RXNON','E_RXNON']
 ill = where(strmatch(fits,'*LL*'),llct)
@@ -88,7 +93,7 @@ iihix = loglxir gt 43.6
 iilox = loglxir lt 43.6
 
 ;; add to variable list
-fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','IIAD','IIAN','IIHIX','IILOX']
+fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','IIAD','IIAN','IIHIX','IILOX','BAND']
 
 ;; save
 var_str = strjoin([fits,surv,stak],',')
