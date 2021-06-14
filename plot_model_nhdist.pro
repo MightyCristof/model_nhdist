@@ -164,8 +164,8 @@ if keyword_set(nhdist) then begin
     ra = minmax(xy)
 
     ;; flux estimates
-    fx_mod = [mode(fx_est.soft,bin=scott(fx_est.soft)),mode(fx_est.hard,kde=kde_bandwidth(fx_est.hard))]
-    e_fx_mod = sqrt([mode(fx_est.e_soft,kde=kde_bandwidth(fx_est.e_soft)),mode(fx_est.e_hard,kde=kde_bandwidth(fx_est.e_hard))]^2.+([stddev(fx_est.soft),stddev(fx_est.hard)])^2.)
+    fx_mod = [mode(fx_non.soft,bin=scott(fx_non.soft)),mode(fx_non.hard,kde=kde_bandwidth(fx_non.hard))]
+    e_fx_mod = sqrt([mode(fx_non.e_soft,kde=kde_bandwidth(fx_non.e_soft)),mode(fx_non.e_hard,kde=kde_bandwidth(fx_non.e_hard))]^2.+([stddev(fx_non.soft),stddev(fx_non.hard)])^2.)
 
     dim = [880,780]
     sq = 180
@@ -203,13 +203,14 @@ if keyword_set(nhdist) then begin
         ;                pos=pos[*,3],errorbar_color='black',errorbar_linestyle='-.')
         pad = errorplot(xxnh,yynh,eenh,'-',thick=4,errorbar_thick=4,_extra=e, $
                         pos=pos[*,3],fill_background=1,fill_color=nhcol,fill_transparency=40,name='This work')
-    
         pavg = plot(nh_ana_lox.xh,nh_ana_lox.yh*frac_lox+nh_ana_hix.yh*frac_hix,'--',thick=2,_extra=e,/ov,name='$Ananna+2019 (weighted)$')
+        ;; CT line
+        pct = plot([24.,24.],e.yra,_extra=e,thick=2,linestyle=':',/ov)
+        ;ctl = text(alog10(1.5e24)+0.1,1.0,'CT',/data,font_size=16,font_name='Times')
         ;; CT fraction
         ctad = text(25.,(e.yra[1]+max(yynh+eenh))/2.,'$!8f!7_{CT} = '+cctf+'$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=1.)
         ;; add legend
         leg = legend(target=[pavg,pad],position=[0.125,0.60],/normal,horizontal_alignment=0.,font_size=14,font_name='Times')
-        
         ;; add X-ray stacked images
         psoft = plot(xy,xy,/nodata,xra=ra,yra=ra,pos=pos[*,0],/current,/device,ytitle='offset in Decl. [arcsec.]',font_name='Times',font_size=14)
         imsoft = image(soft,pos=pos[*,0],/current,/device)    
@@ -222,7 +223,7 @@ if keyword_set(nhdist) then begin
         ;; add X-ray flux estimates
         p = errorplot(energy_center,stack_flux,energy_range,stack_err, $
                        linestyle='',/xlog,/ylog,pos=pos[*,2],/current,/device, $
-                       xtitle='$energy [keV]$',ytitle='$!8F!7_{2-10 keV}  [erg s^{-1} cm^{-2}]$', $
+                       xtitle='$energy [keV]$',ytitle='$!8F!7_{X}  [erg s^{-1} cm^{-2}]$', $
                        font_name='Times',font_size=14)
                        ;xtickunit='exponent'
         px = plot(energy_center,stack_flux,'s',col='black', $
@@ -235,11 +236,12 @@ if keyword_set(nhdist) then begin
                    sym_size=1.4,sym_thick=1.5,sym_filled=1,sym_fill_color='white',sym_transparency=0,/ov)
         pad = plot(energy_center*modoff,fx_mod,'o',col='black', $
                    sym_size=1.4,sym_thick=1.5,sym_filled=1,sym_fill_color=nhcol,sym_transparency=20,/ov)
-        ;; add "legend"    
-        po = plot([1.5e-1],[5.75e-15],'o',col='black',sym_size=1.4,sym_thick=1.5,sym_filled=1,sym_fill_color=nhcol,sym_transparency=20,/ov)
-        to = text(0.15,0.85,target=pad,/relative,'Model',font_name='Times')
-        po = plot([1.5e-1],[3.65e-15],'s',col='black',sym_size=1.2,sym_thick=1.5,sym_filled=1,sym_fill_color='white',sym_transparency=0,/ov)
-        to = text(0.15,0.75,target=px,/relative,'X-ray stack',font_name='Times')
+        ;; add "legend"  
+        to = text(0.06,0.85,target=pad,/relative,'X-ray non-det. sources',font_name='Times')
+        po = plot([1.5e-1],[3.65e-15],'o',col='black',sym_size=1.4,sym_thick=1.5,sym_filled=1,sym_fill_color=nhcol,sym_transparency=20,/ov)
+        to = text(0.15,0.75,target=pad,/relative,'Model',font_name='Times')
+        po = plot([1.5e-1],[2.32e-15],'s',col='black',sym_size=1.2,sym_thick=1.5,sym_filled=1,sym_fill_color='white',sym_transparency=0,/ov)
+        to = text(0.15,0.65,target=px,/relative,'X-ray stack',font_name='Times')
         ;; figure reference for Nature caption
         t = text(0.03,0.97,"a",/normal,font_name='Times',font_style='Bold',font_size=16)
         t = text(0.03,0.62,"b",/normal,font_name='Times',font_style='Bold',font_size=16)

@@ -60,7 +60,7 @@ if keyword_set(fluxes) then begin
     print, ''
     print, '                              SOFT                     HARD                     MEAN'
     print, 'DIFF DET:   '+strjoin(strtrim(frac_det,2)+'('+strtrim(alog10(frac_det),2)+')','    ')+'    '+strtrim(mean(frac_det),2)+'('+strtrim(alog10(mean(frac_det)),2)+')'
-    print, 'DIFF NON:    '+strjoin(strtrim(frac_non,2)+'('+strtrim(alog10(frac_non),2)+')','    ')+'    '+strtrim(mean(frac_non),2)+'('+strtrim(alog10(mean(frac_non)),2)+')'
+    print, 'DIFF NON:   '+strjoin(strtrim(frac_non,2)+'('+strtrim(alog10(frac_non),2)+')','    ')+'    '+strtrim(mean(frac_non),2)+'('+strtrim(alog10(mean(frac_non)),2)+')'
     print, '================================================================='
 
 
