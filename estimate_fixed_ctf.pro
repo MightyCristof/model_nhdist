@@ -9,7 +9,7 @@ common _group
 
 tic
 ;; run this script NITER times and look at the distribution in fct
-niter = 10000
+niter = 1000;0
 fctv = dblarr(niter)
 statv = dblarr(6,niter)
 nhmv = dblarr(nsrc,niter)
@@ -53,7 +53,7 @@ for n = 0,niter-1 do begin
             ;; if comparing test statistics, need p_a2
             ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=(test eq 'JOINT'))
         endif else if (detct gt 0) then begin
-            ad[*,i] = [-1.,-1.]
+            ad[*,i] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     a2 = reform(ad[0,*])
@@ -67,8 +67,8 @@ for n = 0,niter-1 do begin
             if (nbest gt 1) then stop
             stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
             ;; estimate model fluxes
-            fx_est = estimate_fx(rx_mod,iimod,/iterate)
-            if (n eq 0) then fxmv = replicate(dup_struct((fx_est)[0]),niter)
+            ;fx_est = estimate_fx(rx_mod,iimod,/iterate)
+            ;if (n eq 0) then fxmv = replicate(dup_struct((fx_est)[0]),niter)
             end
         'JOINT': begin
             ;; estimate model fluxes
@@ -109,7 +109,7 @@ for n = 0,niter-1 do begin
         nhmv[*,n] = nh_mod[*,ibest]
         rxmv[*,n] = rx_mod[*,ibest]
         iimv[*,n] = iimod[*,ibest]
-        fxmv[n] = fx_est[ibest]
+        ;fxmv[n] = fx_est[ibest]
     endelse
     ;; progress alert
     if (n eq 0) then begin
@@ -125,7 +125,7 @@ sav_vars = ['FCTV','STATV','NREJ','NHMV','RXMV','IIMV']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',/compress,file="ctf_fixed2.sav"')
+re = execute('save,'+sav_str+',/compress,file="ctf_fixed.sav"')
 
 
 END

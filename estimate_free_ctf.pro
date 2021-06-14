@@ -10,7 +10,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 100;00
+niter = 1000;0
 fctv1 = dblarr(niter)
 f24v1 = dblarr(niter)
 f25v1 = dblarr(niter)
@@ -63,7 +63,7 @@ for n = 0,niter-1 do begin
             if (detct ge 5) then begin
                 ad[*,i,j] = ad_test(rxd,rx_mod[idet,i,j],prob=(test eq 'JOINT'))
             endif else if (detct gt 0) then begin
-                ad[*,i,j] = [-1.,-1.,-1.]
+                ad[*,i,j] = -1.
             endif else message, 'NO MODELED DETECTIONS.'
         endfor
     endfor

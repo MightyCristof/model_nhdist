@@ -11,7 +11,7 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 100;00
+niter = 1000;0
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 statv2 = dblarr(6,niter)
@@ -60,7 +60,7 @@ for n = 0,niter-1 do begin
         if (detct ge 5) then begin
             ad[*,j] = ad_test(rxd,rx_mod[idet,j],prob=(test eq 'JOINT'))
         endif else if (detct gt 0) then begin
-            ad[*,j] = [99.,99.]
+            ad[*,j] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
     endfor    
     a2 = reform(ad[0,*])
