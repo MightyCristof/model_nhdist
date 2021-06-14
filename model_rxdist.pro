@@ -55,7 +55,7 @@ for n = 0,niter-1 do begin
     if (detct ge 5) then begin
         ad[*,n] = ad_test(rxd,rx_modv[idet,n],prob=(test eq 'JOINT'))
     endif else if (detct gt 0) then begin
-        ad[*,n] = 1-.
+        ad[*,n] = -1.
     endif else message, 'NO MODELED DETECTIONS.'
     ;; progress alert
     if (n eq 0) then begin
