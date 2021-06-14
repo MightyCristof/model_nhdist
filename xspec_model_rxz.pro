@@ -1,17 +1,17 @@
-PRO xspec_model_rxz, SCAT = scat, $
+PRO xspec_model_rxz, POWER = power, $
                      XCM = xcm, $
-                     POWER = power, $
-                     CALC = calc, $
-                     NHLIM = nhlim, $
-                     HOWLOWCANYOUGO = howlowcanyougo
+                     CONV = conv
 
 
+scat = '0.01'
 engv = ['0.5 2','2 7','2 10']
 prefv = ['052','27','210']
 model = 'rxz'
 zv = [0.:0.8:0.01]
 suffix = ''
 if keyword_set(power) then suffix += '_power'
+nhlim = 1
+howlowcanyougo = 0
 
 ;; prep NH array
 if keyword_set(howlowcanyougo) then begin
@@ -110,6 +110,7 @@ if keyword_set(xcm) then begin
                 endfor
                 printf,1,'new 13 = 1.0e-22*10.0^p7'
                 for n = 0,n_elements(nhhi)-1 do begin
+                    if (nhhi[n] eq '23.00') then printf,1,'new 19 '+'0.005'
                     printf,1,'new 7 '+nhhi[n]
                     printf,1,'flux '+eng
                     printf,1,'puts $id "[tcloutr flux 2]"'
@@ -121,8 +122,8 @@ if keyword_set(xcm) then begin
     close,1
 endif
 
-;; calculate RX from model fluxes; soft and hard conversions
-if keyword_set(calc) then begin
+;; convulate RX from model fluxes; soft and hard conversions
+if keyword_set(conv) then begin
     files = file_search('spectra_*_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.dat')
     ifull = where(strmatch(files,'*210*'),full0)
     ihard = where(strmatch(files,'*27*'),hard0)
