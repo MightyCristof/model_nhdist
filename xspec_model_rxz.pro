@@ -6,10 +6,10 @@ PRO xspec_model_rxz, POWER = power, $
 scat = '0.01'
 engv = ['0.5 2','2 7','2 10']
 prefv = ['052','27','210']
-model = 'rxz'
+if keyword_set(power) then model = 'power' else $
+                           model = 'borus'
 zv = [0.:0.8:0.01]
 suffix = ''
-if keyword_set(power) then suffix += '_power'
 nhlim = 1
 howlowcanyougo = 0
 
@@ -137,7 +137,7 @@ if keyword_set(conv) then begin
     ;; create restframe 2-10keV flux ratio
     full = full[inh]
     rx = alog10(full/full[0])
-    stop
+    
     ;; prepare conversion arrays
     iz = where(dhard lt 0.,zlen)
     if (n_elements(zv) ne zlen) then stop
@@ -163,7 +163,7 @@ if keyword_set(conv) then begin
         c_hard_fine[*,i] = interpol(c_hard[*,i],rx,rx_fine)
         c_soft_fine[*,i] = interpol(c_soft[*,i],rx,rx_fine)
     endfor
-    save,zv,nh,rx,c_hard,c_soft,rx_fine,c_hard_fine,c_soft_fine,file=model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.sav'
+    save,zv,nh,rx,c_hard,c_soft,rx_fine,c_hard_fine,c_soft_fine,file='rxz_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.sav'
 endif
 
 
