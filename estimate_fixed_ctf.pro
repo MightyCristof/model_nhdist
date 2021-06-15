@@ -59,7 +59,7 @@ for n = 0,niter-1 do begin
             p_a2[i] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
-    iia2 = a2 gt 0.
+    iia2 = finite(a2) and a2 gt 0.
     stop
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
@@ -91,7 +91,7 @@ for n = 0,niter-1 do begin
             ;; flag chisqr_pdf value == 1
             ;p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
             ;iix2 = p_x2 gt min(p_x2)/2.
-            iix2 = p_x2 gt 0.
+            iix2 = finite(p_x2) and p_x2 gt 0.
             ;; combined test statistic
             ;; Fisher
             ;x2_joint = -2.*(alog(p_a2)+alog(p_x2))
