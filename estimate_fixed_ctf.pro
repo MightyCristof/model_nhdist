@@ -49,10 +49,10 @@ for n = 0,niter-1 do begin
         nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
         rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)
         iimod[*,i] = rx_mod[*,i] gt rxl
-        idet = where(iimod[*,i] eq 1,detct)
+        idet = where(iimod[*,i] eq 1 and rx_mod[*,i] le 0.,detct)
         if (detct ge 5) then begin
             ;; if comparing test statistics, need p_a2
-            a2[i] = ad_test(rxd,rx_mod[idet,i],permute=(test eq 'JOINT'),prob=p)
+            a2[i] = ad_test(rxd[where(rxd le 0.,/null)],rx_mod[idet,i],permute=1,prob=p);(test eq 'JOINT'),prob=p)
             p_a2[i] = p
         endif else if (detct gt 0) then begin
             a2[i] = -1.
@@ -60,7 +60,7 @@ for n = 0,niter-1 do begin
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     iia2 = finite(a2) and a2 gt 0.
-    stop
+
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
