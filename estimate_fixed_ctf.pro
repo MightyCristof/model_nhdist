@@ -40,7 +40,8 @@ for n = 0,niter-1 do begin
     nh_mod = dblarr(nsrc,nfrac)
     rx_mod = dblarr(nsrc,nfrac)
     iimod = bytarr(nsrc,nfrac)
-    ad = dblarr(2,nfrac)
+    a2 = dblarr(nfrac)
+    p_a2 = dblarr(nfrac)
     for i = 0,nfrac-1 do begin
         nct = round((nthin/(1.-fct[i]))*fct[i])
         nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]
@@ -51,16 +52,14 @@ for n = 0,niter-1 do begin
         idet = where(iimod[*,i] eq 1,detct)
         if (detct ge 5) then begin
             ;; if comparing test statistics, need p_a2
-            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=p_a2)
-;            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=(test eq 'JOINT'))
-            stop
+            a2[i] = ad_test(rxd,rx_mod[idet,i],permute=(test eq 'JOINT'),prob=p)
+            p_a2[i] = p
         endif else if (detct gt 0) then begin
-            ad[*,i] = -1.
+            a2[i] = -1.
+            p_a2[i] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
-    a2 = reform(ad[0,*])
-    p_a2 = reform(ad[1,*])
-    iia2 = p_a2 gt min(p_a2)
+    iia2 = a2 gt 0.
     stop
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
@@ -89,12 +88,17 @@ for n = 0,niter-1 do begin
             x2_hard = (del_hard/sig_hard)^2.    
             x2 = x2_soft+x2_hard
             p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
-            ;; correct for p-value == 1
-            p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
-            iix2 = p_x2 gt min(p_x2)
+            ;; flag chisqr_pdf value == 1
+            ;p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
+            ;iix2 = p_x2 gt min(p_x2)/2.
+            iix2 = p_x2 gt 0.
             ;; combined test statistic
-            x2_joint = -2.*(alog(p_a2)+alog(p_x2))
-            p_joint = 1.-chisqr_pdf(x2_joint,4.)  ;; dof = 2k, where k == 2, the number of tests being combined
+            ;; Fisher
+            ;x2_joint = -2.*(alog(p_a2)+alog(p_x2))
+            ;p_joint = 1.-chisqr_pdf(x2_joint,4.)  ;; dof = 2k, where k == 2, the number of tests being combined
+            ;; Pearson
+            x2_joint = -2.*(alog(1.-p_a2)+alog(1.-p_x2))
+            p_joint = 1.-chisqr_pdf(x2_joint,4.)
             ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
             if (nbest gt 1) then stop
             stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]

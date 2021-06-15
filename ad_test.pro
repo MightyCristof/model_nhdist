@@ -1,5 +1,6 @@
 FUNCTION ad_test, data, $
                   model, $
+                  PERMUTE = permute, $
                   PROB = p
 
                   
@@ -23,11 +24,13 @@ delta = edf - cdf
 
 ;ks = max(abs(delta), /nan)
 ;ky = max(delta, /nan) + max(-delta, /nan)
-ad = delta^2 / (cdf * (1 - cdf))
-ad = total(ad, /nan) / total(finite(ad))
+a2 = delta^2 / (cdf * (1 - cdf))
+a2 = total(a2, /nan) / total(finite(a2))
 ;mad = total(abs(delta), /nan) / total(finite(delta))
-stop
-if keyword_set(prob) then begin
+;; probability placeholder
+p = 0.
+
+if keyword_set(permute) then begin
     nreps = 1000
     ad_perm = dblarr(nreps)
     joint = [data,model]
@@ -42,11 +45,10 @@ if keyword_set(prob) then begin
         ad_perm[i] = ad_test(pdata,pmodel)
     endfor
 
-    p = total(ad_perm gt ad)/nreps > 1./nreps
-    ad = [ad,p]
+    p = total(ad_perm gt a2)/nreps > 1./nreps
 endif
 
-return, ad
+return, a2
 
 
 END
