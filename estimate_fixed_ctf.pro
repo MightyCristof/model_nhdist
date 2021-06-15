@@ -7,9 +7,9 @@ common _nhobs
 common _rxnh
 common _group
 
-tic
+
 ;; run this script NITER times and look at the distribution in fct
-niter = 1000;0
+niter = 10000
 fctv = dblarr(niter)
 statv = dblarr(6,niter)
 nhmv = dblarr(nsrc,niter)
@@ -20,6 +20,7 @@ iimv = bytarr(nsrc,niter)
 step = 0.02d
 fct = [step:1.-step:step]
 nfrac = n_elements(fct)
+rxct = rx2nh(24.,/rx_out)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
@@ -49,10 +50,10 @@ for n = 0,niter-1 do begin
         nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
         rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)
         iimod[*,i] = rx_mod[*,i] gt rxl
-        idet = where(iimod[*,i] eq 1 and rx_mod[*,i] le 0.,detct)
+        idet = where(iimod[*,i] eq 1 and rx_mod[*,i] gt rxct and rx_mod[*,i] le 0.,detct)
         if (detct ge 5) then begin
             ;; if comparing test statistics, need p_a2
-            a2[i] = ad_test(rxd[where(rxd le 0.,/null)],rx_mod[idet,i],permute=1,prob=p);(test eq 'JOINT'),prob=p)
+            a2[i] = ad_test(rxd[where(rxd gt rxct and rxd le 0.,/null)],rx_mod[idet,i],permute=1,prob=p);(test eq 'JOINT'),prob=p)
             p_a2[i] = p
         endif else if (detct gt 0) then begin
             a2[i] = -1.
@@ -126,7 +127,7 @@ for n = 0,niter-1 do begin
 endfor
 print, 'END   - FIXED FCT'
 print, '=============================================='
-toc
+
 
 sav_vars = ['FCTV','STATV','NREJ','NHMV','RXMV','IIMV']
 sav_inds = []
