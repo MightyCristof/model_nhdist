@@ -1,9 +1,9 @@
 FUNCTION ad_test, data, $
                   model, $
-                  PROB = prob
+                  PROB = p
 
                   
-;FORWARD_FUNCTION ad_test
+FORWARD_FUNCTION ad_test
 
 sz = n_elements(data)
 if sz lt 2 then message, 'data must contain at least two elements'
@@ -26,7 +26,7 @@ delta = edf - cdf
 ad = delta^2 / (cdf * (1 - cdf))
 ad = total(ad, /nan) / total(finite(ad))
 ;mad = total(abs(delta), /nan) / total(finite(delta))
-
+stop
 if keyword_set(prob) then begin
     nreps = 1000
     ad_perm = dblarr(nreps)

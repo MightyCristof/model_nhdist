@@ -51,7 +51,9 @@ for n = 0,niter-1 do begin
         idet = where(iimod[*,i] eq 1,detct)
         if (detct ge 5) then begin
             ;; if comparing test statistics, need p_a2
-            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=(test eq 'JOINT'))
+            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=p_a2)
+;            ad[*,i] = ad_test(rxd,rx_mod[idet,i],prob=(test eq 'JOINT'))
+            stop
         endif else if (detct gt 0) then begin
             ad[*,i] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
@@ -59,6 +61,7 @@ for n = 0,niter-1 do begin
     a2 = reform(ad[0,*])
     p_a2 = reform(ad[1,*])
     iia2 = p_a2 gt min(p_a2)
+    stop
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
