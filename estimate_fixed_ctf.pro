@@ -9,7 +9,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in fct
-niter = 10000
+niter = 1000;0
 fctv = dblarr(niter)
 statv = dblarr(6,niter)
 nhmv = dblarr(nsrc,niter)
@@ -17,10 +17,10 @@ rxmv = dblarr(nsrc,niter)
 iimv = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
-step = 0.02d
+step = 0.05d
 fct = [step:1.-step:step]
 nfrac = n_elements(fct)
-rxct = rx2nh(24.,/rx_out)
+rxct = (rx2nh(24.,/rx_out))[0]
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
@@ -43,6 +43,8 @@ for n = 0,niter-1 do begin
     iimod = bytarr(nsrc,nfrac)
     a2 = dblarr(nfrac)
     p_a2 = dblarr(nfrac)
+    ;dv = dblarr(nfrac)
+    ;probv = dblarr(nfrac)
     for i = 0,nfrac-1 do begin
         nct = round((nthin/(1.-fct[i]))*fct[i])
         nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]
@@ -50,10 +52,13 @@ for n = 0,niter-1 do begin
         nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
         rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)
         iimod[*,i] = rx_mod[*,i] gt rxl
-        idet = where(iimod[*,i] eq 1 and rx_mod[*,i] gt rxct and rx_mod[*,i] le 0.,detct)
+        idet = where(iimod[*,i] eq 1,detct)
         if (detct ge 5) then begin
+            ;kstwo,rxd,rx_mod[idet,i],d,prob
+            ;dv[i] = d
+            ;probv[i] = prob
             ;; if comparing test statistics, need p_a2
-            a2[i] = ad_test(rxd[where(rxd gt rxct and rxd le 0.,/null)],rx_mod[idet,i],permute=1,prob=p);(test eq 'JOINT'),prob=p)
+            a2[i] = ad_test(rxd,rx_mod[idet,i],permute=(test eq 'JOINT'),prob=p)
             p_a2[i] = p
         endif else if (detct gt 0) then begin
             a2[i] = -1.
@@ -95,14 +100,15 @@ for n = 0,niter-1 do begin
             iix2 = finite(p_x2) and p_x2 gt 0.
             ;; combined test statistic
             ;; Fisher
-            ;x2_joint = -2.*(alog(p_a2)+alog(p_x2))
-            ;p_joint = 1.-chisqr_pdf(x2_joint,4.)  ;; dof = 2k, where k == 2, the number of tests being combined
+            x2_joint = -2.*(alog(p_a2)+alog(p_x2))
+            p_joint = 1.-chisqr_pdf(x2_joint,4.)  ;; dof = 2k, where k == 2, the number of tests being combined
             ;; Pearson
-            x2_joint = -2.*(alog(1.-p_a2)+alog(1.-p_x2))
-            p_joint = 1.-chisqr_pdf(x2_joint,4.)
+            ;x2_joint = -2.*(alog(1.-p_a2)+alog(1.-p_x2))
+            ;p_joint = 1.-chisqr_pdf(x2_joint,4.)
             ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
             if (nbest gt 1) then stop
             stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
+            stop
             end
         else: message, 'IMPROPER INPUT OF TEST METHOD.'
     endcase
