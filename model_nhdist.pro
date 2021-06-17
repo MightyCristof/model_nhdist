@@ -65,8 +65,8 @@ if keyword_set(setrx) then begin
     ;rx_path = prep_dir+'/rxz_scat01_nh2025.sav'
     ;rx_path = prep_dir+'/rxz_scat01_nh20.525.sav'
     ;rx_path = prep_dir+'/test_param_rx.sav'
-    rx_path = prep_dir+'/rxz_scat01.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01.sav'
+    ;rx_path = prep_dir+'/rxz_scat01.sav'
+    rx_path = prep_dir+'/rxz_borus_scat01.sav'
     ;; -f force to overwrite symbolic link in case changing
     spawn, 'ln -sf '+rx_path+' rx_conversion.sav'
     nkeys--

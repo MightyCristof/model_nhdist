@@ -11,7 +11,7 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 1000;0
+niter = 10000
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 statv2 = dblarr(6,niter)
@@ -20,13 +20,13 @@ rxmv2 = dblarr(nsrc,niter)
 iimv2 = bytarr(nsrc,niter)
 
 ;; free CT fraction split between NH=24-25 and 25-26
-step = 0.02d
+step = 0.05d
 f25 = [step:1.-step:step]
 f24 = 1.-f25
 nfree = n_elements(f24)
 
 ;; set CT fraction from CTF FREE modeling
-fct = mode(fctv1,kde=kde_bandwidth(fctv1))
+fct = mode(fctv1_fine,kde=kde_bandwidth(fctv1_fine))
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
 nrej2 = 0l
@@ -121,7 +121,7 @@ endfor
 print, 'END   - NH SPLIT'
 print, '=============================================='
 
-sav_vars = ['F24V2','F25V2','statv2','NREJ2','NHMV2','RXMV2','IIMV2']
+sav_vars = ['F24V2','F25V2','STATV2','NREJ2','NHMV2','RXMV2','IIMV2']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

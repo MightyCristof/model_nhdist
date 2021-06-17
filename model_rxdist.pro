@@ -27,8 +27,8 @@ nh_samp = nh_mc(nh_obs,nsamp)
 ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
 
 ;; fraction and source numbers
-fct = mode(fctv,kde=kde_bandwidth(fctv));mean([mode(fctv,bin=scott(fctv)),mode(fctv,bin=freedman(fctv)),mode(fctv,kde=kde_bandwidth(fctv))])
-e_fct = stddev(fctv)
+fct = mode(fctv_fine,kde=kde_bandwidth(fctv_fine));mean([mode(fctv,bin=scott(fctv)),mode(fctv,bin=freedman(fctv)),mode(fctv,kde=kde_bandwidth(fctv))])
+e_fct = stddev(fctv_fine)
 fcn = 1.-fct
 ncn = nthin
 nsr = round(ncn/fcn)
@@ -82,8 +82,8 @@ sav_inds = ['IIMODV','POSTMOD']
 ;; RUN FOR SPLIT CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct_ = mode(fctv1,kde=kde_bandwidth(fctv1));mean([mode(fctv1,bin=scott(fctv1)),mode(fctv1,bin=freedman(fctv1)),mode(fctv1,kde=kde_bandwidth(fctv1))])
-e_fct_ = stddev(fctv1)
+fct_ = mode(fctv1_fine,kde=kde_bandwidth(fctv1_fine));mean([mode(fctv1_fine,bin=scott(fctv1_fine)),mode(fctv1_fine,bin=freedman(fctv1_fine)),mode(fctv1_fine,kde=kde_bandwidth(fctv1_fine))])
+e_fct_ = stddev(fctv1_fine)
 fcn_ = 1.-fct_
 ncn_ = nthin
 nsr_ = round(ncn_/fcn_)
