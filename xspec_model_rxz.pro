@@ -3,12 +3,13 @@ PRO xspec_model_rxz, POWER = power, $
                      CONV = conv
 
 
-scat = '0.01'
+scat = '0.008'
+dscat = ''
+if keyword_set(dscat) then conn = '_' else conn = ''
 engv = ['0.5 2','2 7','2 10']
 prefv = ['052','27','210']
 if keyword_set(power) then model = 'power' else $
                            model = 'borus'
-zv = [0.:0.8:0.01]
 suffix = ''
 nhlim = 1
 howlowcanyougo = 0
@@ -24,11 +25,14 @@ endif else begin
 endelse
 nhhi = string([22.:25.5:0.25],format='(f5.2)')
 
+;; redshift bins for model
+zv = [0.:0.8:0.01]
+
 ;; create XSPEC model
 if keyword_set(xcm) then begin
     if keyword_set(power) then begin
         nhval = strtrim(10.^nh/1e22,2)
-        openw,1,'model_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.xcm'
+        openw,1,'model_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+conn+(strsplit(dscat,'.',/extract))[-1]+suffix+'.xcm'
         printf,1,'abund angr'
         printf,1,'cosmo 70 0 0.73'
         printf,1,'method leven 10 0.01'
@@ -38,7 +42,7 @@ if keyword_set(xcm) then begin
             eng = engv[i]
             pref = prefv[i]
             if (pref eq '210') then zra = zv[0] else zra = zv
-            printf,1,'set id [open spectra_'+pref+'_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.dat a]'
+            printf,1,'set id [open spectra_'+pref+'_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+conn+(strsplit(dscat,'.',/extract))[-1]+suffix+'.dat a]'
             for z = 0,n_elements(zra)-1 do begin
                 printf,1,'model  constant*phabs*zphabs(zphabs*cabs*cutoffpl + constant*cutoffpl)'
                 printf,1,'              1         -1          0          0      1e+10      1e+10'
@@ -66,7 +70,7 @@ if keyword_set(xcm) then begin
             printf,1,'close $id'
         endfor    
     endif else begin
-        openw,1,'model_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.xcm'
+        openw,1,'model_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+conn+(strsplit(dscat,'.',/extract))[-1]+suffix+'.xcm'
         printf,1,'abund angr'
         printf,1,'cosmo 70 0 0.73'
         printf,1,'method leven 10 0.01'
@@ -76,7 +80,7 @@ if keyword_set(xcm) then begin
             eng = engv[i]
             pref = prefv[i]
             if (pref eq '210') then zra = zv[0] else zra = zv
-            printf,1,'set id [open spectra_'+pref+'_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.dat a]'
+            printf,1,'set id [open spectra_'+pref+'_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+conn+(strsplit(dscat,'.',/extract))[-1]+suffix+'.dat a]'
             for z = 0,n_elements(zra)-1 do begin
                 printf,1,'model  constant*phabs*zphabs(atable{/Users/ccarroll/heasoft-6.25/localmodels/borus/borus02_v170323a.fits} + zphabs*cabs*cutoffpl + constant*cutoffpl)'
                 printf,1,'              1         -1          0          0      1e+10      1e+10'
@@ -110,7 +114,9 @@ if keyword_set(xcm) then begin
                 endfor
                 printf,1,'new 13 = 1.0e-22*10.0^p7'
                 for n = 0,n_elements(nhhi)-1 do begin
-                    if (nhhi[n] eq '23.00') then printf,1,'new 19 '+'0.005'
+                    if keyword_set(dscat) then begin
+                        if (nhhi[n] eq '23.00') then printf,1,'new 19 '+dscat
+                    endif
                     printf,1,'new 7 '+nhhi[n]
                     printf,1,'flux '+eng
                     printf,1,'puts $id "[tcloutr flux 2]"'
@@ -124,7 +130,7 @@ endif
 
 ;; convulate RX from model fluxes; soft and hard conversions
 if keyword_set(conv) then begin
-    files = file_search('spectra_*_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.dat')
+    files = file_search('spectra_*_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+conn+(strsplit(dscat,'.',/extract))[-1]+suffix+'.dat')
     ifull = where(strmatch(files,'*210*'),full0)
     ihard = where(strmatch(files,'*27*'),hard0)
     isoft = where(strmatch(files,'*052*'),soft0)
@@ -163,7 +169,7 @@ if keyword_set(conv) then begin
         c_hard_fine[*,i] = interpol(c_hard[*,i],rx,rx_fine)
         c_soft_fine[*,i] = interpol(c_soft[*,i],rx,rx_fine)
     endfor
-    save,zv,nh,rx,c_hard,c_soft,rx_fine,c_hard_fine,c_soft_fine,file='rxz_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+suffix+'.sav'
+    save,zv,nh,rx,c_hard,c_soft,rx_fine,c_hard_fine,c_soft_fine,file='rxz_'+model+'_scat'+(strsplit(scat,'.',/extract))[-1]+conn+(strsplit(dscat,'.',/extract))[-1]+suffix+'.sav'
 endif
 
 
