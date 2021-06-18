@@ -3,7 +3,7 @@ PRO xspec_model_rxz, POWER = power, $
                      CONV = conv
 
 
-scat = '0.008'
+scat = '0.01'
 dscat = ''
 if keyword_set(dscat) then conn = '_' else conn = ''
 engv = ['0.5 2','2 7','2 10']
@@ -143,7 +143,6 @@ if keyword_set(conv) then begin
     ;; create restframe 2-10keV flux ratio
     full = full[inh]
     rx = alog10(full/full[0])
-    
     ;; prepare conversion arrays
     iz = where(dhard lt 0.,zlen)
     if (n_elements(zv) ne zlen) then stop
