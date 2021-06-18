@@ -21,7 +21,7 @@ iimv2 = bytarr(nsrc,niter)
 
 ;; free CT fraction split between NH=24-25 and 25-26
 step = 0.05d
-f25 = [step:1.-step:step]
+f25 = [0.05d:1.-0.05d:0.05d]
 f24 = 1.-f25
 nfree = n_elements(f24)
 

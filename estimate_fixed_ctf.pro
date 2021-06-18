@@ -147,8 +147,8 @@ rxmv_fine = dblarr(nsrc,niter)
 iimv_fine = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
-step = 0.02d
-fct = [mode(fctv)-2.*ceil(stddev(fctv)/0.02)*0.02:mode(fctv)+2.0*ceil(stddev(fctv)/0.02)*0.02:step]
+step = 0.05d
+fct = [(mode(fctv)-2.*ceil(stddev(fctv)/step)*step)>(0.+step):(mode(fctv)+2.0*ceil(stddev(fctv)/step)*step)<(1.-step):step]
 nfrac = n_elements(fct)
 ;a2v = dblarr(nfrac,niter)
 
@@ -268,7 +268,7 @@ sav_vars = [sav_vars,'FCTV_FINE','STATV_FINE','NREJ_FINE','NHMV_FINE','RXMV_FINE
 sav_inds = [sav_inds]
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',/compress,file="ctf_fixed_NEW.sav"')
+re = execute('save,'+sav_str+',/compress,file="ctf_fixed.sav"')
 
 
 END

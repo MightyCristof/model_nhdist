@@ -146,8 +146,8 @@ rxmv1_fine = dblarr(nsrc,niter)
 iimv1_fine = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
-step = 0.02d
-fct = [mode(fctv1)-2.*ceil(stddev(fctv1)/0.02)*0.02:mode(fctv1)+2.0*ceil(stddev(fctv1)/0.02)*0.02:step]
+step = 0.05d
+fct = [(mode(fctv1)-2.*ceil(stddev(fctv1)/step)*step)>(0.+step):(mode(fctv1)+2.0*ceil(stddev(fctv1)/step)*step)<(1.-step):step]
 nfrac = n_elements(fct)
 
 ;; free CT fraction split between NH=24-25 and 25-26
@@ -261,7 +261,7 @@ sav_vars = [sav_vars,'FCTV1_FINE','F24V1_FINE','F25V1_FINE','STATV1_FINE', $
 sav_inds = [sav_inds]
 
 sav_str = strjoin([sav_vars,sav_inds],',')
-re = execute('save,'+sav_str+',/compress,file="ctf_free_NEW.sav"')
+re = execute('save,'+sav_str+',/compress,file="ctf_free.sav"')
 
 
 END
