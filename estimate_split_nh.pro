@@ -11,7 +11,7 @@ common _free
 
 
 ;; run this script NITER times 
-niter = 10000
+niter = 1000;0
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 statv2 = dblarr(6,niter)
@@ -24,6 +24,8 @@ step = 0.05d
 f25 = [0.05d:1.-0.05d:0.05d]
 f24 = 1.-f25
 nfree = n_elements(f24)
+
+a2_fine2 = dblarr(nfree,niter)
 
 ;; set CT fraction from CTF FREE modeling
 fct = mode(fctv1_fine,kde=kde_bandwidth(fctv1_fine))
@@ -47,7 +49,8 @@ for n = 0,niter-1 do begin
     nh_mod = dblarr(nsrc,nfree)
     rx_mod = dblarr(nsrc,nfree)
     iimod = bytarr(nsrc,nfree)
-    ad = dblarr(2,nfree)
+    a2 = dblarr(nfree)
+    p_a2 = dblarr(nfree)
     for j = 0,nfree-1 do begin
         n25 = round(nct*f25[j])>1
         n24 = nct-n25
@@ -58,14 +61,16 @@ for n = 0,niter-1 do begin
         iimod[*,j] = rx_mod[*,j] gt rxl
         idet = where(iimod[*,j] eq 1,detct)
         if (detct ge 5) then begin
-            ad[*,j] = ad_test(rxd,rx_mod[idet,j],prob=(test eq 'JOINT'))
+            a2[j] = ad_test(rxd,rx_mod[idet,j],permute=(test eq 'JOINT'),prob=p)
+            p_a2[j] = p
         endif else if (detct gt 0) then begin
-            ad[*,j] = -1.
+            a2[j] = -1.
+            p_a2[j] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
     endfor    
-    a2 = reform(ad[0,*])
-    p_a2 = reform(ad[1,*])
     iia2 = p_a2 gt min(p_a2)
+    a2_fine2[*,n] = a2
+    
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case test of 
@@ -121,7 +126,8 @@ endfor
 print, 'END   - NH SPLIT'
 print, '=============================================='
 
-sav_vars = ['F24V2','F25V2','STATV2','NREJ2','NHMV2','RXMV2','IIMV2']
+sav_vars = ['F24V2','F25V2','STATV2','NREJ2','NHMV2','RXMV2','IIMV2', $
+            'A2_FINE2']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

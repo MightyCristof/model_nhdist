@@ -10,7 +10,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 10000
+niter = 1000;0
 
 ;; ROUGH PASS
 fctv1 = dblarr(niter)
@@ -23,13 +23,15 @@ iimv1 = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
 step = 0.10d
-fct = [step:1.-step:step]
-nfrac = n_elements(fct)
+fct_rough1 = [step:1.-step:step]
+nfrac = n_elements(fct_rough1)
 
 ;; free CT fraction split between NH=24-25 and 25-26
 f25 = [0.05d:1.-0.05d:0.05d];[step:1.-step:step]
 f24 = 1.-f25
 nfree = n_elements(f24)
+
+a2_rough1 = dblarr(nfrac,nfree,niter)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
@@ -49,10 +51,11 @@ for n = 0,niter-1 do begin
     nh_mod = dblarr(nsrc,nfrac,nfree)
     rx_mod = dblarr(nsrc,nfrac,nfree)
     iimod = bytarr(nsrc,nfrac,nfree)
-    ad = dblarr(2,nfrac,nfree)
+    a2 = dblarr(nfrac,nfree)
+    p_a2 = dblarr(nfrac,nfree)
     for i = 0,nfrac-1 do begin
         ;; vary CT fraction
-        nct = round((nthin/(1.-fct[i]))*fct[i])
+        nct = round((nthin/(1.-fct_rough1[i]))*fct_rough1[i])
         for j = 0,nfree-1 do begin
             n25 = round(nct*f25[j])>1
             n24 = nct-n25
@@ -63,17 +66,17 @@ for n = 0,niter-1 do begin
             iimod[*,i,j] = rx_mod[*,i,j] gt rxl
             idet = where(iimod[*,i,j] eq 1,detct)
             if (detct ge 5) then begin
-                ad[*,i,j] = ad_test(rxd,rx_mod[idet,i,j],prob=(test eq 'JOINT'))
+                a2[i,j] = ad_test(rxd,rx_mod[idet,i,j],permute=(test eq 'JOINT'),prob=p)
+                p_a2[i,j] = p
             endif else if (detct gt 0) then begin
-                ad[*,i,j] = -1.
+                a2[i,j] = -1.
+                p_a2[i,j] = -1.
             endif else message, 'NO MODELED DETECTIONS.'
         endfor
     endfor
-    ;; account for extra dimensions    
-    sz = size(ad)
-    re = execute('a2 = reform(ad['+strjoin(['0',strarr(sz[0]-1)+'*'],',')+'])')
-    re = execute('p_a2 = reform(ad['+strjoin(['1',strarr(sz[0]-1)+'*'],',')+'])')
-    iia2 = p_a2 gt min(p_a2)
+    iia2 = finite(a2) and a2 gt 0.
+    a2_rough1[*,*,n] = a2
+    
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
@@ -115,7 +118,7 @@ for n = 0,niter-1 do begin
     endif else begin
         ;; account for extra dimensions
         ind = array_indices(a2,ibest)
-        fctv1[n] = fct[ind[0]]
+        fctv1[n] = fct_rough1[ind[0]]
         f24v1[n] = f24[ind[1]]
         f25v1[n] = f25[ind[1]]
         statv1[*,n] = stat
@@ -133,7 +136,8 @@ print, 'END   - FREE FCT, ROUND 1, ROUGH PASS'
 print, '=============================================='
 
 sav_vars = ['FCTV1','F24V1','F25V1','STATV1', $
-            'NREJ1','NHMV1','RXMV1','IIMV1']
+            'NREJ1','NHMV1','RXMV1','IIMV1', $
+            'FCT_ROUGH1','A2_ROUGH1']
 sav_inds = []
 
 ;; FINE PASS
@@ -147,13 +151,15 @@ iimv1_fine = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
 step = 0.05d
-fct = [(mode(fctv1)-2.*ceil(stddev(fctv1)/step)*step)>(0.+step):(mode(fctv1)+2.0*ceil(stddev(fctv1)/step)*step)<(1.-step):step]
-nfrac = n_elements(fct)
+fct_fine1 = [(mode(fctv1)-2.*ceil(stddev(fctv1)/step)*step)>(0.+step):(mode(fctv1)+2.0*ceil(stddev(fctv1)/step)*step)<(1.-step):step]
+nfrac = n_elements(fct_fine1)
 
 ;; free CT fraction split between NH=24-25 and 25-26
 f25 = [0.05d:1.-0.05d:0.05d];[step:1.-step:step]
 f24 = 1.-f25
 nfree = n_elements(f24)
+
+a2_fine1 = dblarr(nfrac,nfree,niter)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
@@ -173,10 +179,11 @@ for n = 0,niter-1 do begin
     nh_mod = dblarr(nsrc,nfrac,nfree)
     rx_mod = dblarr(nsrc,nfrac,nfree)
     iimod = bytarr(nsrc,nfrac,nfree)
-    ad = dblarr(2,nfrac,nfree)
+    a2 = dblarr(nfrac,nfree)
+    p_a2 = dblarr(nfrac,nfree)
     for i = 0,nfrac-1 do begin
         ;; vary CT fraction
-        nct = round((nthin/(1.-fct[i]))*fct[i])
+        nct = round((nthin/(1.-fct_fine1[i]))*fct_fine1[i])
         for j = 0,nfree-1 do begin
             n25 = round(nct*f25[j])>1
             n24 = nct-n25
@@ -187,17 +194,17 @@ for n = 0,niter-1 do begin
             iimod[*,i,j] = rx_mod[*,i,j] gt rxl
             idet = where(iimod[*,i,j] eq 1,detct)
             if (detct ge 5) then begin
-                ad[*,i,j] = ad_test(rxd,rx_mod[idet,i,j],prob=(test eq 'JOINT'))
+                a2[i,j] = ad_test(rxd,rx_mod[idet,i,j],permute=(test eq 'JOINT'),prob=p)
+                p_a2[i,j] = p
             endif else if (detct gt 0) then begin
-                ad[*,i,j] = -1.
+                a2[i,j] = -1.
+                p_a2[i,j] = -1.                
             endif else message, 'NO MODELED DETECTIONS.'
         endfor
     endfor
-    ;; account for extra dimensions    
-    sz = size(ad)
-    re = execute('a2 = reform(ad['+strjoin(['0',strarr(sz[0]-1)+'*'],',')+'])')
-    re = execute('p_a2 = reform(ad['+strjoin(['1',strarr(sz[0]-1)+'*'],',')+'])')
     iia2 = p_a2 gt min(p_a2)
+    a2_fine1[*,*,n] = a2
+
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
@@ -239,7 +246,7 @@ for n = 0,niter-1 do begin
     endif else begin
         ;; account for extra dimensions
         ind = array_indices(a2,ibest)
-        fctv1_fine[n] = fct[ind[0]]
+        fctv1_fine[n] = fct_fine1[ind[0]]
         f24v1_fine[n] = f24[ind[1]]
         f25v1_fine[n] = f25[ind[1]]
         statv1_fine[*,n] = stat
@@ -257,7 +264,8 @@ print, 'END   - FREE FCT, ROUND 1, FINE PASS'
 print, '=============================================='
 
 sav_vars = [sav_vars,'FCTV1_FINE','F24V1_FINE','F25V1_FINE','STATV1_FINE', $
-                     'NREJ1_FINE','NHMV1_FINE','RXMV1_FINE','IIMV1_FINE']
+                     'NREJ1_FINE','NHMV1_FINE','RXMV1_FINE','IIMV1_FINE', $
+                     'FCT_FINE1','A2_FINE1']
 sav_inds = [sav_inds]
 
 sav_str = strjoin([sav_vars,sav_inds],',')
@@ -265,6 +273,7 @@ re = execute('save,'+sav_str+',/compress,file="ctf_free.sav"')
 
 
 END
+
 
 
 

@@ -9,7 +9,7 @@ common _group
 
 
 ;; run this script NITER times and look at the distribution in fct
-niter = 10000
+niter = 1000;0
 
 ;; ROUGH PASS
 fctv = dblarr(niter)
@@ -20,9 +20,10 @@ iimv = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
 step = 0.10d
-fct = [step:1.-step:step]
-nfrac = n_elements(fct)
-;a2v = dblarr(nfrac,niter)
+fct_rough = [step:1.-step:step]
+nfrac = n_elements(fct_rough)
+
+a2_rough = dblarr(nfrac,niter)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
@@ -48,7 +49,7 @@ for n = 0,niter-1 do begin
     ;dv = dblarr(nfrac)
     ;probv = dblarr(nfrac)
     for i = 0,nfrac-1 do begin
-        nct = round((nthin/(1.-fct[i]))*fct[i])
+        nct = round((nthin/(1.-fct_rough[i]))*fct_rough[i])
         nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]
         nresamp = n_elements(nh_resamp)
         nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
@@ -68,7 +69,7 @@ for n = 0,niter-1 do begin
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     iia2 = finite(a2) and a2 gt 0.
-    ;a2v[*,n] = a2
+    a2_rough[*,n] = a2
 
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
@@ -120,7 +121,7 @@ for n = 0,niter-1 do begin
         continue
     ;; record best fit statistics
     endif else begin
-        fctv[n] = fct[ibest]
+        fctv[n] = fct_rough[ibest]
         statv[*,n] = stat
         nhmv[*,n] = nh_mod[*,ibest]
         rxmv[*,n] = rx_mod[*,ibest]
@@ -136,7 +137,7 @@ endfor
 print, 'END   - FIXED FCT, ROUGH PASS'
 print, '=============================================='
 
-sav_vars = ['FCTV','STATV','NREJ','NHMV','RXMV','IIMV'];,'FCT','A2V']
+sav_vars = ['FCTV','STATV','NREJ','NHMV','RXMV','IIMV','FCT_ROUGH','A2_ROUGH']
 sav_inds = []
 
 ;; FINE PASS
@@ -148,9 +149,9 @@ iimv_fine = bytarr(nsrc,niter)
 
 ;; fixed CT fraction
 step = 0.05d
-fct = [(mode(fctv)-2.*ceil(stddev(fctv)/step)*step)>(0.+step):(mode(fctv)+2.0*ceil(stddev(fctv)/step)*step)<(1.-step):step]
-nfrac = n_elements(fct)
-;a2v = dblarr(nfrac,niter)
+fct_fine = [(mode(fctv)-2.*ceil(stddev(fctv)/step)*step)>(0.+step):(mode(fctv)+2.0*ceil(stddev(fctv)/step)*step)<(1.-step):step]
+nfrac = n_elements(fct_fine)
+a2_fine = dblarr(nfrac,niter)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
@@ -176,7 +177,7 @@ for n = 0,niter-1 do begin
     ;dv = dblarr(nfrac)
     ;probv = dblarr(nfrac)
     for i = 0,nfrac-1 do begin
-        nct = round((nthin/(1.-fct[i]))*fct[i])
+        nct = round((nthin/(1.-fct_fine[i]))*fct_fine[i])
         nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]
         nresamp = n_elements(nh_resamp)
         nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
@@ -196,7 +197,7 @@ for n = 0,niter-1 do begin
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     iia2 = finite(a2) and a2 gt 0.
-    ;a2v[*,n] = a2
+    a2_fine[*,n] = a2
 
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
@@ -248,7 +249,7 @@ for n = 0,niter-1 do begin
         continue
     ;; record best fit statistics
     endif else begin
-        fctv_fine[n] = fct[ibest]
+        fctv_fine[n] = fct_fine[ibest]
         statv_fine[*,n] = stat
         nhmv_fine[*,n] = nh_mod[*,ibest]
         rxmv_fine[*,n] = rx_mod[*,ibest]
@@ -264,7 +265,7 @@ endfor
 print, 'END   - FIXED FCT, FINE PASS'
 print, '=============================================='
 
-sav_vars = [sav_vars,'FCTV_FINE','STATV_FINE','NREJ_FINE','NHMV_FINE','RXMV_FINE','IIMV_FINE'];,'FCT','A2V']
+sav_vars = [sav_vars,'FCTV_FINE','STATV_FINE','NREJ_FINE','NHMV_FINE','RXMV_FINE','IIMV_FINE','FCT_FINE','A2_FINE']
 sav_inds = [sav_inds]
 
 sav_str = strjoin([sav_vars,sav_inds],',')
