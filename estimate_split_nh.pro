@@ -58,8 +58,8 @@ for n = 0,niter-1 do begin
     mdetf = dblarr(nfree)
     a2 = dblarr(nfree)
     p_a2 = dblarr(nfree)
-    rxdv2[*,n] = rxd+randomn(seed,ndet)*rx_scat
-    ;rxdv2[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    ;rxdv2[*,n] = rxd+randomn(seed,ndet)*rx_scat
+    rxdv2[*,n] = rxd+randomn(seed,ndet)*e_rxd
     for j = 0,nfree-1 do begin
         n25 = round(nct*f25[j])>1
         n24 = nct-n25
@@ -83,11 +83,13 @@ for n = 0,niter-1 do begin
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     ;; weight A2 test statistic by fractional detections
-    dweight = abs(mdetf-ddetf)/ddetf
-    a2 += dweight/total(dweight)/nfree
+    ;dweight = ((mdetf-ddetf)/ddetf)^2.
+    ;dw = dweight/total(dweight);(dweight-min(dweight))/(max(dweight)-min(dweight))+1
+    ;a2 += dw
     ;; penalize large disparity in NH split
-    nhpen = abs(f24-f25)
-    a2 += nhpen/total(nhpen)/nfree
+    nhpen = (f24-f25)^2.
+    nhp = nhpen/nfree;(nhpen-min(nhpen))/(max(nhpen)-min(nhpen))+1.
+    a2 += nhp
     ;; finite values only
     iia2 = p_a2 gt min(p_a2)
     a2_free2[*,n] = a2

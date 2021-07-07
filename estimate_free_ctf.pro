@@ -58,8 +58,8 @@ for n = 0,niter-1 do begin
     mdetf = dblarr(nfrac,nfree)
     a2 = dblarr(nfrac,nfree)
     p_a2 = dblarr(nfrac,nfree)
-    rxdv1[*,n] = rxd+randomn(seed,ndet)*rx_scat
-    ;rxdv1[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    ;rxdv1[*,n] = rxd+randomn(seed,ndet)*rx_scat
+    rxdv1[*,n] = rxd+randomn(seed,ndet)*e_rxd
     for i = 0,nfrac-1 do begin
         ;; vary CT fraction
         nct = round((nthin/(1.-fct_free1[i]))*fct_free1[i])
@@ -89,11 +89,13 @@ for n = 0,niter-1 do begin
     endfor
     ;; weight A2 test statistic by fractional detections
     mdetf = mean(mdetf,dim=2)
-    dweight = abs(mdetf-ddetf)/ddetf
-    a2 += rebin(dweight/nfrac,nfrac,nfree)
+    dweight = ((mdetf-ddetf)/ddetf)^2.
+    dw = dweight/total(dweight);(dweight-min(dweight))/(max(dweight)-min(dweight))+1
+    a2 += rebin(dw,nfrac,nfree)
     ;; penalize large disparity in NH split
-    nhpen = abs(f24-f25)
-    a2 += rebin(reform(nhpen/total(nhpen)/nfree,1,nfree),nfrac,nfree)
+    ;nhpen = (f24-f25)^2.
+    ;nhp = nhpen/nfree;/total(nhpen)
+    ;a2 += rebin(reform(nhp,1,nfree),nfrac,nfree)
     ;; finite values only
     iia2 = finite(a2) and a2 gt 0.
     a2_free1[*,*,n] = a2

@@ -52,8 +52,8 @@ for n = 0,niter-1 do begin
     mdetf = dblarr(nfrac)
     a2 = dblarr(nfrac)
     p_a2 = dblarr(nfrac)
-    rxdv[*,n] = rxd+randomn(seed,ndet)*rx_scat
-    ;rxdv[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    ;rxdv[*,n] = rxd+randomn(seed,ndet)*rx_scat
+    rxdv[*,n] = rxd+randomn(seed,ndet)*e_rxd
     for i = 0,nfrac-1 do begin
         nct = round((nthin/(1.-fct_fixed[i]))*fct_fixed[i])
         nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]
@@ -77,8 +77,9 @@ for n = 0,niter-1 do begin
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     ;; weight A2 test statistic by fractional detections
-    dweight = abs(mdetf-ddetf)/ddetf
-    a2 += dweight/nfrac;total(dweight)
+    dweight = ((mdetf-ddetf)/ddetf)^2.
+    dw = dweight/total(dweight);(dweight-min(dweight))/(max(dweight)-min(dweight))+1
+    a2 += dw
     ;; finite values only
     iia2 = finite(a2) and a2 gt 0.
     a2_fixed[*,n] = a2
