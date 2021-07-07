@@ -9,24 +9,24 @@ if (n_elements(mode) eq 0) then mode = 'ALL'
 dir = '/Users/ccarroll/Research/projects/xray_lack_agn/workspace/run_20201008_final_updated/'
 
 ;; variables for MODEL_NHDIST
-fits = ['OBJID','RA','DEC','Z','ZERR','ZTYPE', $            ;; fits.sav
-        'MAG','E_MAG', $
-        'PERC_AGN', $                                       ;; resamp.sav
-        'IIWAC', $                                          ;; detections_wac.sav
-        'EBV','E_EBV','DL2', $                              ;; src_luminosities.sav
-        'LIR','E_LIR','LOGLIR','E_LOGLIR', $                ;; 
-        'FIR','E_FIR','LOGFIR','E_LOGFIR', $                ;; 
-        'LXIR','LOGLXIR','FXIR','LOGFXIR', $                ;; 
-        'IIQUAL_DET','IIQUAL_NON', $                        ;; quality_src.sav
-        'LX','E_LX','LOGLX','E_LOGLX', $                    ;; combined_lum.sav
-        'FX','E_FX','LOGFX','E_LOGFX', $                    ;; 
-        'LXLIM','E_LXLIM','LOGLXLIM','E_LOGLXLIM', $        ;; 
-        'FXLIM','E_FXLIM','LOGFXLIM','E_LOGFXLIM', $        ;; 
-        'LLDET','E_LLDET','LLNON','E_LLNON', $              ;; 
-        'XDET','XNON','LOGEBV', $                           ;; 
-        'RXLIM']                                            ;; 
-surv = ['SIMRLW','WNH_POWER','WNH_BORUS']                   ;; surv_anal.sav
-stak = ['ENRANGEV','FLUXV','FLUX_ERRV','LXV']               ;; stack_output.sav
+fits = ['OBJID','RA','DEC','Z','ZERR','ZTYPE', $                            ;; fits.sav
+        'MAG','E_MAG', $                                                    ;;
+        'PERC_AGN', $                                                       ;; resamp.sav
+        'IIWAC', $                                                          ;; detections_wac.sav
+        'EBV','E_EBV','DL2', $                                              ;; src_luminosities.sav
+        'LIR','E_LIR','LOGLIR','E_LOGLIR', $                                ;; 
+        'FIR','E_FIR','LOGFIR','E_LOGFIR', $                                ;; 
+        'LXIR','LXIR_SCAT','LOGLXIR','LOGLXIR_SCAT','FXIR','LOGFXIR', $     ;; 
+        'IIQUAL_DET','IIQUAL_NON', $                                        ;; quality_src.sav
+        'LX','E_LX','LOGLX','E_LOGLX', $                                    ;; combined_lum.sav
+        'FX','E_FX','LOGFX','E_LOGFX', $                                    ;; 
+        'LXLIM','E_LXLIM','LOGLXLIM','E_LOGLXLIM', $                        ;; 
+        'FXLIM','E_FXLIM','LOGFXLIM','E_LOGFXLIM', $                        ;; 
+        'LLDET','E_LLDET','LLNON','E_LLNON', $                              ;; 
+        'XDET','XNON','LOGEBV', $                                           ;; 
+        'RXLIM']                                                            ;; 
+surv = ['SIMRLW','WNH_POWER','WNH_BORUS']                                   ;; surv_anal.sav
+stak = ['ENRANGEV','FLUXV','FLUX_ERRV','LXV']                               ;; stack_output.sav
 
 ;; IDL save files containing above variables
 files = ['fits.sav','resamp.sav','detections_wac.sav','src_luminosities.sav', $
@@ -79,8 +79,10 @@ if (llct gt 0) then begin
     fits = [fits[0:ill[0]-1],rx,fits[ill[-1]+1:-1]]
 endif
 
+;rxdet[where(rxdet ne -9999)] = rxdet[where(rxdet ne -9999)]+loglxir[where(rxdet ne -9999)]-lxir_c17(loglir[where(rxdet ne -9999)]-0.2)
+
 ;; STDDEV observed in LX-LMIR relation of Chen+17
-rx_scat = 0.2
+rx_scat = 0.30
 ;; separate WISE AGN, detections and non-detections
 iwac = where(iiwac)
 iiwd = iiwac and xdet ne ''

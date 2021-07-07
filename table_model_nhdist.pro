@@ -36,12 +36,14 @@ if keyword_set(fluxes) then begin
     ;print, 'MODEL NON:   '+strjoin(string(mod_non,format='(e8.2)')+'$\pm$'+string(e_mod_non,format='(e8.2)'),'      ')
     ;print, '================================================================='
     
-    ;; flux estimates - free
+    ;; FREE modeling
     mod_non = [mode(fx_non_.soft,bin=scott(fx_non_.soft)),mode(fx_non_.hard,kde=kde_bandwidth(fx_non_.hard))]
-    e_mod_non = sqrt([mode(fx_non_.e_soft,kde=kde_bandwidth(fx_non_.e_soft)),mode(fx_non_.e_hard,kde=kde_bandwidth(fx_non_.e_hard))]^2.+([stddev(fx_non_.soft),stddev(fx_non_.hard)])^2.)
+    e_mod_non = [mode(fx_non_.e_soft,kde=kde_bandwidth(fx_non_.e_soft)),mode(fx_non_.e_hard,kde=kde_bandwidth(fx_non_.e_hard))]
+    ;e_mod_non = [stddev(fx_non_.soft),stddev(fx_non_.hard)]
     mod_det = [mode(fx_det_.soft,bin=scott(fx_det_.soft)),mode(fx_det_.hard,kde=kde_bandwidth(fx_det_.hard))]
-    e_mod_det = sqrt([mode(fx_det_.e_soft,kde=kde_bandwidth(fx_det_.e_soft)),mode(fx_det_.e_hard,kde=kde_bandwidth(fx_det_.e_hard))]^2.+([stddev(fx_det_.soft),stddev(fx_det_.hard)])^2.)
-
+    e_mod_det = [mode(fx_det_.e_soft,kde=kde_bandwidth(fx_det_.e_soft)),mode(fx_det_.e_hard,kde=kde_bandwidth(fx_det_.e_hard))]
+    ;e_mod_det = [stddev(fx_det_.soft),stddev(fx_det_.hard)]
+    
     print, '================================================================='
     print, 'FREE MODELING'
     print, ''
@@ -59,8 +61,8 @@ if keyword_set(fluxes) then begin
     print, 'DIFFERENCE'
     print, ''
     print, '                              SOFT                     HARD                     MEAN'
-    print, 'DIFF DET:   '+strjoin(strtrim(frac_det,2)+'('+strtrim(alog10(frac_det),2)+')','    ')+'    '+strtrim(mean(frac_det),2)+'('+strtrim(alog10(mean(frac_det)),2)+')'
-    print, 'DIFF NON:   '+strjoin(strtrim(frac_non,2)+'('+strtrim(alog10(frac_non),2)+')','    ')+'    '+strtrim(mean(frac_non),2)+'('+strtrim(alog10(mean(frac_non)),2)+')'
+    print, 'RATIO DET:   '+strjoin(strtrim(frac_det,2)+'('+strtrim(alog10(frac_det),2)+')','    ')+'    '+strtrim(mean(frac_det),2)+'('+strtrim(alog10(mean(frac_det)),2)+')'
+    print, 'RATIO NON:   '+strjoin(strtrim(frac_non,2)+'('+strtrim(alog10(frac_non),2)+')','    ')+'    '+strtrim(mean(frac_non),2)+'('+strtrim(alog10(mean(frac_non)),2)+')'
     print, '================================================================='
 
 

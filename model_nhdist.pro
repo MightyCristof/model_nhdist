@@ -10,7 +10,9 @@ PRO model_nhdist, sub_dir, $
                   MODEL = model, $
                   TEST = test, $
                   POSTMOD = postmod
+                  
 
+chen = 0
 ;; check for keyword commands
 nkeys = n_elements(data) + $
         n_elements(nhdist) + $
@@ -29,10 +31,12 @@ if (n_elements(sub_dir) eq 0) then sub_dir = './' else $
 
 ;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
 if keyword_set(data) then begin
-    pull_carroll21_data
+    if (chen eq 1) then pull_carroll21b_data else $
+                        pull_carroll21_data
     nkeys--
 endif
-load_vars,'carroll21_data.sav','_data'
+if (chen eq 1) then load_vars,'carroll21b_data.sav','_data' else $
+                    load_vars,'carroll21_data.sav','_data'
 
 ;; pull NH distributions from Lansbury+2015 and Ananna+2019
 if keyword_set(nhdist) then begin
@@ -62,14 +66,21 @@ if keyword_set(setrx) then begin
         up = up+'../'
         prep_dir = file_search(up+'data_prep')
     endwhile
-    ;rx_path = prep_dir+'/rxz_scat01_nh2025.sav'
-    ;rx_path = prep_dir+'/rxz_scat01_nh20.525.sav'
-    ;rx_path = prep_dir+'/test_param_rx.sav'
-    rx_path = prep_dir+'/rxz_borus_scat01.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat005.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01.sav'
     ;rx_path = prep_dir+'/rxz_borus_scat008.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_005.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_008.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat005.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01_008_nh23.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01_008_nh24.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01_005_nh23.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01_005_nh24.sav'
+    ;rx_path = prep_dir+'/rxz_borus_varscat08.sav'
+    ;rx_path = prep_dir+'/rxz_borus_varscat04.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01_008nh24_005nh245.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01_008nh245_005nh25.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat0100_varscat.sav'
+    ;rx_path = prep_dir+'/rxz_borus_scat01_008nh25.sav'
+    ;rx_path = prep_dir+'/rxz_borus_gupta_mc.sav'
+    rx_path = prep_dir+'/rxz_borus_gupta.sav'
     ;; -f force to overwrite symbolic link in case changing
     spawn, 'ln -sf '+rx_path+' rx_conversion.sav'
     nkeys--

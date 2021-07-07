@@ -1,12 +1,22 @@
 
-dir = 'variant_models/scat01/'
+;model_nhdist,/data
+
+dir = 'final_model/'
+;;; WISE AGN AD TEST
+model_nhdist,dir+'lan_ad_wac_pm',setnh='nh_lan_nst',/setrx,group='WAC',test='AD',/fixed,/free,/split,/model,/postmod
+;popd
+;file_copy,dir+'lan_ad_wac_mc',dir+'lan_ad_wac_pm_mc',/recursive,/overwrite
+;pushd,dir+'lan_ad_wac_pm'
+;model_rxdist,/postmod
+
+
+;dir = 'variant_models/plus_c17/scat01/'
 ;; WISE AGN AD TEST
-model_nhdist,dir+'lan_ad_wac',setnh='nh_lan_nst',/setrx,group='WAC',test='AD',/fixed,/free,/split,/model
-popd
-file_copy,dir+'lan_ad_wac',dir+'lan_ad_wac_pm',/recursive,/overwrite
-pushd,dir+'lan_ad_wac_pm'
-model_rxdist,/postmod
-popd
+;model_nhdist,dir+'lan_ad_all',setnh='nh_lan_nst',/setrx,group='ALL',test='AD',/fixed,/free,/split,/model
+;popd
+;file_copy,dir+'lan_ad_all',dir+'lan_ad_all_pm',/recursive,/overwrite
+;pushd,dir+'lan_ad_all_pm'
+;model_rxdist,/postmod
 
 ;; ALL SOURCES AD TEST
 ;model_nhdist,'variant_models/lan_ad_all',setnh='nh_lan_nst',/setrx,group='ALL',test='AD',/fixed,/free,/split,/model

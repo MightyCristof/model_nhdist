@@ -61,8 +61,10 @@ case group of
 endcase
 ;; full number of sources, detected and non-detected
 nsrc = n_elements(rxl)
+;; data detection fraction
+ddetf = 1.*ndet/nsrc
 
-sav_vars = ['GROUP','RXD','E_RXD','RXL','FRAC_HIX','FRAC_LOX','NSRC','TEST']
+sav_vars = ['GROUP','RXD','E_RXD','RXL','FRAC_HIX','FRAC_LOX','NSRC','NDET','DDETF','TEST']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

@@ -13,17 +13,13 @@ common _free
 cvm = 0
 
 ;; run this script NITER times 
-niter = 1000
-
-;; modeling variables
+niter = 1000;0
 f24v2 = dblarr(niter)
 f25v2 = dblarr(niter)
 statv2 = dblarr(6,niter)
 nhmv2 = dblarr(nsrc,niter)
 rxmv2 = dblarr(nsrc,niter)
 iimv2 = bytarr(nsrc,niter)
-;; data variables
-rxdv2 = dblarr(ndet,niter)
 
 ;; free CT fraction split between NH=24-25 and 25-26
 step = 0.05d
@@ -31,10 +27,10 @@ f25 = [0.05d:1.-0.05d:0.05d]
 f24 = 1.-f25
 nfree = n_elements(f24)
 
-a2_free2 = dblarr(nfree,niter)
+a2_fine2 = dblarr(nfree,niter)
 
 ;; set CT fraction from CTF FREE modeling
-fct = mode(fctv1,kde=kde_bandwidth(fctv1))
+fct = mode(fctv1_fine,kde=kde_bandwidth(fctv1_fine))
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
 nrej2 = 0l
@@ -55,11 +51,10 @@ for n = 0,niter-1 do begin
     nh_mod = dblarr(nsrc,nfree)
     rx_mod = dblarr(nsrc,nfree)
     iimod = bytarr(nsrc,nfree)
-    mdetf = dblarr(nfree)
     a2 = dblarr(nfree)
     p_a2 = dblarr(nfree)
-    rxdv2[*,n] = rxd+randomn(seed,ndet)*rx_scat
-    ;rxdv2[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    rxd_scat = randomn(seed,ndet)*e_rxd
+    ;rxm_scat = randomn(seed,nsrc)*rx_scat
     for j = 0,nfree-1 do begin
         n25 = round(nct*f25[j])>1
         n24 = nct-n25
@@ -68,29 +63,21 @@ for n = 0,niter-1 do begin
         nh_mod[*,j] = nh_resamp[randomi(nsrc,nresamp)]
         rx_mod[*,j] = rx2nh(nh_mod[*,j],/rx_out,scat=rx_scat)
         iimod[*,j] = rx_mod[*,j] gt rxl
-        idet = where(iimod[*,j] eq 1,moddet)
-        mdetf[j] = 1.*moddet/nsrc
-        if (moddet ge 5) then begin
+        idet = where(iimod[*,j] eq 1,detct)
+        if (detct ge 5) then begin
             ;; if comparing test statistics, need p_a2
-            a2[j] = ad_test(rxdv2[*,n],rx_mod[idet,j],permute=(test eq 'JOINT'),prob=p,cvm=cvm)
+            a2[j] = ad_test(rxd+rxd_scat,rx_mod[idet,j],permute=(test eq 'JOINT'),prob=p,cvm=cvm)
             p_a2[j] = p
             ;kstwo,rxd,rx_mod[idet,j],d,prob
             ;a2[j] = d
             ;p_a2[j] = prob            
-        endif else if (moddet gt 0) then begin
+        endif else if (detct gt 0) then begin
             a2[j] = -1.
             p_a2[j] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
-    endfor
-    ;; weight A2 test statistic by fractional detections
-    dweight = abs(mdetf-ddetf)/ddetf
-    a2 += dweight/total(dweight)
-    ;; penalize large disparity in NH split
-    nhpen = abs(f24-f25)
-    a2 += nhpen/total(nhpen)/nfree
-    ;; finite values only
+    endfor    
     iia2 = p_a2 gt min(p_a2)
-    a2_free2[*,n] = a2
+    a2_fine2[*,n] = a2
     
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
@@ -119,7 +106,7 @@ for n = 0,niter-1 do begin
             iix2 = p_x2 gt min(p_x2)
             ;; combined test statistic
             x2_joint = -2.*(alog(p_a2)+alog(p_x2))<99.
-            p_joint = 1.-chisqr_pdf(x2_joint[where(iix2)],4.) ;; dof = 2k, where k is the number of tests being combined            
+            p_joint = 1.-chisqr_pdf(x2_joint,4.) ;; dof = 2k, where k is the number of tests being combined            
             ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
             if (nbest gt 1) then stop
             stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
@@ -148,9 +135,9 @@ endfor
 print, 'END   - NH SPLIT'
 print, '=============================================='
 
-sav_vars = ['F24V2','F25V2','STATV2','NREJ2','NHMV2','RXMV2','RXDV2', $
-            'A2_FREE2']
-sav_inds = ['IIMV2']
+sav_vars = ['F24V2','F25V2','STATV2','NREJ2','NHMV2','RXMV2','IIMV2', $
+            'A2_FINE2']
+sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
 re = execute('save,'+sav_str+',/compress,file="nh_split.sav"')
