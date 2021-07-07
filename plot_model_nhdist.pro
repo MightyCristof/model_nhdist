@@ -212,8 +212,8 @@ if keyword_set(nhdist) then begin
         pnh = errorplot(nhm.xhoff,nhm.yh,nhm.sig,'-',thick=4,errorbar_thick=4,_extra=enh, $
                         pos=pos[*,3],fill_background=1,fill_color=col,fill_transparency=30,name='This work')
         pan = plot(nh_ana_lox.xh,nh_ana_lox.yh*frac_lox+nh_ana_hix.yh*frac_hix,'--',thick=2,_extra=enh,/ov,name='$Ananna+2019 (weighted)$')
-        tct = text(24.1,0.06,'CT',target=pnh,/data,font_name='Times',font_size=14)
-        ctad = text(25.,(pnh.yra[1]+max(nhm.yh+nhm.sig))/2.,'$!8f!7_{CT} = '+ctf+'$',target=pnh,/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5)
+        tct = text(0.683,0.91,'CT',target=pnh,/relative,font_name='Times',font_size=14)
+        ctad = text(25.,max(nhm.yh)/2.,'$!8f!7_{CT} = '+ctf+'$',target=pnh,/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5)
         leg = legend(target=[pnh,pan],position=[0.125,0.60],/normal,horizontal_alignment=0.,font_size=14,font_name='Times')
 
         ;; figure reference for Nature caption

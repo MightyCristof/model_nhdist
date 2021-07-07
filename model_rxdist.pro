@@ -56,8 +56,8 @@ for n = 0,niter-1 do begin
     rx_modv[*,n] = rx2nh(nh_modv[*,n],/rx_out,scat=rx_scat)
     iimodv[*,n] = rx_modv[*,n] gt rxl
     idet = where(iimodv[*,n] eq 1,moddet)
-    ;rx_detv[*,n] = rxd+randomn(seed,ndet)*rx_scat
-    rx_detv[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    rx_detv[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
+    ;rx_detv[*,n] = rxd+randomn(seed,ndet)*e_rxd
     if (moddet ge 5) then begin
         a2[n] = ad_test(rx_detv[*,n],rx_modv[idet,n],permute=(test eq 'JOINT'),prob=p,cvm=cvm)
         p_a2[n] = p
@@ -126,8 +126,8 @@ for n = 0,niter-1 do begin
     rx_modv_[*,n] = rx2nh(nh_modv_[*,n],/rx_out,scat=rx_scat)
     iimodv_[*,n] = rx_modv_[*,n] gt rxl
     idet = where(iimodv_[*,n] eq 1,moddet)
-    ;rx_detv_[*,n] = rxd+randomn(seed,ndet)*rx_scat
-    rx_detv_[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    rx_detv_[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
+    ;rx_detv_[*,n] = rxd+randomn(seed,ndet)*e_rxd
     if (moddet ge 5) then begin
         a2_[n] = ad_test(rx_detv_[*,n],rx_modv[idet,n],permute=(test eq 'JOINT'),prob=p,cvm=cvm)
         p_a2_[n] = p

@@ -58,8 +58,8 @@ for n = 0,niter-1 do begin
     mdetf = dblarr(nfrac,nfree)
     a2 = dblarr(nfrac,nfree)
     p_a2 = dblarr(nfrac,nfree)
-    ;rxdv1[*,n] = rxd+randomn(seed,ndet)*rx_scat
-    rxdv1[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    rxdv1[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
+    ;rxdv1[*,n] = rxd+randomn(seed,ndet)*e_rxd
     for i = 0,nfrac-1 do begin
         ;; vary CT fraction
         nct = round((nthin/(1.-fct_free1[i]))*fct_free1[i])
