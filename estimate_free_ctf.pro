@@ -90,7 +90,7 @@ for n = 0,niter-1 do begin
     ;; weight A2 test statistic by fractional detections
     mdetf = mean(mdetf,dim=2)
     dweight = abs(mdetf-ddetf)/ddetf
-    a2 += rebin(dweight/total(dweight),nfrac,nfree)
+    a2 += rebin(dweight/nfrac,nfrac,nfree)
     ;; penalize large disparity in NH split
     nhpen = abs(f24-f25)
     a2 += rebin(reform(nhpen/total(nhpen)/nfree,1,nfree),nfrac,nfree)

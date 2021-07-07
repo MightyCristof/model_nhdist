@@ -84,7 +84,7 @@ for n = 0,niter-1 do begin
     endfor
     ;; weight A2 test statistic by fractional detections
     dweight = abs(mdetf-ddetf)/ddetf
-    a2 += dweight/total(dweight)
+    a2 += dweight/total(dweight)/nfree
     ;; penalize large disparity in NH split
     nhpen = abs(f24-f25)
     a2 += nhpen/total(nhpen)/nfree

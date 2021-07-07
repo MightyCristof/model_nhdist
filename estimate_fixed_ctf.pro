@@ -78,7 +78,7 @@ for n = 0,niter-1 do begin
     endfor
     ;; weight A2 test statistic by fractional detections
     dweight = abs(mdetf-ddetf)/ddetf
-    a2 += dweight/total(dweight)
+    a2 += dweight/nfrac;total(dweight)
     ;; finite values only
     iia2 = finite(a2) and a2 gt 0.
     a2_fixed[*,n] = a2
