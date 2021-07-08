@@ -6,7 +6,7 @@ PRO model_nhdist, sub_dir, $
                   GROUP = group, $
                   FIXED = fixed, $
                   FREE = free, $
-                  SPLIT = split, $
+                  ;SPLIT = split, $
                   MODEL = model, $
                   TEST = test, $
                   POSTMOD = postmod
@@ -21,7 +21,7 @@ nkeys = n_elements(data) + $
         n_elements(group) + $
         n_elements(fixed) + $
         n_elements(free) + $
-        n_elements(split) + $
+        ;n_elements(split) + $
         n_elements(model)
 if (nkeys eq 0) then GOTO, NO_KEYS
 
@@ -114,12 +114,12 @@ load_vars,'ctf_free.sav','_free'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of NH=24-25 split
-if keyword_set(split) then begin
-    estimate_split_nh
-    nkeys--
-endif
-load_vars,'nh_split.sav','_split'
-if (nkeys eq 0) then GOTO, NO_KEYS
+;if keyword_set(split) then begin
+;    estimate_split_nh
+;    nkeys--
+;endif
+;load_vars,'nh_split.sav','_split'
+;if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; simulate the NH and RL distributions
 if keyword_set(model) then begin

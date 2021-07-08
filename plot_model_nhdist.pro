@@ -14,7 +14,7 @@ common _rxnh
 common _group
 common _fixed
 common _free
-common _split
+;common _split
 common _model
 
 
@@ -326,9 +326,9 @@ if keyword_set(xspec) then begin
     line = ['-','--','-.',':','__']
     ;col = [[213,94,0],[204,121,167],[0,114,178],[240,228,66],[0,158,115]]
 
-    ;;      TOTAL       PL         SCPL        BORUS
-    ;;      GREEN       ORANGE     BLUE        MAGENTA
-    col = [[0,158,115],[213,94,0],[0,114,178],[204,121,167]]
+    ;;      BORUS         SCPL        PL         TOTAL
+    ;;      MAGENTA       GREEN       ORANGE     BLUE
+    col = [[204,121,167],[0,158,115],[213,94,0],[0,114,178]]
 
     e = {xra:[0.1,200],yra:[1e-4,50], $
          xlog:1,ylog:1, $
@@ -338,20 +338,21 @@ if keyword_set(xspec) then begin
          font_name:'Times',font_size:16}
     p = plot(energy,tot21,_extra=e,/nodata)
     thick = 2
-    ;; total SED vs. NH
-    re = execute('pt21 = plot(energy,'+tot[0]+',linestyle=line[0],col=col[*,0],thick=thick,/ov,name="Total log !8N!7$_H$ = 21")')
-    re = execute('pt23 = plot(energy,'+tot[1]+',linestyle=line[1],col=col[*,0],thick=thick,/ov,name="Total log !8N!7$_H$ = 23")')
-    re = execute('pt25 = plot(energy,'+tot[2]+',linestyle=line[2],col=col[*,0],thick=thick,/ov,name="Total log !8N!7$_H$ = 25")')
+    ;; component SEDs
+    re = execute('pb = plot(energy,'+bor[0]+',linestyle=line[0],col=col[*,0],thick=thick,/ov,name="Torus")')
+    for i = 1,nnh-1 do re = execute('p = plot(energy,'+bor[i]+',linestyle=line[i],col=col[*,0],thick=thick,/ov)')
+    re = execute('ps = plot(energy,'+scpl[0]+',linestyle=line[0],col=col[*,1],thick=thick,/ov,name="Scat. PL")')
+    for i = 1,nnh-1 do re = execute('p = plot(energy,'+scpl[i]+',linestyle=line[i],col=col[*,1],thick=thick,/ov)')
+    re = execute('pp = plot(energy,'+pl[0]+',linestyle=line[0],col=col[*,2],thick=thick,/ov,name="P Law")')
+    for i = 1,nnh-1 do re = execute('p = plot(energy,'+pl[i]+',linestyle=line[i],col=col[*,2],thick=thick,/ov)')
+    ;; total SEDs
+    re = execute('pt21 = plot(energy,'+tot[0]+',linestyle=line[0],col=col[*,3],thick=thick,/ov,name="Total log !8N!7$_H$ = 21")')
+    re = execute('pt23 = plot(energy,'+tot[1]+',linestyle=line[1],col=col[*,3],thick=thick,/ov,name="Total log !8N!7$_H$ = 23")')
+    re = execute('pt25 = plot(energy,'+tot[2]+',linestyle=line[2],col=col[*,3],thick=thick,/ov,name="Total log !8N!7$_H$ = 25")')
     ;for i = 0,nnh-1 do re = execute('pt = plot(energy,'+tot[i]+',linestyle=line[i],col=col[*,0],/ov)')
-    re = execute('pp = plot(energy,'+pl[0]+',linestyle=line[0],col=col[*,1],thick=thick,/ov,name="Direct")')
-    for i = 1,nnh-1 do re = execute('p = plot(energy,'+pl[i]+',linestyle=line[i],col=col[*,1],thick=thick,/ov)')
-    re = execute('ps = plot(energy,'+scpl[0]+',linestyle=line[0],col=col[*,2],thick=thick,/ov,name="Scattered")')
-    for i = 1,nnh-1 do re = execute('p = plot(energy,'+scpl[i]+',linestyle=line[i],col=col[*,2],thick=thick,/ov)')
-    re = execute('pb = plot(energy,'+bor[0]+',linestyle=line[0],col=col[*,3],thick=thick,/ov,name="Torus")')
-    for i = 1,nnh-1 do re = execute('p = plot(energy,'+bor[i]+',linestyle=line[i],col=col[*,3],thick=thick,/ov)')
     ;; legend
     leg = legend(target=[pt21,pt23,pt25],position=[0.43,0.87],horizontal_spacing=0.06,font_name='Times',font_size=14)
-    leg = legend(target=[pp,ps,pb],position=[0.86,0.30],horizontal_spacing=0.06,font_name='Times',font_size=14)
+    leg = legend(target=[pp,ps,pb],position=[0.85,0.30],horizontal_alignment=1.,horizontal_spacing=0.06,font_name='Times',font_size=14)
 
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'

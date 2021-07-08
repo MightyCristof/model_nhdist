@@ -90,14 +90,20 @@ for n = 0,niter-1 do begin
     ;; weight A2 test statistic by fractional detections
     mdetf = mean(mdetf,dim=2)
     dweight = ((mdetf-ddetf)/ddetf)^2.
-    dw = dweight/total(dweight);(dweight-min(dweight))/(max(dweight)-min(dweight))+1
-    a2 += rebin(dw,nfrac,nfree)
+    dw = rebin(dweight/total(dweight),nfrac,nfree)
+    pw = a2/(a2+dw)
+    a2 += dw
+    p_a2 *= pw
+    
     ;; penalize large disparity in NH split
-    ;nhpen = (f24-f25)^2.
-    ;nhp = nhpen/nfree;/total(nhpen)
-    ;a2 += rebin(reform(nhp,1,nfree),nfrac,nfree)
+    spenalty = (f24-f25)^2./nfree
+    sp = rebin(reform(spenalty,1,nfree),nfrac,nfree)
+    pp = a2/(a2+sp)
+    a2 += sp
+    p_a2 *= pp    
+    
     ;; finite values only
-    iia2 = finite(a2) and a2 gt 0.
+    iia2 = finite(p_a2) and p_a2 gt 0.
     a2_free1[*,*,n] = a2
     
     ;; determine "best-fit"
@@ -105,31 +111,34 @@ for n = 0,niter-1 do begin
     case strupcase(test) of 
         'AD': begin
             ibest = where(a2 eq min(a2[where(a2 gt 0,/null)]),nbest)
-            ;if (nbest gt 1) then stop
             if (nbest gt 1) then ibest = ibest[0]
             stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
             end
         'JOINT': begin
             ;; constraints by X-ray stacked fluxes
             fx_est = estimate_fx(rx_mod,iimod,/iterate)
-            ;; compare to X-ray stacked fluxes
-            ;x2_soft = ((fxstak[1,0]-fx_est.soft)/e_fxstak[1,0])^2.
-            ;x2_hard = ((fxstak[1,1]-fx_est.hard)/e_fxstak[1,1])^2.
-            ;; uncertainties in quadrature
-            unc_soft = abs(fxstak[1,0] * sqrt((e_fxstak[1,0]/fxstak[1,0])^2. + (fx_est.e_soft/fx_est.soft)^2.))
-            unc_hard = abs(fxstak[1,1] * sqrt((e_fxstak[1,1]/fxstak[1,1])^2. + (fx_est.e_hard/fx_est.hard)^2.))
-            x2_soft = ((fxstak[1,0]-fx_est.soft)/unc_soft)^2.
-            x2_hard = ((fxstak[1,1]-fx_est.hard)/unc_hard)^2.
+            ;; X-ray stack data minus model
+            del_soft = abs(fxstak[1,0]-fx_est.csoft)
+            del_hard = abs(fxstak[1,1]-fx_est.chard)
+            ;; uncertainties
+            ;sig_soft = e_fxstak[1,0]
+            ;sig_hard = e_fxstak[1,1]
+            sig_soft = abs(fxstak[1,0] * sqrt((e_fxstak[1,0]/fxstak[1,0])^2. + (fx_est.e_csoft/fx_est.csoft)^2.))
+            sig_hard = abs(fxstak[1,1] * sqrt((e_fxstak[1,1]/fxstak[1,1])^2. + (fx_est.e_chard/fx_est.chard)^2.))
+            ;; chi-square
+            x2_soft = (del_soft/sig_soft)^2.
+            x2_hard = (del_hard/sig_hard)^2.    
             x2 = x2_soft+x2_hard
             p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
-            ;; correct for p-value == 1
-            p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
-            iix2 = p_x2 gt min(p_x2)
+            ;; flag chisqr_pdf value == 1
+            iix2 = finite(p_x2) and p_x2 gt 0.
             ;; combined test statistic
-            x2_joint = -2.*(alog(p_a2)+alog(p_x2))<99.
-            p_joint = 1.-chisqr_pdf(x2_joint[where(iix2)],4.) ;; dof = 2k, where k is the number of tests being combined            
+            x2_joint = -2.*(alog(p_a2)+alog(p_x2))
+            p_joint = dblarr(nfrac,nfree)
+            p_joint[where(iia2 and iix2,/null)] = 1.-chisqr_pdf(x2_joint[where(iia2 and iix2,/null)],4.)  ;; dof = 2k, where k == 2, the number of tests being combined
+            ;; choose best model
             ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
-            if (nbest gt 1) then stop
+            if (nbest gt 1) then ibest = ibest[0]
             stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
             end
         else: message, 'IMPROPER INPUT OF TEST METHOD.'

@@ -8,7 +8,7 @@ common _rxnh
 common _group
 common _fixed
 common _free
-common _split
+;common _split
 
 ;; use observed NH dist with added unobscured sources after modeling without it to find
 if keyword_set(postmod) then nh_obs = nh_lan_cor else $
@@ -98,10 +98,10 @@ fcn_ = 1.-fct_
 ncn_ = nthin
 nsr_ = round(ncn_/fcn_)
 nct_ = round(nsr_*fct_)
-f24_ = mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
+f24_ = mode(f24v1,kde=kde_bandwidth(f24v1))*fct_
 ;f24_ = mean(f24v2)*fct_;mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
 n24_ = round(nsr_*f24_)
-f25_ = mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
+f25_ = mode(f25v1,kde=kde_bandwidth(f25v1))*fct_
 ;f25_ = mean(f25v2)*fct_;mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
 n25_ = round(nsr_*f25_)
 ;n25_ = nct_-n24_

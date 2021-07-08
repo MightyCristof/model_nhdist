@@ -76,29 +76,28 @@ for n = 0,niter-1 do begin
             p_a2[i] = -1.
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
-    ;; weight A2 test statistic by fractional detections
+    ;; weight test statistic by fractional detections
     dweight = ((mdetf-ddetf)/ddetf)^2.
-    dw = dweight/total(dweight);(dweight-min(dweight))/(max(dweight)-min(dweight))+1
+    dw = dweight/total(dweight)
+    pw = a2/(a2+dw)
     a2 += dw
+    p_a2 *= pw
+
     ;; finite values only
-    iia2 = finite(a2) and a2 gt 0.
+    iia2 = finite(p_a2) and p_a2 gt 0.
     a2_fixed[*,n] = a2
     ;; determine "best-fit"
     ;; QUESTION: method to determine best-fit?
     case strupcase(test) of 
         'AD': begin
             ibest = where(a2 eq min(a2[where(iia2,/null)]),nbest)
-            ;if (nbest gt 1) then stop
             if (nbest gt 1) then ibest = ibest[0]
             stat = [a2[ibest],p_a2[ibest],0.,0.,0.,0.]
-            ;; estimate model fluxes
-            ;fx_est = estimate_fx(rx_mod,iimod,/iterate)
-            ;if (n eq 0) then fxmv = replicate(dup_struct((fx_est)[0]),niter)
             end
         'JOINT': begin
             ;; estimate model fluxes
             fx_est = estimate_fx(rx_mod,iimod,/iterate)
-            ;; X-ray stack data-model
+            ;; X-ray stack data minus model
             del_soft = fxstak[1,0]-fx_est.csoft
             del_hard = fxstak[1,1]-fx_est.chard
             ;; uncertainties
@@ -112,18 +111,14 @@ for n = 0,niter-1 do begin
             x2 = x2_soft+x2_hard
             p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
             ;; flag chisqr_pdf value == 1
-            ;p_x2 = p_x2 > min(p_x2[where(p_x2,/null)])/2.
-            ;iix2 = p_x2 gt min(p_x2)/2.
             iix2 = finite(p_x2) and p_x2 gt 0.
             ;; combined test statistic
-            ;; Fisher
             x2_joint = -2.*(alog(p_a2)+alog(p_x2))
-            p_joint = 1.-chisqr_pdf(x2_joint[where(iix2)],4.)  ;; dof = 2k, where k == 2, the number of tests being combined
-            ;; Pearson
-            ;x2_joint = -2.*(alog(1.-p_a2)+alog(1.-p_x2))
-            ;p_joint = 1.-chisqr_pdf(x2_joint,4.)
+            p_joint = dblarr(nfrac)
+            p_joint[where(iia2 and iix2,/null)] = 1.-chisqr_pdf(x2_joint[where(iia2 and iix2,/null)],4.)  ;; dof = 2k, where k == 2, the number of tests being combined
+            ;; choose best model
             ibest = where(x2_joint eq min(x2_joint[where(iia2 and iix2,/null)]),nbest)
-            if (nbest gt 1) then stop
+            if (nbest gt 1) then ibest = ibest[0]
             stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],x2_joint[ibest],p_joint[ibest]]
             end
         else: message, 'IMPROPER INPUT OF TEST METHOD.'
