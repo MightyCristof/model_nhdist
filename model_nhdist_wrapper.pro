@@ -3,7 +3,7 @@
 
 dir = 'final_model/'
 ;;; WISE AGN AD TEST
-model_nhdist,dir+'free_penalty_no_split',/model,/postmod
+model_nhdist,dir+'lan_ad_wac_pm',setnh='nh_lan_nst',/setrx,group='WAC',test='AD',/fixed,/free,/model,/postmod
 ;popd
 ;file_copy,dir+'lan_ad_wac_mc',dir+'lan_ad_wac_pm_mc',/recursive,/overwrite
 ;pushd,dir+'lan_ad_wac_pm'
