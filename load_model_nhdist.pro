@@ -14,7 +14,7 @@ load_vars,'rx_conversion.sav','_rxnh'
 load_vars,'select_group.sav','_group'
 load_vars,'ctf_fixed.sav','_fixed'
 load_vars,'ctf_free.sav','_free'
-load_vars,'nh_split.sav','_split'
+;load_vars,'nh_split.sav','_split'
 load_vars,'rx_model.sav','_model'
 
 

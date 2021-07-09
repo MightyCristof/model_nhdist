@@ -28,7 +28,7 @@ nh_samp = nh_mc(nh_obs,nsamp)
 ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
 
 ;; fraction and source numbers
-fct = mode(fctv,kde=kde_bandwidth(fctv))
+fct = mode(fctv+randomn(seed,n_elements(fctv))*0.025,kde=kde_bandwidth(fctv))
 e_fct = stddev(fctv)
 fcn = 1.-fct
 ncn = nthin
@@ -92,7 +92,7 @@ sav_inds = ['IIMODV','POSTMOD']
 ;; RUN FOR SPLIT CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct_ = mode(fctv1,kde=kde_bandwidth(fctv1))
+fct_ = mode(fctv1+randomn(seed,n_elements(fctv1))*0.025,kde=kde_bandwidth(fctv1))
 e_fct_ = stddev(fctv1)
 fcn_ = 1.-fct_
 ncn_ = nthin
