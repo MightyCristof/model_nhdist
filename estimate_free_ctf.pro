@@ -12,7 +12,7 @@ common _group
 cvm = 0
 
 ;; run this script NITER times and look at the distribution in CTF
-niter = 1000
+niter = 10;00
 
 ;; modeling variables
 fctv1 = dblarr(niter)
@@ -72,11 +72,12 @@ for n = 0,niter-1 do begin
             nh_mod[*,i,j] = nh_resamp[randomi(nsrc,nresamp)]
             rx_mod[*,i,j] = rx2nh(nh_mod[*,i,j],/rx_out,scat=rx_scat)
             iimod[*,i,j] = rx_mod[*,i,j] gt rxl
-            idet = where(iimod[*,i,j] eq 1,moddet)
+            idet = where(iimod[*,i,j] eq 1,moddet,ncomplement=modnon)
+            rxmn = dblarr(modnon)-9999.
             mdetf[i,j] = 1.*moddet/nsrc
             if (moddet ge 5) then begin
                 ;; if comparing test statistics, need p_a2
-                a2[i,j] = ad_test(rxdv1[*,n],rx_mod[idet,i,j],permute=(test eq 'JOINT'),prob=p,cvm=cvm)
+                a2[i,j] = ad_test([rxdn,rxdv1[*,n]],[rxmn,rx_mod[idet,i,j]],permute=(test eq 'JOINT'),prob=p,cvm=cvm,weight=1)
                 p_a2[i,j] = p
                 ;kstwo,rxd,rx_mod[idet,i,j],d,prob
                 ;a2[i,j] = d
@@ -88,19 +89,19 @@ for n = 0,niter-1 do begin
         endfor
     endfor
     ;; weight A2 test statistic by fractional detections
-    mdetf = mean(mdetf,dim=2)
-    dweight = ((mdetf-ddetf)/ddetf)^2.
-    dw = rebin(dweight/total(dweight),nfrac,nfree)
-    pw = a2/(a2+dw)
-    a2 += dw
-    p_a2 *= pw
+    ;mdetf = mean(mdetf,dim=2)
+    ;dweight = ((mdetf-ddetf)/ddetf)^2.
+    ;dw = rebin(dweight/total(dweight),nfrac,nfree)
+    ;pw = a2/(a2+dw)
+    ;a2 += dw
+    ;p_a2 *= pw
     
     ;; penalize large disparity in NH split
-    spenalty = (f24-f25)^2./nfree
-    sp = rebin(reform(spenalty,1,nfree),nfrac,nfree)
-    pp = a2/(a2+sp)
-    a2 += sp
-    p_a2 *= pp    
+    ;spenalty = (f24-f25)^2./nfree
+    ;sp = rebin(reform(spenalty,1,nfree),nfrac,nfree)
+    ;pp = a2/(a2+sp)
+    ;a2 += sp
+    ;p_a2 *= pp    
     
     ;; finite values only
     iia2 = finite(p_a2) and p_a2 gt 0.
@@ -167,7 +168,7 @@ for n = 0,niter-1 do begin
 endfor
 print, 'END   - FREE FCT, ROUND 1'
 print, '=============================================='
-
+stop
 sav_vars = ['FCTV1','F24V1','F25V1','STATV1', $
             'NREJ1','NHMV1','RXMV1','RXDV1', $
             'FCT_FREE1','A2_FREE1']

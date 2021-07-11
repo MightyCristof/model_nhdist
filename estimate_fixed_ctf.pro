@@ -61,11 +61,12 @@ for n = 0,niter-1 do begin
         nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
         rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)
         iimod[*,i] = rx_mod[*,i] gt rxl
-        idet = where(iimod[*,i] eq 1,moddet)
+        idet = where(iimod[*,i] eq 1,moddet,ncomplement=modnon)
+        rxmn = dblarr(modnon)-9999.
         mdetf[i] = 1.*moddet/nsrc
         if (moddet ge 5) then begin
             ;; if comparing test statistics, need p_a2
-            a2[i] = ad_test(rxdv[*,n],rx_mod[idet,i],permute=(test eq 'JOINT'),prob=p,cvm=cvm);,cdfm=cdfm)
+            a2[i] = ad_test([rxdn,rxdv[*,n]],[rxmn,rx_mod[idet,i]],permute=(test eq 'JOINT'),prob=p,cvm=cvm,weight=1)
             p_a2[i] = p
             ;cdfmv[*,i] = cdfm
             ;kstwo,rxd,rx_mod[idet,i],d,prob
@@ -77,12 +78,12 @@ for n = 0,niter-1 do begin
         endif else message, 'NO MODELED DETECTIONS.'
     endfor
     ;; weight test statistic by fractional detections
-    dweight = ((mdetf-ddetf)/ddetf)^2.
-    dw = dweight/total(dweight)
-    pw = a2/(a2+dw)
-    a2 += dw
-    p_a2 *= pw
-
+    ;dweight = ((mdetf-ddetf)/ddetf)^2.
+    ;dw = dweight/total(dweight)
+    ;pw = a2/(a2+dw)
+    ;a2 += dw
+    ;p_a2 *= pw
+    
     ;; finite values only
     iia2 = finite(p_a2) and p_a2 gt 0.
     a2_fixed[*,n] = a2

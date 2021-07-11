@@ -19,6 +19,7 @@ case group of
     'WAC': begin 
         rxd = rxdet[where(iiwd,ndet)]
         e_rxd = e_rxdet[where(iiwd)]
+        rxdn = dblarr(n_elements(where(iiwn,nnon)))-9999.
         rxl = rxlim[where(iiwac)]
         frac_hix = total(iiwac and iihix)/total(iiwac)
         frac_lox = total(iiwac and iilox)/total(iiwac)
@@ -26,6 +27,7 @@ case group of
     'SEC': begin
         rxd = rxdet[where(iisd,ndet)]
         e_rxd = e_rxdet[where(iisd)]
+        rxdn = dblarr(n_elements(where(iisn,nnon)))-9999.
         rxl = rxlim[where(~iiwac)]
         frac_hix = total(~iiwac and iihix)/total(~iiwac)
         frac_lox = total(~iiwac and iilox)/total(~iiwac)
@@ -33,6 +35,7 @@ case group of
     'ALL': begin
         rxd = rxdet[where(iiad,ndet)]
         e_rxd = e_rxdet[where(iiad)]
+        rxdn = dblarr(n_elements(where(iian,nnon)))-9999.
         rxl = rxlim
         frac_hix = total(iihix)/total(iihix or iilox)
         frac_lox = total(iilox)/total(iihix or iilox)
@@ -40,6 +43,7 @@ case group of
     'WAC_HIX': begin
         rxd = rxdet[where(iiwd and iihix,ndet)]
         e_rxd = e_rxdet[where(iiwd and iihix)]
+        rxdn = dblarr(n_elements(where(iiwn and iihix,nnon)))-9999.
         rxl = rxlim[where(iiwac and iihix)]
         frac_hix = 1.
         frac_lox = 0.
@@ -47,6 +51,7 @@ case group of
     'WAC_LOX': begin
         rxd = rxdet[where(iiwd and iilox,ndet)]
         e_rxd = e_rxdet[where(iiwd and iilox)]
+        rxdn = dblarr(n_elements(where(iiwn and iilox,nnon)))-9999.
         rxl = rxlim[where(iiwac and iilox)]
         frac_hix = 0.
         frac_lox = 1.
@@ -54,6 +59,7 @@ case group of
     'OFFSET': begin
         rxd = rxdet[where(iiwd,ndet)]+0.3
         e_rxd = e_rxdet[where(iiwd)]
+        rxdn = dblarr(n_elements(where(iiwn,nnon)))-9999.
         rxl = rxlim[where(iiwac)]
         frac_hix = total(iiwac and iihix)/total(iiwac)
         frac_lox = total(iiwac and iilox)/total(iiwac)
@@ -64,7 +70,7 @@ nsrc = n_elements(rxl)
 ;; data detection fraction
 ddetf = 1.*ndet/nsrc
 
-sav_vars = ['GROUP','RXD','E_RXD','RXL','FRAC_HIX','FRAC_LOX','NSRC','NDET','DDETF','TEST']
+sav_vars = ['GROUP','RXD','E_RXD','RXDN','RXL','FRAC_HIX','FRAC_LOX','NSRC','NDET','NNON','DDETF','TEST']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')
