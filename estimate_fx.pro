@@ -43,8 +43,6 @@ dl2_grp = dl2[igrp]
 
 ;; prep hard and soft conversion arrays
 iz = value_locate(zv,z_grp)
-;c_hard_grp = c_hard[*,iz]
-;c_soft_grp = c_soft[*,iz]
 c_hard_grp = c_hard_fine[*,iz]
 c_soft_grp = c_soft_fine[*,iz]
 
@@ -64,6 +62,7 @@ for i = 0,n_elements(clin_vars)-1 do re = execute(clin_vars[i]+' = dblarr(nmod)'
 for i = 0,nmod-1 do begin  
     ;; "flagged" model sources
     iflg = where(ii_flag[*,i],flgct)
+    ;iflg = lindgen(sz[1])
     if (flgct eq 0) then message, 'NO FLAGGED SOURCES IN MODEL.'
     rx_modn = (rx_modd[*,i])[iflg]
     fullv = dblarr(ngrp,niter)
@@ -99,29 +98,35 @@ for i = 0,nmod-1 do begin
     full = mean(fullv,dim=1,/nan)
     hard = mean(hardv,dim=1,/nan)
     soft = mean(softv,dim=1,/nan)
-    e_full = medabsdev(fullv,dim=1)
-    e_hard = medabsdev(hardv,dim=1)
-    e_soft = medabsdev(softv,dim=1)
+    resistant_mean,fullv,6.,mn,sigmn,nrej,goodvec=igf
+    resistant_mean,hardv,6.,mn,sigmn,nrej,goodvec=igh
+    resistant_mean,softv,6.,mn,sigmn,nrej,goodvec=igs
+    e_full = stddev(fullv[igf]);medabsdev(fullv,dim=1)
+    e_hard = stddev(hardv[igh]);medabsdev(hardv,dim=1)
+    e_soft = stddev(softv[igs]);medabsdev(softv,dim=1)
     cfull = mean(cfullv,dim=1,/nan)
     chard = mean(chardv,dim=1,/nan)
     csoft = mean(csoftv,dim=1,/nan)
-    e_cfull = medabsdev(cfullv,dim=1)
-    e_chard = medabsdev(chardv,dim=1)
-    e_csoft = medabsdev(csoftv,dim=1)
-    ;; and the mode of the 
+    resistant_mean,cfullv,6.,mn,sigmn,nrej,goodvec=igcf
+    resistant_mean,chardv,6.,mn,sigmn,nrej,goodvec=igch
+    resistant_mean,csoftv,6.,mn,sigmn,nrej,goodvec=igcs
+    e_cfull = stddev(cfullv[igcf]);medabsdev(cfullv,dim=1)
+    e_chard = stddev(chardv[igch]);medabsdev(chardv,dim=1)
+    e_csoft = stddev(csoftv[igcs]);medabsdev(csoftv,dim=1)
+    ;; and the mode of the single iteration
     if (niter gt 1) then begin
-        full = median(mode(full,kde=kde_bandwidth(full)),/even)
-        hard = median(mode(hard,kde=kde_bandwidth(hard)),/even)
-        soft = median(mode(soft,kde=kde_bandwidth(soft)),/even)
-        e_full = median(mode(e_full,kde=kde_bandwidth(e_full)),/even)
-        e_hard = median(mode(e_hard,kde=kde_bandwidth(e_hard)),/even)
-        e_soft = median(mode(e_soft,kde=kde_bandwidth(e_soft)),/even)
-        cfull = median(mode(cfull,kde=kde_bandwidth(cfull)),/even)
-        chard = median(mode(chard,kde=kde_bandwidth(chard)),/even)
-        csoft = median(mode(csoft,kde=kde_bandwidth(csoft)),/even)
-        e_cfull = median(mode(e_cfull,kde=kde_bandwidth(e_cfull)),/even)
-        e_chard = median(mode(e_chard,kde=kde_bandwidth(e_chard)),/even)
-        e_csoft = median(mode(e_csoft,kde=kde_bandwidth(e_csoft)),/even)
+        full = (mode(full,kde=kde_bandwidth(full)))[0]
+        hard = (mode(hard,kde=kde_bandwidth(hard)))[0]
+        soft = (mode(soft,kde=kde_bandwidth(soft)))[0]
+        ;e_full = mode(e_full,kde=kde_bandwidth(e_full))
+        ;e_hard = mode(e_hard,kde=kde_bandwidth(e_hard))
+        ;e_soft = mode(e_soft,kde=kde_bandwidth(e_soft))
+        cfull = (mode(cfull,kde=kde_bandwidth(cfull)))[0]
+        chard = (mode(chard,kde=kde_bandwidth(chard)))[0]
+        csoft = (mode(csoft,kde=kde_bandwidth(csoft)))[0]
+        ;e_cfull = mode(e_cfull,kde=kde_bandwidth(e_cfull))
+        ;e_chard = mode(e_chard,kde=kde_bandwidth(e_chard))
+        ;e_csoft = mode(e_csoft,kde=kde_bandwidth(e_csoft))
     endif
     fx_full[i] = full
     fx_hard[i] = hard

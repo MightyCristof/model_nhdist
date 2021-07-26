@@ -4,11 +4,9 @@ PRO model_nhdist, sub_dir, $
                   SETNH = setnh, $
                   SETRX = setrx, $
                   GROUP = group, $
-                  FIXED = fixed, $
-                  FREE = free, $
-                  ;SPLIT = split, $
-                  MODEL = model, $
-                  TEST = test, $
+                  UNIFORM = uniform, $
+                  VARIABLE = variable, $
+                  FINAL = final, $
                   POSTMOD = postmod
                   
 
@@ -19,10 +17,9 @@ nkeys = n_elements(data) + $
         n_elements(setnh) + $
         n_elements(setrx) + $
         n_elements(group) + $
-        n_elements(fixed) + $
-        n_elements(free) + $
-        ;n_elements(split) + $
-        n_elements(model)
+        n_elements(uniform) + $
+        n_elements(variable) + $
+        n_elements(final)
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; assume current directory unless specified
@@ -31,8 +28,7 @@ if (n_elements(sub_dir) eq 0) then sub_dir = './' else $
 
 ;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
 if keyword_set(data) then begin
-    if (chen eq 1) then pull_carroll21b_data else $
-                        pull_carroll21_data
+    pull_carroll21_data
     nkeys--
 endif
 if (chen eq 1) then load_vars,'carroll21b_data.sav','_data' else $
@@ -66,20 +62,6 @@ if keyword_set(setrx) then begin
         up = up+'../'
         prep_dir = file_search(up+'data_prep')
     endwhile
-    ;rx_path = prep_dir+'/rxz_borus_scat01.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat008.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat005.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_008_nh23.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_008_nh24.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_005_nh23.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_005_nh24.sav'
-    ;rx_path = prep_dir+'/rxz_borus_varscat08.sav'
-    ;rx_path = prep_dir+'/rxz_borus_varscat04.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_008nh24_005nh245.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_008nh245_005nh25.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat0100_varscat.sav'
-    ;rx_path = prep_dir+'/rxz_borus_scat01_008nh25.sav'
-    ;rx_path = prep_dir+'/rxz_borus_gupta_mc.sav'
     rx_path = prep_dir+'/rxz_borus_gupta.sav'
     ;; -f force to overwrite symbolic link in case changing
     spawn, 'ln -sf '+rx_path+' rx_conversion.sav'
@@ -91,39 +73,31 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 ;; select data group WISE AGN, secondary sources, or all (WAC/SEC/ALL)
 if keyword_set(group) then begin
     if (typename(group) ne 'STRING') then message, 'PLEASE SELECT INPUT GROUP: WAC/SEC/ALL/WAC_HIX/WAC_LOX/OFFSET'
-    set_data_group,group=group,test=test
+    set_data_group,group=group
     nkeys--
 endif
 load_vars,'select_group.sav','_group'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of fixed CTF
-if keyword_set(fixed) then begin
-    estimate_fixed_ctf;_update
+if keyword_set(uniform) then begin
+    ctf_uniform
     nkeys--
 endif
-load_vars,'ctf_fixed.sav','_fixed'
+load_vars,'fct_uniform.sav','_uniform'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; estimate the distribution of free CTF
-if keyword_set(free) then begin
-    estimate_free_ctf;_update
+if keyword_set(variable) then begin
+    ctf_variable,/chisq
     nkeys--
 endif
-load_vars,'ctf_free.sav','_free'
+load_vars,'fct_variable.sav','_variable'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
-;; estimate the distribution of NH=24-25 split
-;if keyword_set(split) then begin
-;    estimate_split_nh
-;    nkeys--
-;endif
-;load_vars,'nh_split.sav','_split'
-;if (nkeys eq 0) then GOTO, NO_KEYS
-
 ;; simulate the NH and RL distributions
-if keyword_set(model) then begin
-    model_rxdist,postmod=postmod;_update
+if keyword_set(final) then begin
+    model_rxdist,postmod=postmod
     nkeys--
 endif
 load_vars,'rx_model.sav','_model'

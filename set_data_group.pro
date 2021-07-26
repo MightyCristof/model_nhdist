@@ -1,5 +1,4 @@
-PRO set_data_group, GROUP = group, $
-                    TEST = test
+PRO set_data_group, GROUP = group
                     
 
 common _data
@@ -7,10 +6,6 @@ common _nhdist
 common _nhobs
 common _rxnh
 
-
-;; AD test or JOINT (Fisher method)
-if (n_elements(test) eq 0) then message, 'NO TEST STAT SPECIFIED.' else $
-                                test = strupcase(test)
 
 group = strupcase(group)
 
@@ -70,7 +65,7 @@ nsrc = n_elements(rxl)
 ;; data detection fraction
 ddetf = 1.*ndet/nsrc
 
-sav_vars = ['GROUP','RXD','E_RXD','RXDN','RXL','FRAC_HIX','FRAC_LOX','NSRC','NDET','NNON','DDETF','TEST']
+sav_vars = ['GROUP','RXD','E_RXD','RXDN','RXL','FRAC_HIX','FRAC_LOX','NSRC','NDET','NNON','DDETF']
 sav_inds = []
 
 sav_str = strjoin([sav_vars,sav_inds],',')

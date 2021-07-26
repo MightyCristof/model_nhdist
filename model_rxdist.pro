@@ -6,9 +6,9 @@ common _nhdist
 common _nhobs
 common _rxnh
 common _group
-common _fixed
-common _free
-;common _split
+common _uniform
+common _variable
+
 
 ;; use observed NH dist with added unobscured sources after modeling without it to find
 if keyword_set(postmod) then nh_obs = nh_lan_cor else $
@@ -28,7 +28,7 @@ nh_samp = nh_mc(nh_obs,nsamp)
 ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
 
 ;; fraction and source numbers
-fct = mode(fctv+randomn(seed,n_elements(fctv))*0.025,kde=kde_bandwidth(fctv))
+fct = mode(fctv,kde=kde_bandwidth(fctv))
 e_fct = stddev(fctv)
 fcn = 1.-fct
 ncn = nthin
@@ -59,7 +59,7 @@ for n = 0,niter-1 do begin
     rx_detv[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
     ;rx_detv[*,n] = rxd+randomn(seed,ndet)*e_rxd
     if (moddet ge 5) then begin
-        a2[n] = ad_test(rx_detv[*,n],rx_modv[idet,n],permute=(test eq 'JOINT'),prob=p,cvm=cvm)
+        a2[n] = ad_test(rx_detv[*,n],rx_modv[idet,n],permute=0,prob=p,cvm=cvm)
         p_a2[n] = p
     endif else if (moddet gt 0) then begin
         a2[n] = -1.
@@ -92,16 +92,16 @@ sav_inds = ['IIMODV','POSTMOD']
 ;; RUN FOR SPLIT CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct_ = mode(fctv1+randomn(seed,n_elements(fctv1))*0.025,kde=kde_bandwidth(fctv1))
-e_fct_ = stddev(fctv1)
+fct_ = mode(fctv,kde=kde_bandwidth(fctv))
+e_fct_ = stddev(fctv)
 fcn_ = 1.-fct_
 ncn_ = nthin
 nsr_ = round(ncn_/fcn_)
 nct_ = round(nsr_*fct_)
-f24_ = mode(f24v1,kde=kde_bandwidth(f24v1))*fct_
+f24_ = mode(f24v_,kde=kde_bandwidth(f24v_))*fct_
 ;f24_ = mean(f24v2)*fct_;mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
 n24_ = round(nsr_*f24_)
-f25_ = mode(f25v1,kde=kde_bandwidth(f25v1))*fct_
+f25_ = mode(f25v_,kde=kde_bandwidth(f25v_))*fct_
 ;f25_ = mean(f25v2)*fct_;mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
 n25_ = round(nsr_*f25_)
 ;n25_ = nct_-n24_
@@ -129,7 +129,7 @@ for n = 0,niter-1 do begin
     rx_detv_[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
     ;rx_detv_[*,n] = rxd+randomn(seed,ndet)*e_rxd
     if (moddet ge 5) then begin
-        a2_[n] = ad_test(rx_detv_[*,n],rx_modv[idet,n],permute=(test eq 'JOINT'),prob=p,cvm=cvm)
+        a2_[n] = ad_test(rx_detv_[*,n],rx_modv[idet,n],permute=0,prob=p,cvm=cvm)
         p_a2_[n] = p
     endif else if (moddet gt 0) then begin
         a2_[n] = -1.
