@@ -10,7 +10,7 @@ dir = '/Users/ccarroll/Research/projects/xray_lack_agn/workspace/run_20201008_fi
 
 ;; variables for MODEL_NHDIST
 fits = ['OBJID','RA','DEC','Z','ZERR','ZSTR','ZTYPE', $                     ;; fits.sav
-        'MAG','E_MAG', $                                                    ;;
+        'MAG','E_MAG','FLUX','E_FLUX','BIN', $                              ;;
         'PERC_AGN', $                                                       ;; resamp.sav
         'IIWAC', $                                                          ;; detections_wac.sav
         'EBV','E_EBV','DL2', $                                              ;; src_luminosities.sav
@@ -64,8 +64,11 @@ lxstak[*,1] = lxstak[*,2]*6.888E-01
 ;stak  = ['XSUBG',stak]
 stak = ['XSUBG','ESTAK','FXSTAK','E_FXSTAK','LOGFXSTAK','E_LOGFXSTAK']
 
+;; source found outside Chandra field (Tonima)
+iiflag = ra eq 122.32634735107422 and dec eq 28.25208282470703
+
 ;; trim analysis subset
-iq = where(iiqual)
+iq = where(iiqual and ~iiflag)
 for i = 0,n_elements(fits)-1 do begin
     re = execute('ndim = size('+fits[i]+',/n_dim)')
     if (ndim eq 1) then re = execute(fits[i]+' = '+fits[i]+'[iq]') else $

@@ -37,17 +37,17 @@ if keyword_set(properties) then begin
     yhd = histogram(z[id],bin=bn,location=xhd,min=0.,max=0.8)
     yhn = histogram(z[in],bin=bn,location=xhn,min=0.,max=0.8)
 
-    e = {xra:[0.,0.85],yra:[0.,120.],$
+    e = {xra:[-0.05,0.85],yra:[0.,120.],$
          stairstep:1,thick:2,fill_background:1, $
          xtitle:'$!8z!7$',ytitle:'Frequency', $
-         font_name:'Times',font_size:16, $
+         font_name:'Times',font_size:14, $
          buffer:0}
     if keyword_set(hide) then e.buffer = 1
     
     p = plot(xh+bn/2.,yh,':',_extra=e,fill_color='light grey',name='All sources',fill_transparency=30)
     pn = plot(xhn+bn/2.,yhn,'-',_extra=e,fill_color='orange',/ov,name='X-ray non-det.',fill_transparency=20)
     pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
-    leg = legend(target=[p,pd,pn],position=[0.61,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=12,font_name='Times')
+    leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
     t = text(0.03,0.90,"a",/normal,font_name='Times',font_style='Bold',font_size=16)
     
     if keyword_set(sav) then begin
@@ -56,24 +56,50 @@ if keyword_set(properties) then begin
                                                      p.save,'figures/z_dist.png',resolution=res
     endif    
 
-    ;; LIR
+    ;; LX
     bn = 0.25
-    yh = histogram(loglir[ix],bin=bn,location=xh,min=41.,max=46.)
-    yhd = histogram(loglir[id],bin=bn,location=xhd,min=41.,max=46.)
-    yhn = histogram(loglir[in],bin=bn,location=xhn,min=41.,max=46.)
+    yh = histogram(loglx[ix],bin=bn,location=xh,min=41.,max=46.)
+    yhd = histogram(loglx[id],bin=bn,location=xhd,min=41.,max=46.)
+    yhn = histogram(loglx[in],bin=bn,location=xhn,min=41.,max=46.)
     
-    e = {xra:[42.,46.],yra:[0.,200.],$
+    e = {xra:[41.5,45.5],yra:[0.,80.],$
          stairstep:1,thick:2,fill_background:1, $
-         xtitle:'$log !8L!7_{MIR}  [erg s^{-1} cm^{-2}]$',ytitle:'Frequency', $
-         font_name:'Times', $
+         xtitle:'$log !8L!7_{X}  [erg s^{-1} cm^{-2}]$',ytitle:'Frequency', $
+         font_name:'Times',font_size:14, $
          buffer:0}
     if keyword_set(hide) then e.buffer = 1
 
     p = plot(xh+bn/2.,yh,':',_extra=e,fill_color='light grey',name='All sources',fill_transparency=30)
     pn = plot(xhn+bn/2.,yhn,'-',_extra=e,fill_color='orange',/ov,name='X-ray non-det.',fill_transparency=20)
     pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
-    leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=12,font_name='Times')
+    leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
+    ;leg = legend(target=[pd],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=12,font_name='Times')
     t = text(0.03,0.90,"b",/normal,font_name='Times',font_style='Bold',font_size=16)
+
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/lx_dist.eps',/BITMAP else $
+                                                     p.save,'figures/lx_dist.png',resolution=res
+    endif    
+
+    ;; LIR
+    bn = 0.25
+    yh = histogram(loglir[ix],bin=bn,location=xh,min=41.,max=46.)
+    yhd = histogram(loglir[id],bin=bn,location=xhd,min=41.,max=46.)
+    yhn = histogram(loglir[in],bin=bn,location=xhn,min=41.,max=46.)
+    
+    e = {xra:[41.5,45.5],yra:[0.,200.],$
+         stairstep:1,thick:2,fill_background:1, $
+         xtitle:'$log !8L!7_{MIR}  [erg s^{-1} cm^{-2}]$',ytitle:'Frequency', $
+         font_name:'Times',font_size:14, $
+         buffer:0}
+    if keyword_set(hide) then e.buffer = 1
+
+    p = plot(xh+bn/2.,yh,':',_extra=e,fill_color='light grey',name='All sources',fill_transparency=30)
+    pn = plot(xhn+bn/2.,yhn,'-',_extra=e,fill_color='orange',/ov,name='X-ray non-det.',fill_transparency=20)
+    pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
+    leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
+    t = text(0.03,0.90,"c",/normal,font_name='Times',font_style='Bold',font_size=16)
 
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'
@@ -87,18 +113,18 @@ if keyword_set(properties) then begin
     yhd = histogram(loglxir[id],bin=bn,location=xhd,min=41.,max=46.)
     yhn = histogram(loglxir[in],bin=bn,location=xhn,min=41.,max=46.)
     
-    e = {xra:[42.,46.],yra:[0.,200.],$
+    e = {xra:[41.5,45.5],yra:[0.,200.],$
          stairstep:1,thick:2,fill_background:1, $
          xtitle:'$log !8L!7_{X}(!8L!7_{MIR})  [erg s^{-1} cm^{-2}]$',ytitle:'Frequency', $
-         font_name:'Times', $
+         font_name:'Times',font_size:14, $
          buffer:0}
     if keyword_set(hide) then e.buffer = 1
 
     p = plot(xh+bn/2.,yh,':',_extra=e,fill_color='light grey',name='All sources',fill_transparency=30)
     pn = plot(xhn+bn/2.,yhn,'-',_extra=e,fill_color='orange',/ov,name='X-ray non-det.',fill_transparency=20)
     pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
-    leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=12,font_name='Times')
-    t = text(0.03,0.90,"c",/normal,font_name='Times',font_style='Bold',font_size=16)
+    leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
+    t = text(0.03,0.90,"d",/normal,font_name='Times',font_style='Bold',font_size=16)
 
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'
@@ -270,7 +296,8 @@ if keyword_set(rxdist) then begin
     
     rxbin = 0.2d
     
-    for i = 0,1 do begin
+    ;for i = 0,1 do begin
+    for i = 0,0 do begin
         re = execute('dat = '+data[i])
         re = execute('model = '+models[i])
         re = execute('index = '+indices[i])
@@ -283,7 +310,7 @@ if keyword_set(rxdist) then begin
         e = {xra:[-2.6,1.],yra:[0.,0.3],$
              stairstep:1,fill_background:1, $
              xtitle:'$!8R!7_{!8L!7_X}$',ytitle:'Frequency (normalized)', $
-             font_name:'Times',font_size:16, $
+             font_name:'Times',font_size:14, $
              buffer:0}
         if keyword_set(hide) then e.buffer = 1
 
@@ -314,12 +341,17 @@ if keyword_set(rxdist) then begin
         t = text(0.62,0.8,/normal,'$!8N!7_H \geq$ 10$^{23}$ cm$^{-2}$',alignment=1.,font_name='Times',font_size=14)
         p = text(0.62,0.75,/normal,'$\leftarrow$',alignment=1.,font_size=26)
         ;; figure reference for Nature caption
-        t = text(0.03,0.90,letter[i],/normal,font_name='Times',font_style='Bold',font_size=16)
+        ;t = text(0.03,0.90,letter[i],/normal,font_name='Times',font_style='Bold',font_size=16)
 
+        ;if keyword_set(sav) then begin
+        ;    print, '    SAVING PLOT'
+        ;    if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/'+file[i]+'.eps',/BITMAP else $
+        ;                                                 p.save,'figures/'+file[i]+'.png',resolution=res
+        ;endif        
         if keyword_set(sav) then begin
             print, '    SAVING PLOT'
-            if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/'+file[i]+'.eps',/BITMAP else $
-                                                         p.save,'figures/'+file[i]+'.png',resolution=res
+            if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/rx_dist.eps',/BITMAP else $
+                                                         p.save,'figures/rx_dist.png',resolution=res
         endif        
     endfor    
 endif
@@ -346,6 +378,7 @@ if keyword_set(xspec) then begin
     scpl = 'scpl'+nhs
 
     ;; plot variables
+    letter = ['a','b','c']
     line = ['-','__','-.',':','__']
     ;col = [[213,94,0],[204,121,167],[0,114,178],[240,228,66],[0,158,115]]
 
@@ -358,7 +391,7 @@ if keyword_set(xspec) then begin
          xtickname:['0.1','1','10','100'],ytickname:'10!U'+strtrim([-4:2],2), $
          ytickinterval:1, $
          xtitle:'Energy  [keV]',ytitle:'keV$^2$  [Photons cm$^{-2}$ s$^{-1}$ keV$^{-1}$]', $
-         font_name:'Times',font_size:16}
+         font_name:'Times',font_size:14}
     thick = 2
     
     for i = 0,n_elements(nhs)-1 do begin
@@ -369,7 +402,8 @@ if keyword_set(xspec) then begin
         re = execute('pt = plot(energy,'+tot[i]+',linestyle=line[0],col=col[*,3],thick=thick,/ov,name="Total emission")')
         leg = legend(target=[pt,pp,ps,pb],position=[0.410,0.866],sample_width=0.16,horizontal_spacing=0.06,font_name='Times',font_size=14)
         tx = text(0.8,0.76,'!8N!7$_H = 10^{'+nhs[i]+'} cm^{-2}$',/relative,alignment=1.,font_name='Times',font_style='Bold',font_size=16)
-        
+        t = text(0.03,0.90,letter[i],/normal,font_name='Times',font_style='Bold',font_size=16)
+
         if keyword_set(sav) then begin
             print, '    SAVING PLOT'
             if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/xspec_nh'+nhs[i]+'.eps',/BITMAP else $
