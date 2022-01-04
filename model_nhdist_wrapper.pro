@@ -1,9 +1,9 @@
 
 ;model_nhdist,/data
 
-dir = 'final_model/'
+dir = 'referee-1/'
 ;;; WISE AGN AD TEST
-model_nhdist,dir+'lan_ad_all_pm',setnh='nh_lan_nst',/setrx,group='ALL',/uniform,/variable,/final,/postmod
+model_nhdist,dir+'lan_ad_wac_pm',setnh='nh_lan_nst',/setrx,group='OFFAXIS',/uniform,/variable,/final,/postmod
 ;popd
 ;file_copy,dir+'lan_ad_wac_mc',dir+'lan_ad_wac_pm_mc',/recursive,/overwrite
 ;pushd,dir+'lan_ad_wac_pm'

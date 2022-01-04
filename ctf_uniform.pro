@@ -12,7 +12,7 @@ common _group
 cvm = 0
 
 ;; run this script NITER times and look at the distribution in fct
-niter = 10000
+niter = 1000
 
 ;; uniform CT fraction
 step = 0.01d

@@ -12,6 +12,7 @@ dir = '/Users/ccarroll/Research/projects/xray_lack_agn/workspace/run_20201008_fi
 fits = ['OBJID','RA','DEC','Z','ZERR','ZSTR','ZTYPE', $                     ;; fits.sav
         'MAG','E_MAG','FLUX','E_FLUX','BIN', $                              ;;
         'PERC_AGN', $                                                       ;; resamp.sav
+        'SDST_DET','SDST_NON', $                                            ;; infield_cha.sav,infield_xmm.sav,infield_nst.sav
         'IIWAC', $                                                          ;; detections_wac.sav
         'EBV','E_EBV','DL2', $                                              ;; src_luminosities.sav
         'LIR','E_LIR','LOGLIR','E_LOGLIR', $                                ;; 
@@ -29,10 +30,20 @@ surv = ['SIMRLW','WNH_POWER','WNH_BORUS']                                   ;; s
 stak = ['ENRANGEV','FLUXV','FLUX_ERRV','LXV']                               ;; stack_output.sav
 
 ;; IDL save files containing above variables
-files = ['fits.sav','resamp.sav','detections_wac.sav','src_luminosities.sav', $
+files = ['fits.sav','resamp.sav','infield_cha.sav','infield_xmm.sav','infield_nst.sav', $
+         'detections_wac.sav','src_luminosities.sav', $
          'quality_src.sav','combined_lum.sav','surv_anal.sav','stack_output/stack_output.sav']
 ;; restore all data
 for i = 0,n_elements(files)-1 do restore,dir+files[i]
+
+;; create combined array of off-axis angle for all three X-ray fields
+fld = ['CHA','XMM','NST']
+sdst_det = dblarr(size(xdet,/dim))-9999.
+sdst_non = dblarr(size(xnon,/dim))-9999.
+for i = 0,n_elements(fld)-1 do begin
+    re = execute('sdst_det[where(xdet eq fld[i],/null)] = sdst_'+fld[i]+'[where(xdet eq fld[i],/null)]')
+    re = execute('sdst_non[where(xnon eq fld[i],/null)] = sdst_'+fld[i]+'[where(xnon eq fld[i],/null)]')
+endfor
 
 ;;; extract hard (2-7 keV) and soft (0.5-2 keV) band flux for Chandra sources
 ;chandra_hard_soft,[[fpl90s],[fpl90s_err]],[[fpl90m],[fpl90m_err]],[[fpl90h],[fpl90h_err]],softx,hardx

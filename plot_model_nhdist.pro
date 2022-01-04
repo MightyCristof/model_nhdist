@@ -48,7 +48,7 @@ if keyword_set(properties) then begin
     pn = plot(xhn+bn/2.,yhn,'-',_extra=e,fill_color='orange',/ov,name='X-ray non-det.',fill_transparency=20)
     pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
     leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
-    t = text(0.03,0.90,"a",/normal,font_name='Times',font_style='Bold',font_size=16)
+    ;t = text(0.03,0.90,"a",/normal,font_name='Times',font_style='Bold',font_size=16)
     
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'
@@ -74,7 +74,7 @@ if keyword_set(properties) then begin
     pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
     leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
     ;leg = legend(target=[pd],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=12,font_name='Times')
-    t = text(0.03,0.90,"b",/normal,font_name='Times',font_style='Bold',font_size=16)
+    ;t = text(0.03,0.90,"b",/normal,font_name='Times',font_style='Bold',font_size=16)
 
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'
@@ -99,7 +99,7 @@ if keyword_set(properties) then begin
     pn = plot(xhn+bn/2.,yhn,'-',_extra=e,fill_color='orange',/ov,name='X-ray non-det.',fill_transparency=20)
     pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
     leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
-    t = text(0.03,0.90,"c",/normal,font_name='Times',font_style='Bold',font_size=16)
+    ;t = text(0.03,0.90,"c",/normal,font_name='Times',font_style='Bold',font_size=16)
 
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'
@@ -124,7 +124,7 @@ if keyword_set(properties) then begin
     pn = plot(xhn+bn/2.,yhn,'-',_extra=e,fill_color='orange',/ov,name='X-ray non-det.',fill_transparency=20)
     pd = plot(xhd+bn/2.,yhd,'--',_extra=e,fill_color='dodger blue',/ov,name='X-ray detected',fill_transparency=15)
     leg = legend(target=[p,pd,pn],position=[0.15,0.86],/normal,sample_width=0.16,horizontal_spacing=0.06,horizontal_alignment=0.,font_size=14,font_name='Times')
-    t = text(0.03,0.90,"d",/normal,font_name='Times',font_style='Bold',font_size=16)
+    ;t = text(0.03,0.90,"d",/normal,font_name='Times',font_style='Bold',font_size=16)
 
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'
@@ -269,8 +269,8 @@ if keyword_set(nhdist) then begin
     leg = legend(target=[pan,pnhu,pnhv],position=[0.125,0.60],/normal,horizontal_alignment=0.,sample_width=0.14,font_size=14,font_name='Times')
 
     ;; figure reference for Nature caption
-    t = text(0.03,0.97,"a",/normal,font_name='Times',font_style='Bold',font_size=16)
-    t = text(0.03,0.62,"b",/normal,font_name='Times',font_style='Bold',font_size=16)
+    ;t = text(0.03,0.97,"a",/normal,font_name='Times',font_style='Bold',font_size=16)
+    ;t = text(0.03,0.62,"b",/normal,font_name='Times',font_style='Bold',font_size=16)
     
     ;; save image
     if keyword_set(sav) then begin
@@ -402,7 +402,7 @@ if keyword_set(xspec) then begin
         re = execute('pt = plot(energy,'+tot[i]+',linestyle=line[0],col=col[*,3],thick=thick,/ov,name="Total emission")')
         leg = legend(target=[pt,pp,ps,pb],position=[0.410,0.866],sample_width=0.16,horizontal_spacing=0.06,font_name='Times',font_size=14)
         tx = text(0.8,0.76,'!8N!7$_H = 10^{'+nhs[i]+'} cm^{-2}$',/relative,alignment=1.,font_name='Times',font_style='Bold',font_size=16)
-        t = text(0.03,0.90,letter[i],/normal,font_name='Times',font_style='Bold',font_size=16)
+        ;t = text(0.03,0.90,letter[i],/normal,font_name='Times',font_style='Bold',font_size=16)
 
         if keyword_set(sav) then begin
             print, '    SAVING PLOT'

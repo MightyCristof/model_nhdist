@@ -13,7 +13,7 @@ common _uniform
 cvm = 0
 
 ;; run this script NITER times 
-niter = 10000
+niter = 1000
 
 ;; modeling variables
 f24v_ = dblarr(niter)

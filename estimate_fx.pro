@@ -33,6 +33,7 @@ case group of
     'WAC_HIX': if keyword_set(detections) then iigrp = iiwd and iixh else iigrp = iiwn and iixh
     'WAC_LOX': if keyword_set(detections) then iigrp = iiwd and iixl else iigrp = iiwn and iixl
     'OFFSET': if keyword_set(detections) then iigrp = iiwd else iigrp = iiwn
+    'OFFAXIS': if keyword_set(detections) then iigrp = iiwd and sdst_det gt 60. else iigrp = iiwn and sdst_non gt 60.
     else: message, message, 'NO INPUT MODE SET FOR FXEST: WAC/SEC/ALL'
 endcase
 ;; set variables for chosen group

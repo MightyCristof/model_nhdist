@@ -47,10 +47,10 @@ if keyword_set(fluxes) then begin
     print, 'UNIFORM MODELING'
     print, ''
     print, '                             SOFT                      HARD'
-    print, 'STACK DET:   '+strjoin(string(stk_det,format='(e8.2)')+' +- '+string(e_stk_det,format='(e8.2)'),'      ')
-    print, 'MODEL DET:   '+strjoin(string(mod_det,format='(e8.2)')+' +- '+string(e_mod_det,format='(e8.2)'),'      ')
-    print, 'STACK NON:   '+strjoin(string(stk_non,format='(e8.2)')+' +- '+string(e_stk_non,format='(e8.2)'),'      ')
-    print, 'MODEL NON:   '+strjoin(string(mod_non,format='(e8.2)')+' +- '+string(e_mod_non,format='(e8.2)'),'      ')
+    print, 'STACK DET:   '+strjoin(string(stk_det,format='(e7.1)')+' +- '+string(e_stk_det,format='(e7.1)'),'      ')
+    print, 'MODEL DET:   '+strjoin(string(mod_det,format='(e7.1)')+' +- '+string(e_mod_det,format='(e7.1)'),'      ')
+    print, 'STACK NON:   '+strjoin(string(stk_non,format='(e7.1)')+' +- '+string(e_stk_non,format='(e7.1)'),'      ')
+    print, 'MODEL NON:   '+strjoin(string(mod_non,format='(e7.1)')+' +- '+string(e_mod_non,format='(e7.1)'),'      ')
     print, '================================================================='
     
     frac_det = mod_det/stk_det
@@ -77,10 +77,10 @@ if keyword_set(fluxes) then begin
     print, 'VARIABLE MODELING'
     print, ''
     print, '                             SOFT                      HARD'
-    print, 'STACK DET:   '+strjoin(string(stk_det,format='(e8.2)')+' +- '+string(e_stk_det,format='(e8.2)'),'      ')
-    print, 'MODEL DET:   '+strjoin(string(mod_det,format='(e8.2)')+' +- '+string(e_mod_det,format='(e8.2)'),'      ')
-    print, 'STACK NON:   '+strjoin(string(stk_non,format='(e8.2)')+' +- '+string(e_stk_non,format='(e8.2)'),'      ')
-    print, 'MODEL NON:   '+strjoin(string(mod_non,format='(e8.2)')+' +- '+string(e_mod_non,format='(e8.2)'),'      ')
+    print, 'STACK DET:   '+strjoin(string(stk_det,format='(e7.1)')+' +- '+string(e_stk_det,format='(e7.1)'),'      ')
+    print, 'MODEL DET:   '+strjoin(string(mod_det,format='(e7.1)')+' +- '+string(e_mod_det,format='(e7.1)'),'      ')
+    print, 'STACK NON:   '+strjoin(string(stk_non,format='(e7.1)')+' +- '+string(e_stk_non,format='(e7.1)'),'      ')
+    print, 'MODEL NON:   '+strjoin(string(mod_non,format='(e7.1)')+' +- '+string(e_mod_non,format='(e7.1)'),'      ')
     print, '================================================================='
     
     frac_det = mod_det/stk_det
@@ -97,6 +97,7 @@ if keyword_set(fluxes) then begin
 
 
 endif
+
 
 
 END
