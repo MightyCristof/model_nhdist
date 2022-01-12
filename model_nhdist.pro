@@ -26,7 +26,7 @@ if (nkeys eq 0) then GOTO, NO_KEYS
 if (n_elements(sub_dir) eq 0) then sub_dir = './' else $
                                    sub_dir = strlowcase(sub_dir)+'/' & file_mkdir,sub_dir
 
-;; pass data from XRAY_LACK_AGN to MODEL_NHDIST
+;; pass data from XRAY_LACK_AGN (Paper 1) to MODEL_NHDIST (this paper)
 if keyword_set(data) then begin
     pull_carroll21_data
     nkeys--
@@ -54,7 +54,7 @@ endif
 load_vars,'select_nhobs.sav','_nhobs'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
-;; load RX-NH conversions
+;; load RX-NH conversions from XSPEC model
 if keyword_set(setrx) then begin
     prep_dir = file_search('data_prep')
     up = ''

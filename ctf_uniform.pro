@@ -32,8 +32,9 @@ a2v = dblarr(nfrac,niter)
 
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
+;; run the entire process NITER times
 for n = 0,niter-1 do begin
-    ;; resample observed NH distribution to increase data density
+    ;; resample observed NH distribution to increase density for draw
     nsamp = nsrc*100.
     nh_samp = nh_mc(nh_obs,nsamp)
     ;; number of Compton-thin sources
@@ -47,15 +48,17 @@ for n = 0,niter-1 do begin
     p_a2 = dblarr(nfrac)
     rxdv[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
     ;rxdv[*,n] = rxd+randomn(seed,ndet)*e_rxd
+    ;; loop over CT fracions
     for i = 0,nfrac-1 do begin
-        nct = round((nthin/(1.-fct_steps[i]))*fct_steps[i])
-        nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]
-        nresamp = n_elements(nh_resamp)
-        nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]
-        rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)
-        iimod[*,i] = rx_mod[*,i] gt rxl
-        idet = where(iimod[*,i] eq 1,moddet,ncomplement=modnon)
-        rxmn = dblarr(modnon)-9999.
+        nct = round((nthin/(1.-fct_steps[i]))*fct_steps[i])     ;; determine the number of CT sources
+        nh_resamp = [nh_samp[ithin],24.+2.*randomu(seed,nct)]   ;; create an NH distribution with specified CT fraction
+        nresamp = n_elements(nh_resamp)                         ;; number of sources in the NH distribution
+        nh_mod[*,i] = nh_resamp[randomi(nsrc,nresamp)]          ;; resample the NH distribution to match our number of sources
+        rx_mod[*,i] = rx2nh(nh_mod[*,i],/rx_out,scat=rx_scat)   ;; convert model NH to model RX
+        iimod[*,i] = rx_mod[*,i] gt rxl                         ;; simulate model detections/non-detections comparing to RX limits (from instrument flux limits)
+        idet = where(iimod[*,i] eq 1,moddet,ncomplement=modnon) ;; flag model detections
+        rxmn = dblarr(modnon)-9999.                             ;; array for model non-detections
+        ;; determine test statistic
         if (moddet ge 5) then begin
             a2[i] = ad_test([rxdn,rxdv[*,n]],[rxmn,rx_mod[idet,i]],permute=0,prob=p,weight=1)
             p_a2[i] = p

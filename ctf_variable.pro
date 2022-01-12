@@ -33,7 +33,7 @@ nfree = n_elements(f24_steps)
 
 a2v_ = dblarr(nfree,niter)
 
-;; set CT fraction from CTF FREE modeling
+;; set CT fraction from CTF_UNIFORM modeling
 fct = mode(fctv,kde=kde_bandwidth(fctv))
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.

@@ -32,12 +32,8 @@ if (n_elements(suffix) eq 0) then suffix = ''
 if keyword_set(scat) then begin
     fs = replicate(scat,nnh)
 endif else if keyword_set(gupta) then begin
-    readcol,'Gupta+2021_Fig1_data.csv',nhrv,fsrv,format='d,d'
-    ;; choice of model
-    fsr = fsrv[0:1]  ;; exclude upper limits
-    nhr = nhrv[0:1]
-    ;fsr = fsrv[2:3]  ;; MC simulations
-    ;nhr = nhrv[2:3]
+    readcol,'Gupta+2021_Fig01_model_LR.csv',nhr,fsr,format='d,d'
+    ;readcol,'Gupta+2021_Fig01_model_MC.csv',nhr,fsr,format='d,d'
     ;; interpolate, convert to decimal, string
     fs = string(10.^interpol(alog10(fsr),nhr,nh)/100.,format='(d6.4)')
     suffix = '_gupta'
