@@ -10,7 +10,7 @@ common _rxnh
 group = strupcase(group)
 
 ;; set variables for modeling
-ii = sdst_det gt 60. or sdst_non gt 60.
+;ii = sdst_det gt 60. or sdst_non gt 60.
 case group of 
     'WAC': begin 
         rxd = rxdet[where(iiwd,ndet)]
@@ -54,7 +54,7 @@ case group of
         end
     'OFFSET': begin
         rxd = rxdet[where(iiwd,ndet)]+0.3
-        e_rxd = e_rxdet[where(iiwd)]which 
+        e_rxd = e_rxdet[where(iiwd)]
         rxdn = dblarr(n_elements(where(iiwn,nnon)))-9999.
         rxl = rxlim[where(iiwac)]
         frac_hix = total(iiwac and iihix)/total(iiwac)
@@ -67,6 +67,14 @@ case group of
         rxl = rxlim[where(iiwac and (sdst_det gt 60. or sdst_non gt 60.))]
         frac_hix = total(iiwac and iihix and (sdst_det gt 60. or sdst_non gt 60.))/total(iiwac and (sdst_det gt 60. or sdst_non gt 60.))
         frac_lox = total(iiwac and iilox and (sdst_det gt 60. or sdst_non gt 60.))/total(iiwac and (sdst_det gt 60. or sdst_non gt 60.))
+        end
+    'WAC2': begin 
+        rxd = rxdet[where(iiwd and iitype2,ndet)]
+        e_rxd = e_rxdet[where(iiwd and iitype2)]
+        rxdn = dblarr(n_elements(where(iiwn and iitype2,nnon)))-9999.
+        rxl = rxlim[where(iiwac and iitype2)]
+        frac_hix = total(iiwac  and iitype2 and iihix)/total(iiwac)
+        frac_lox = total(iiwac  and iitype2 and iilox)/total(iiwac)
         end
 endcase
 ;; full number of sources, detected and non-detected

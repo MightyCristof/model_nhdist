@@ -8,7 +8,7 @@ common _rxnh
 common _group
 common _uniform
 
-
+;FX_ESTV2 = []
 ;; AD vs CvM test
 cvm = 0
 
@@ -34,7 +34,7 @@ nfree = n_elements(f24_steps)
 a2v_ = dblarr(nfree,niter)
 
 ;; set CT fraction from CTF_UNIFORM modeling
-fct = mode(fctv,kde=kde_bandwidth(fctv))
+fct = mode(fctv,/kde)
 ;; counter for iteration alerts
 ncount = ceil(niter/10.)*10.
 for n = 0,niter-1 do begin
@@ -70,8 +70,8 @@ for n = 0,niter-1 do begin
             p_a2[j] = 1.
         endif else begin
             if (moddet ge 5) then begin
-                a2[j] = ad_test(rxdv_[*,n],rx_mod[idet,j],permute=1,prob=p,cvm=cvm)
-                a2[j] = ad_test([rxdn,rxdv_[*,n]],[rxmn,rx_mod[idet,j]],permute=0,prob=p,weight=1)
+                a2[j] = ad_test(rxdv_[*,n],rx_mod[idet,j],permute=1,prob=p)
+                ;a2[j] = ad_test([rxdn,rxdv_[*,n]],[rxmn,rx_mod[idet,j]],permute=0,prob=p,weight=1)
                 p_a2[j] = p
             endif else if (moddet gt 0) then begin
                 a2[j] = -1.
@@ -94,6 +94,7 @@ for n = 0,niter-1 do begin
     ;; determine "best-fit" model per iteration
     ;; constraints by X-ray stacked fluxes
     fx_est = estimate_fx(rx_mod,iimod,/iterate)
+;    fx_est = estimate_fx(rx_mod,iimod)
     ;; X-ray stack data minus model
     del_soft = abs(fxstak[1,0]-fx_est.csoft)
     del_hard = abs(fxstak[1,1]-fx_est.chard)
@@ -103,11 +104,14 @@ for n = 0,niter-1 do begin
     ;; chi-square
     x2_soft = (del_soft/sig_soft)^2.
     x2_hard = (del_hard/sig_hard)^2.    
+;    x2_soft = (abs(fxstak[1,0]-fx_est.csoft)/fxstak[1,0])^2.
+;    x2_hard = (abs(fxstak[1,1]-fx_est.chard)/fxstak[1,1])^2.    
     x2 = x2_soft+x2_hard
     p_x2 = 1.-chisqr_pdf(x2,1.) ;; dof = 1 (2 X-ray data points - 1)
     ;; flag chisqr_pdf value == 1
     iix2 = finite(p_x2) and p_x2 gt 0.
     if keyword_set(chisq) then begin
+;    stop
         ibest = where(x2 eq min(x2[where(iix2,/null)]),nbest)
         if (nbest gt 1) then stop;ibest = ibest[0]
         stat = [a2[ibest],p_a2[ibest],x2[ibest],p_x2[ibest],0.,0.]
@@ -130,6 +134,7 @@ for n = 0,niter-1 do begin
     nhmv_[*,n] = nh_mod[*,ibest]
     rxmv_[*,n] = rx_mod[*,ibest]
     iimv_[*,n] = iimod[*,ibest]
+;FX_ESTV2 = [FX_ESTV2,FX_EST[ibest]]
     ;; progress alert
     if (n eq 0) then begin
         print, '=============================================='
@@ -138,6 +143,10 @@ for n = 0,niter-1 do begin
 endfor
 print, 'END   - VARIABLE CTF'
 print, '=============================================='
+
+FX_ESTV2_ = ESTIMATE_FX(RXMV_,IIMV_)
+SAVE,FILE='idlsave.dat'
+STOP
 
 sav_vars = ['F24_STEPS','F25_STEPS', $
             'RXDV_', $

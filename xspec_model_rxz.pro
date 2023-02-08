@@ -32,8 +32,8 @@ if (n_elements(suffix) eq 0) then suffix = ''
 if keyword_set(scat) then begin
     fs = replicate(scat,nnh)
 endif else if keyword_set(gupta) then begin
-    readcol,'Gupta+2021_Fig01_model_LR.csv',nhr,fsr,format='d,d'
-    ;readcol,'Gupta+2021_Fig01_model_MC.csv',nhr,fsr,format='d,d'
+    ;readcol,'Gupta+2021_Fig01_model_LR.csv',nhr,fsr,format='d,d'
+    readcol,'Gupta+2021_Fig01_model_MC.csv',nhr,fsr,format='d,d'
     ;; interpolate, convert to decimal, string
     fs = string(10.^interpol(alog10(fsr),nhr,nh)/100.,format='(d6.4)')
     suffix = '_gupta'
@@ -141,9 +141,9 @@ endif
 ;; convulate RX from model fluxes; soft and hard conversions
 if keyword_set(conv) then begin
     files = file_search('spectra_*_'+model+'_scat'+fs[0]+suffix+'.dat')
-    ifull = where(strmatch(files,'*210*'),full0)
-    ihard = where(strmatch(files,'*27*'),hard0)
-    isoft = where(strmatch(files,'*052*'),soft0)
+    ifull = where(strmatch(files,'spectra_210*'),full0)
+    ihard = where(strmatch(files,'spectra_27*'),hard0)
+    isoft = where(strmatch(files,'spectra_052*'),soft0)
     if (full0 eq 0 or soft0 eq 0 or hard0 eq 0) then stop
     readcol,files[ifull],full,dfull,format='d,d'
     readcol,files[ihard],hard,dhard,format='d,d'
@@ -152,22 +152,41 @@ if keyword_set(conv) then begin
     inh = where(dfull eq 0.,num_nh)
     ;; create restframe 2-10keV flux ratio
     full = full[inh]
-    rx = alog10(full/full[0])
+    rx = alog10(full/full[0])    
+    
+
     ;; prepare conversion arrays
     iz = where(dhard lt 0.,zlen)
     if (n_elements(zv) ne zlen) then stop
+    temp_hard = dblarr(num_nh,zlen)
+    temp_soft = dblarr(num_nh,zlen)
     c_hard = dblarr(num_nh,zlen)
     c_soft = dblarr(num_nh,zlen)
     for i = 0,zlen-1 do begin
+        temp_hard[*,i] = hard[iz[i]+1:iz[i]+num_nh]
+        temp_soft[*,i] = soft[iz[i]+1:iz[i]+num_nh]
         c_hard[*,i] = hard[iz[i]+1:iz[i]+num_nh]/full
         c_soft[*,i] = soft[iz[i]+1:iz[i]+num_nh]/full
     endfor
+    hard = temp_hard
+    soft = temp_soft
+    ;; test reform of hard and soft fluxes (SAME)
+    ;inhh = where(dhard eq 0.,nhard)
+    ;inhs = where(dsoft eq 0.,nsoft)
+    ;newhard = reform(hard[inhh],num_nh,zlen) 
+    ;newsoft = reform(soft[inhs],num_nh,zlen) 
+    ;newc_hard = newhard/rebin(full,num_nh,zlen)
+    ;newc_soft = newsoft/rebin(full,num_nh,zlen)
+
     ;; limit NH ² 25.0
     if keyword_set(nhlim) then begin
         ilim = where(nh le 25.,ct)
         nh = nh[ilim]
         fs = fs[ilim]
         rx = rx[ilim]
+        full = full[ilim]
+        soft = soft[ilim,*]
+        hard = hard[ilim,*]
         c_hard = c_hard[ilim,*]
         c_soft = c_soft[ilim,*]
     endif
@@ -179,7 +198,8 @@ if keyword_set(conv) then begin
         c_hard_fine[*,i] = interpol(c_hard[*,i],rx,rx_fine)
         c_soft_fine[*,i] = interpol(c_soft[*,i],rx,rx_fine)
     endfor
-    save,zv,nh,fs,rx,c_hard,c_soft,rx_fine,c_hard_fine,c_soft_fine,file='rxz_'+model+'_scat'+fs[0]+suffix+'.sav'
+    save,zv,nh,fs,full,hard,soft, $
+         rx,c_hard,c_soft,rx_fine,c_hard_fine,c_soft_fine,file='rxz_'+model+'_scat'+fs[0]+suffix+'.sav'
 endif
 
 

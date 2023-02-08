@@ -13,7 +13,7 @@ load_vars,'select_nhobs.sav','_nhobs'
 load_vars,'rx_conversion.sav','_rxnh'
 load_vars,'select_group.sav','_group'
 load_vars,'fct_uniform.sav','_uniform'
-load_vars,'fct_variable.sav','_variable'
+;load_vars,'fct_variable.sav','_variable'
 load_vars,'rx_model.sav','_model'
 
 

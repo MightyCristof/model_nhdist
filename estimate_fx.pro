@@ -61,6 +61,7 @@ for i = 0,n_elements(clin_vars)-1 do re = execute(clin_vars[i]+' = dblarr(nmod)'
 
 ;; sample from model RL for each group observation (ngrp)
 for i = 0,nmod-1 do begin  
+;stop
     ;; "flagged" model sources
     iflg = where(ii_flag[*,i],flgct)
     ;iflg = lindgen(sz[1])
@@ -76,6 +77,7 @@ for i = 0,nmod-1 do begin
         ;; random draw from model to match number of sources
         rx_samp = mc_samp(rx_modn,ngrp)
         ;; estimate flux
+        ;loglxir_grp = mc_samp(loglxir[where(iiwac)],ngrp)
         lx_grp = 10.^(rx_samp+loglxir_grp)
         fullv[*,n] = lx_grp/(4.*!const.pi*dl2_grp)
         hardv[*,n] = fullv[*,n]

@@ -7,11 +7,11 @@ common _nhobs
 common _rxnh
 common _group
 common _uniform
-common _variable
+;common _variable
 
 
 ;; use observed NH dist with added unobscured sources after modeling without it to find
-if keyword_set(postmod) then nh_obs = nh_lan_cor else $
+if keyword_set(postmod) then nh_obs = nh_ric_int else $
                              postmod = 0
 cvm = 0
 
@@ -28,7 +28,8 @@ nh_samp = nh_mc(nh_obs,nsamp)
 ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
 
 ;; fraction and source numbers
-fct = mode(fctv,kde=kde_bandwidth(fctv))
+;fct = mode(fctv,kde=kde_bandwidth(fctv))
+fct = 0.562
 e_fct = stddev(fctv)
 fcn = 1.-fct
 ncn = nthin
@@ -92,19 +93,29 @@ sav_inds = ['IIMODV','POSTMOD']
 ;; RUN FOR SPLIT CTF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fraction and source numbers
-fct_ = mode(fctv,kde=kde_bandwidth(fctv))
-e_fct_ = stddev(fctv)
+;fct_ = mode(fctv,kde=kde_bandwidth(fctv))
+;e_fct_ = stddev(fctv)
+;fcn_ = 1.-fct_
+;ncn_ = nthin
+;nsr_ = round(ncn_/fcn_)
+;nct_ = round(nsr_*fct_)
+;f24_ = mode(f24v_,kde=kde_bandwidth(f24v_))*fct_
+;;f24_ = mean(f24v2)*fct_;mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
+;n24_ = round(nsr_*f24_)
+;f25_ = mode(f25v_,kde=kde_bandwidth(f25v_))*fct_
+;;f25_ = mean(f25v2)*fct_;mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
+;n25_ = round(nsr_*f25_)
+;;n25_ = nct_-n24_
+
+fct_ = fct
+e_fct_ = e_fct
 fcn_ = 1.-fct_
 ncn_ = nthin
 nsr_ = round(ncn_/fcn_)
 nct_ = round(nsr_*fct_)
-f24_ = mode(f24v_,kde=kde_bandwidth(f24v_))*fct_
-;f24_ = mean(f24v2)*fct_;mode(f24v2,kde=kde_bandwidth(f24v2))*fct_
-n24_ = round(nsr_*f24_)
-f25_ = mode(f25v_,kde=kde_bandwidth(f25v_))*fct_
-;f25_ = mean(f25v2)*fct_;mode(f25v2,kde=kde_bandwidth(f25v2))*fct_
-n25_ = round(nsr_*f25_)
-;n25_ = nct_-n24_
+n24_ = round(nct_ * 0.13)
+n25_ = round(nct_ * 0.87)
+
 ;; NH_RESAMP: structure of increased CT sources
 ;; NH_MOD: draw N sources from NH_RESAMP
 ;; RX_MOD: convert the model NH model to model RX with observed scatter in Chen+17 LX-LMIR
@@ -129,7 +140,7 @@ for n = 0,niter-1 do begin
     rx_detv_[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
     ;rx_detv_[*,n] = rxd+randomn(seed,ndet)*e_rxd
     if (moddet ge 5) then begin
-        a2_[n] = ad_test(rx_detv_[*,n],rx_modv[idet,n],permute=0,prob=p,cvm=cvm)
+        a2_[n] = ad_test(rx_detv_[*,n],rx_modv_[idet,n],permute=0,prob=p,cvm=cvm)
         p_a2_[n] = p
     endif else if (moddet gt 0) then begin
         a2_[n] = -1.
