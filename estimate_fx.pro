@@ -43,9 +43,9 @@ z_grp = z[igrp]
 dl2_grp = dl2[igrp]
 
 ;; prep hard and soft conversion arrays
-iz = value_locate(zv,z_grp)
-c_hard_grp = c_hard_fine[*,iz]
-c_soft_grp = c_soft_fine[*,iz]
+iz = value_locate(double(zm),z_grp)
+c_hard_grp = c_hard[*,iz]
+c_soft_grp = c_soft[*,iz]
 
 ;; reform to 2D array if needed
 sz = size(rx_model)
@@ -82,10 +82,20 @@ for i = 0,nmod-1 do begin
         fullv[*,n] = lx_grp/(4.*!const.pi*dl2_grp)
         hardv[*,n] = fullv[*,n]
         softv[*,n] = fullv[*,n]
+        
         ;; bounded indices
-        ibnd = where(rx_samp ge min(rx),nbnd,complement=iunb,ncomplement=nunb)
-        hardv[ibnd,n] *= c_hard_grp[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
-        softv[ibnd,n] *= c_soft_grp[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
+        ;; random index for FSCAT
+        ifs = fix(randomn(seed,10000)*0.8+2.)
+        ifs = (ifs[where(ifs gt 0 and ifs lt 3)])[0:ngrp-1]
+        rx_ifs = rx[*,ifs]
+        ibnd = where(rx_samp ge min(rx_ifs,dim=1),nbnd,complement=iunb,ncomplement=nunb)
+        
+        iloc = lonarr(nbnd)
+        for b = 0,nbnd-1 do iloc[b] = value_locate(rx_ifs[*,ibnd[b]],rx_samp[ibnd[b]])
+        hardv[ibnd,n] *= c_hard_grp[iloc+1,ibnd]
+        softv[ibnd,n] *= c_soft_grp[iloc+1,ibnd]
+        ;hardv[ibnd,n] *= c_hard_grp[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
+        ;softv[ibnd,n] *= c_soft_grp[value_locate(rx_fine,rx_samp[ibnd]),ibnd]
         hardv[iunb,n] *= c_hard_grp[-1,iunb]
         softv[iunb,n] *= c_soft_grp[-1,iunb]
         ;; simulate contamination

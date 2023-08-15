@@ -62,7 +62,10 @@ if keyword_set(setrx) then begin
         up = up+'../'
         prep_dir = file_search(up+'data_prep')
     endwhile
-    rx_path = prep_dir+'/rxz_borus_gupta.sav'
+    rx_path = prep_dir+'/rx_mcmc.sav'
+    ;; indices for final mcmc assumed parameters
+    ;rx = reform(rx[*,1,*,5,5])
+    ;rx_path = prep_dir+'/rxz_borus_gupta.sav'
     ;; -f force to overwrite symbolic link in case changing
     spawn, 'ln -sf '+rx_path+' rx_conversion.sav'
     nkeys--
@@ -79,25 +82,27 @@ endif
 load_vars,'select_group.sav','_group'
 if (nkeys eq 0) then GOTO, NO_KEYS
 
-;; estimate the distribution of fixed CTF
-if keyword_set(uniform) then begin
-    ctf_uniform
-    nkeys--
-endif
-load_vars,'fct_uniform.sav','_uniform'
-if (nkeys eq 0) then GOTO, NO_KEYS
-
-;; estimate the distribution of free CTF
-if keyword_set(variable) then begin
-    ctf_variable,/chisq
-    nkeys--
-endif
-load_vars,'fct_variable.sav','_variable'
-if (nkeys eq 0) then GOTO, NO_KEYS
+;; NULL BY MCMC
+;;; estimate the distribution of fixed CTF
+;if keyword_set(uniform) then begin
+;    ctf_uniform
+;    nkeys--
+;endif
+;load_vars,'fct_uniform.sav','_uniform'
+;if (nkeys eq 0) then GOTO, NO_KEYS
+;
+;;; estimate the distribution of free CTF
+;if keyword_set(variable) then begin
+;    ctf_variable,/chisq
+;    nkeys--
+;endif
+;load_vars,'fct_variable.sav','_variable'
+;if (nkeys eq 0) then GOTO, NO_KEYS
 
 ;; simulate the NH and RL distributions
 if keyword_set(final) then begin
     model_rxdist,postmod=postmod
+    ;model_rxdist
     nkeys--
 endif
 load_vars,'rx_model.sav','_model'

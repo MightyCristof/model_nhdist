@@ -38,9 +38,12 @@ if keyword_set(iidet) then begin
         yh_non[*,i] = histogram(arr[where(iidet[*,i] eq 0),i],bin=binsz,min=xh[0],max=xh[-1])
     endfor
     if keyword_set(normalize) then begin
-        if (typename(normalize) eq 'STRING') then re = execute('nm_det = nm') else $
-                                                  nm_det = total(yh_det,1)
-        nm_det = rebin(transpose(nm_det),nbins,sz[1])
+        if (typename(normalize) eq 'STRING') then begin
+            re = execute('nm_det = nm')
+        endif else begin
+            nm_det = total(yh_det,1)
+            nm_det = rebin(transpose(nm_det),nbins,sz[1])
+        endelse
         yh_det /= nm_det
         yh_non /= nm_det
     endif

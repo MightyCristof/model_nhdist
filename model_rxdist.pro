@@ -6,7 +6,7 @@ common _nhdist
 common _nhobs
 common _rxnh
 common _group
-common _uniform
+;common _uniform
 ;common _variable
 
 
@@ -29,8 +29,13 @@ ithin = where(nh_samp lt 24.,nthin);,complement=ithick,ncomplement=nthick)
 
 ;; fraction and source numbers
 ;fct = mode(fctv,kde=kde_bandwidth(fctv))
-fct = 0.562
-e_fct = stddev(fctv)
+;fct = 0.562
+;e_fct = stddev(fctv)
+
+;; mcmc results
+fct = 0.555857
+e_fct = 0.0345998
+
 fcn = 1.-fct
 ncn = nthin
 nsr = round(ncn/fcn)
@@ -54,7 +59,7 @@ rx_detv = dblarr(ndet,niter)
 ncount = ceil(niter/10.)*10.
 for n = 0,niter-1 do begin
     nh_modv[*,n] = nh_resamp[randomi(nsrc,nresamp)]
-    rx_modv[*,n] = rx2nh(nh_modv[*,n],/rx_out,scat=rx_scat)
+    rx_modv[*,n] = rx2nh(nh_modv[*,n],/rx_out,scat=rx_scat,/mcmc)
     iimodv[*,n] = rx_modv[*,n] gt rxl
     idet = where(iimodv[*,n] eq 1,moddet)
     rx_detv[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat
@@ -74,7 +79,6 @@ for n = 0,niter-1 do begin
 endfor
 print, 'END   - FIXED FCT MODELING'
 print, '=============================================='
-
 nh_mod = hist2d_avg(nh_modv,1.d,iidet=iimodv,normalize='where(xh lt 24.,/null)')
 rx_mod = hist2d_avg(rx_modv,0.2d,iidet=iimodv,/normalize)
 fx_non = estimate_fx(rx_modv,iimodv)
@@ -113,8 +117,8 @@ fcn_ = 1.-fct_
 ncn_ = nthin
 nsr_ = round(ncn_/fcn_)
 nct_ = round(nsr_*fct_)
-n24_ = round(nct_ * 0.13)
-n25_ = round(nct_ * 0.87)
+n24_ = round(nct_ * 0.45)
+n25_ = round(nct_ * 0.55)
 
 ;; NH_RESAMP: structure of increased CT sources
 ;; NH_MOD: draw N sources from NH_RESAMP
@@ -134,7 +138,7 @@ rx_detv_ = dblarr(ndet,niter)
 ;; fill arrays
 for n = 0,niter-1 do begin
     nh_modv_[*,n] = nh_resamp[randomi(nsrc,nresamp)]
-    rx_modv_[*,n] = rx2nh(nh_modv_[*,n],/rx_out,scat=rx_scat)
+    rx_modv_[*,n] = rx2nh(nh_modv_[*,n],/rx_out,scat=rx_scat,/mcmc)
     iimodv_[*,n] = rx_modv_[*,n] gt rxl
     idet = where(iimodv_[*,n] eq 1,moddet)
     rx_detv_[*,n] = rxd+randomn(seed,ndet)*0.23;rx_scat

@@ -96,7 +96,7 @@ endif
 ;rxdet[where(rxdet ne -9999)] = rxdet[where(rxdet ne -9999)]+loglxir[where(rxdet ne -9999)]-lxir_c17(loglir[where(rxdet ne -9999)]-0.2)
 
 ;; STDDEV observed in LX-LMIR relation of Chen+17
-rx_scat = 0.30
+rx_scat = 0.23
 ;; separate WISE AGN, detections and non-detections, type 1/2
 iwac = where(iiwac)
 iiwd = iiwac and xdet ne ''
@@ -112,7 +112,7 @@ iitype2 = (rxdet gt -9999. and rxdet lt 0.) or (rxnon gt -9999. and rxnon lt 0.)
 
 ;; add to variable list
 fits = [fits,'RX_SCAT','IIWD','IIWN','IISD','IISN','IIAD','IIAN','IIHIX','IILOX','IITYPE1','IITYPE2','BAND']
-stop
+
 ;; save
 var_str = strjoin([fits,surv,stak],',')
 re = execute('save,'+var_str+',file="carroll21_data.sav"')

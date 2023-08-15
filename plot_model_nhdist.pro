@@ -6,20 +6,23 @@ PRO plot_model_nhdist, PROPERTIES = properties, $
                        RXMODEL = rxmodel, $
                        RXNH = rxnh, $
                        STACK = stack, $
-                       NEWNH = newnh, $
+                       NEW_NHDIST = new_nhdist, $
+                       PARAM_COMP = param_comp, $
+                       MRLX = mrlx, $
+                       CORNER = corner, $
                        HIDE = hide, $
                        LOW_RES = low_res, $
                        SAV = sav
 
 
-common _data
-common _nhdist
-common _nhobs
-common _rxnh
-common _group
-common _uniform
-;common _variable
-common _model
+;common _data
+;common _nhdist
+;common _nhobs
+;common _rxnh
+;common _group
+;common _uniform
+;;common _variable
+;common _model
 
 
 if keyword_set(low_res) then res = 100 else res = 600
@@ -369,7 +372,7 @@ endif
 if keyword_set(xspec) then begin
 
     ;; XSPEC model component output
-    file = '/Users/ccarroll/Research/projects/model_nhdist/workspace/data_prep/borus_modelcomps.txt'
+    file = '/Users/ccarroll/Research/projects/model_nhdist/workspace/data_prep/mc_modelcomps.txt'
 
     ;; read data
     readcol,file,energy,tot21,bor21,pl21,scpl21,tot22,bor22,pl22,scpl22,tot23,bor23,pl23,scpl23,tot24,bor24,pl24,scpl24,tot25,bor25,pl25,scpl25,/silent
@@ -392,9 +395,10 @@ if keyword_set(xspec) then begin
     ;;      MAGENTA       GREEN       ORANGE     BLUE
     col = [[204,121,167],[0,158,115],[213,94,0],[0,114,178]]
 
-    e = {xra:[0.1,300],yra:[1e-4,100], $
+    e = {xra:[0.1,300],yra:[5e-5,5e3], $
          xlog:1,ylog:1, $
-         xtickname:['0.1','1','10','100'],ytickname:'10!U'+strtrim([-4:2],2), $
+         thick:3, $
+         xtickname:['0.1','1','10','100'],ytickname:'10!U'+strtrim([-4:3],2), $
          ytickinterval:1, $
          xtitle:'Energy  [keV]',ytitle:'keV$^2$  [Photons cm$^{-2}$ s$^{-1}$ keV$^{-1}$]', $
          font_name:'Times',font_size:14}
@@ -444,7 +448,12 @@ endif
 ;;----------------------------------------------------------------------------------------
 if keyword_set(nhmodel) then begin
 
-    nsamp = 10000.
+    readcol,'/Users/ccarroll/Research/projects/model_nhdist/workspace/data_prep/Ricci+2017_Fig23_data.csv', $
+            nh,freq,format='d,d'
+    nh_obs = soa2aos({xh:nh,yh:freq})
+    nh_obs[where(nh_obs.xh eq 20.5,/null)].yh = 0.0
+    
+    nsamp = 50000.
     nh_samp = nh_mc(nh_obs,nsamp)
     ithin = where(nh_samp lt 24.,nthin)
     nct = round((nthin/(1.-dindgen(9,start=1)/10.))*(dindgen(9,start=1)/10.))     ;; determine the number of CT sources
@@ -510,10 +519,11 @@ if keyword_set(nhmodel) then begin
     ;p = plot(x80,y80/nrm,/stairstep,/ov)
     ;p = plot(x90,y90/nrm,/stairstep,/ov)
 
-    ar = ARROW([26.18,26.18], [0.05,0.13], COLOR=col[*,2], /DATA, /CURRENT,thick=2)
-    ct = text(26.48,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
-    ct = text(26.48,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
-    ct = text(26.48,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
+    ;ar = ARROW([26.18,26.18], [0.05,0.13], COLOR=col[*,2], /DATA, /CURRENT,thick=2)
+    ar = ARROW([0.835,0.835], [0.35,0.65], COLOR=col[*,2], /NORMAL, /CURRENT,thick=2)
+    ct = text(0.85,0.5,'$!8f!7_{CT}^{  model}$',/NORMAL,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=1.0,orientation=90)
+    ;ct = text(26.48,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
+    ;ct = text(26.48,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
     ct10 = text(25.5,0.017,'0.10',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
     ct20 = text(25.5,0.033,'0.20',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
     ct30 = text(25.5,0.051,'0.30',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
@@ -535,7 +545,12 @@ endif
 ;;----------------------------------------------------------------------------------------
 if keyword_set(rxmodel) then begin
 
-    nsamp = 10000.
+    readcol,'/Users/ccarroll/Research/projects/model_nhdist/workspace/data_prep/Ricci+2017_Fig23_data.csv', $
+            nhric,freq,format='d,d'
+    nh_obs = soa2aos({xh:nhric,yh:freq})
+    nh_obs[where(nh_obs.xh eq 20.5,/null)].yh = 0.0
+
+    nsamp = 50000.
     nh_samp = nh_mc(nh_obs,nsamp)
     ithin = where(nh_samp lt 24.,nthin)
     nct = round((nthin/(1.-dindgen(9,start=1)/10.))*(dindgen(9,start=1)/10.))     ;; determine the number of CT sources
@@ -569,7 +584,7 @@ if keyword_set(rxmodel) then begin
     y80 = histogram(rx_fct80,bin=0.2,locations=x80,min=-4.4,max=1.4)
     y90 = histogram(rx_fct90,bin=0.2,locations=x90,min=-4.4,max=1.4)
 
-    e = {xra:[-4.2,1.2],yra:[0.,0.3], $
+    e = {xra:[-4.2,1.2],yra:[0.,0.25], $
          stairstep:1,fill_background:1,color:'black', $
          xtitle:'$!8R_{L!7_X}^{ model}$',ytitle:'Frequency (arbitrary)', $
          font_name:'Times',font_size:14}
@@ -601,27 +616,29 @@ if keyword_set(rxmodel) then begin
 ;           [253,187,132], $
 ;           [253,212,158]]
 ;    
-    p = plot(x90,y90/10000.,_extra=e,fill_color=col[*,0])
-    p = plot(x80,y80/10000.,_extra=e,fill_color=col[*,1],/ov)
-    p = plot(x70,y70/10000.,_extra=e,fill_color=col[*,2],/ov)
-    p = plot(x60,y60/10000.,_extra=e,fill_color=col[*,3],/ov)
-    p = plot(x50,y50/10000.,_extra=e,fill_color=col[*,4],/ov)
-    p = plot(x40,y40/10000.,_extra=e,fill_color=col[*,5],/ov)
-    p = plot(x30,y30/10000.,_extra=e,fill_color=col[*,6],/ov)
-    p = plot(x20,y20/10000.,_extra=e,fill_color=col[*,7],/ov)
-    p = plot(x10,y10/10000.,_extra=e,fill_color=col[*,8],/ov)
+    p = plot(x90,y90/nsamp,_extra=e,fill_color=col[*,0])
+    p = plot(x80,y80/nsamp,_extra=e,fill_color=col[*,1],/ov)
+    p = plot(x70,y70/nsamp,_extra=e,fill_color=col[*,2],/ov)
+    p = plot(x60,y60/nsamp,_extra=e,fill_color=col[*,3],/ov)
+    p = plot(x50,y50/nsamp,_extra=e,fill_color=col[*,4],/ov)
+    p = plot(x40,y40/nsamp,_extra=e,fill_color=col[*,5],/ov)
+    p = plot(x30,y30/nsamp,_extra=e,fill_color=col[*,6],/ov)
+    p = plot(x20,y20/nsamp,_extra=e,fill_color=col[*,7],/ov)
+    p = plot(x10,y10/nsamp,_extra=e,fill_color=col[*,8],/ov)
 
-    ar = ARROW([0.6,0.6], [0.08,0.22], COLOR=col[*,2], /DATA, /CURRENT,thick=2)
-    ct = text(0.8,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
-    ct = text(0.8,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
-    ct = text(0.8,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
+
+
+    ar = ARROW([0.235,0.235], [0.35,0.65], COLOR=col[*,2], /NORMAL, /CURRENT,thick=2)
+    ct = text(0.21,0.5,'$!8f!7_{CT}^{  model}$',/NORMAL,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.,orientation=90)
+    ;ct = text(0.8,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
+    ;ct = text(0.8,e.yra[1]/2.,'$!8f!7_{CT}^{  model}$',/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5,orientation=90)
     ;ct10 = text(25.5,0.017,'0.10',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
     ;ct20 = text(25.5,0.033,'0.20',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
     ;ct30 = text(25.5,0.051,'0.30',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
     ;ct40 = text(25.5,0.075,'0.40',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
     ;ct50 = text(25.5,0.108,'0.50',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
     ;ct60 = text(25.5,0.158,'0.60',/data,font_size=14,font_name='Times',font_style='Bold',alignment=0.5,vertical_alignment=0.5)
-stop
+
     if keyword_set(sav) then begin
         print, '    SAVING PLOT'
         if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/rx_model.eps',/BITMAP else $
@@ -637,40 +654,87 @@ endif
 ;;----------------------------------------------------------------------------------------
 if keyword_set(rxnh) then begin
 
-    restore,'/Users/ccarroll/Research/projects/model_nhdist/workspace/data_prep/rx_mc_borus.sav'    
-    nhp = rebin(nh_fine,n_elements(nh_fine)*100d)
-    rxgp = interpol(reform(rx_fine[*,0,-2]),nh_fine,nhp)
-    rxhi = interpol(reform(rx_fine[*,0,-1]),nh_fine,nhp)
-    rxlo = interpol(reform(rx_fine[*,0,0]),nh_fine,nhp)
-
+    ;; read data
+    rx = mrdfits('rx.fits',0,hd)
+    nh = mrdfits('rx.fits',3)
+    phot = mrdfits('rx.fits',4)
+    scat = mrdfits('rx.fits',5)
+    refl = mrdfits('rx.fits',6)
+    open = mrdfits('rx.fits',7)
+    
+    ;; rebin for finer elements so the plot lines match up when shading
+    nhp = rebin(nh,n_elements(nh)*10d)
+    sz = size(rx,/dim)
+    nsrc = product(sz[1:-1])
+    vec_rx = reform(rx,sz[0],nsrc)
+    rxp = dblarr(n_elements(nhp),nsrc)
+    for i = 0,nsrc-1 do rxp[*,i] = interpol(vec_rx[*,i],nh,nhp)
+    
+    ;; find the upper and lower bounds
+    ;for i = 0,n_elements(nhp)-1 do begin
+    ;   mm = minmax(rxp[i,*],imm)
+    ;   print, nhp[i], mm[0], imm[0], mm[1], imm[1]
+    ;endfor
+    ;% Compiled module: MINMAX.
+    ;   21.000000       0.0000000           0       0.0000000           0
+    ;   21.250000     -0.11406621        1205    -0.012380086        1566
+    ;   21.500000     -0.22716184        1205    -0.025157160        1566
+    ;   21.750000     -0.33922480        1205    -0.040565469        1566
+    ;   22.000000     -0.45035115        1403    -0.058008511         180
+    ;   22.250000     -0.56108265        1403    -0.087032824         180
+    ;   22.500000     -0.67243711        1403     -0.13039931         180
+    ;   22.750000     -0.78581145        1403     -0.19339732         180
+    ;   23.000000     -0.90249016        1403     -0.27963530         180
+    ;   23.250000      -1.0236432        1403     -0.39574794         180
+    ;   23.500000      -1.1504725        1403     -0.55835479         180
+    ;   23.750000      -1.2827198        1403     -0.80429493         180
+    ;   24.000000      -1.4360859        1388      -1.1948127          18
+    ;   24.250000      -2.0294886        1370      -1.5392724          15
+    ;   24.500000      -2.5777558        1370      -1.6623632        1401
+    ;   24.750000      -2.7985731        1370      -1.7803468        1401
+    ;   25.000000      -2.9315420        1370      -1.8980953        1401    
+    
+    
+    ;; bounds for left and right of intersection
+    ileft = [180,1403]
+    iright = [1401,1370]
     ;; index where upper and lower sigma intersect
-    !null = min(abs(rxhi[100:-1]-rxlo[100:-1]),ind)
-    ;; index where upper sigma intersects CT shading
+    ioff = 25
+    !null = min(abs(rxp[ioff:-1,ileft[0]]-rxp[ioff:-1,ileft[1]]),ind)
+    inters_left = ind+ioff
+    !null = min(abs(rxp[ioff:-1,iright[0]]-rxp[ioff:-1,iright[1]]),ind)
+    inters_right = ind+ioff
+
+    ;; index for CT shading
     ict = value_locate(nhp,24.) 
 
     e = {xra:[21.0,25.0],yra:[-3.5,0.5], $
-         thick:2,fill_background:1, $
+         thick:1,fill_background:1,fill_level:-3.5, $
          xtitle:'$log !8N!7_H / cm^2$',ytitle:'$!8R_{L_{!7X}}$', $
          font_name:'Times',font_size:14}
+    transp = 40
+    ;; similar red as NH_DIST.PNG
+    ;col = [223,89,75]
+    col = [215,48,31]
 
-    ;; additive RGB purple
-    col = [123,73,99]
-    ; pretty purple
-    col = [128,125,186]
-    
     ;; CT shading
-    pct = plot([24.,25.],e.yra[1]*[1.,1.],_extra=e,fill_color='light grey',fill_level=e.yra[0])
+    pct = plot([24.,25.],e.yra[1]*[1.,1.],_extra=e,fill_color='light grey')
+    ;; remove CT shading in plot area for transparency to look right
+    pct = plot(nhp[ict:-1],rxp[inters_right:-1,iright[0]],_extra=e,color='white',fill_color='white',/ov)
+    pct = plot(nhp[ict:inters_left],rxp[ict:inters_left,ileft[0]],_extra=e,col='white',fill_col='white',/ov)
     ;; RX–NH shading
-    plo = plot(nhp[0:ind],rxlo[0:ind],_extra=e,linestyle='',/ov,fill_color=col,fill_transparency=0,name='$\sigma_{scatt} = -2.0$')
-    phi = plot(nhp[0:ind],rxhi[0:ind],_extra=e,linestyle='',/ov,fill_color='white',name='$\sigma_{scatt} = 0.5$')
-    p = plot(nhp[ind:-1],rxlo[ind:-1],_extra=e,linestyle='',/ov,fill_color=col,fill_level=rxlo[ind],fill_transparency=0)
-    p = plot(nhp[ind:-1],rxhi[ind:-1],_extra=e,linestyle='',/ov,fill_level=rxlo[ind],fill_color='white')
+    p = plot(nhp[0:inters_left],rxp[0:inters_left,ileft[0]],_extra=e,col=col,fill_color=col,transparency=transp,fill_transparency=transp,/ov)
+    p = plot(nhp[0:inters_left],rxp[0:inters_left,ileft[1]],_extra=e,col=col,transparency=transp,fill_color='white',/ov)
     ;; fix CT shading
-    pct = plot(nhp[ict:-1],rxhi[ict:-1],_extra=e,linestyle='',fill_color='light grey',fill_level=rxlo[ind],/ov)
+    ;pct = plot(nhp[ict:inters_left],rxp[ict:inters_left,ileft[1]],_extra=e,linestyle='',fill_color='light grey',/ov)
+    ;; continue RX-NH shading
+    p = plot(nhp[inters_right:-1],rxp[inters_right:-1,iright[0]],_extra=e,col=col,fill_color=col,transparency=transp,fill_transparency=transp,/ov)
+    p = plot(nhp[inters_right:-1],rxp[inters_right:-1,iright[1]],_extra=e,col=col,transparency=transp,fill_color='white',/ov)
+    ;; fix CT shading
+    pct = plot(nhp[ict:-1],rxp[ict:-1,iright[1]],_extra=e,linestyle='',fill_color='light grey',/ov)
     ;; plot data
-    plo = plot(nhp,rxlo,'-.',/ov,thick=2,name='$\sigma_{!8f!7_{scatt}} = -2.0$')
-    phi = plot(nhp,rxhi,':',/ov,thick=2,name='$\sigma_{!8f!7_{scatt}} = 0.5$')
-    pgp = plot(nhp,rxgp,'-',thick=2,/ov,name='$!8f!7_{scatt}$ (Gupta+2021)')
+    for i = 0,nsrc-1 do p = plot(nh,vec_rx[*,i],col=col,transparency=98,/ov)
+
     ;; CT label
     t = text(24.10,0.15,'CT',col='black',font_size=14,font_name='Times',font_style='Bold',/data)
     ;; legend
@@ -684,6 +748,7 @@ if keyword_set(rxnh) then begin
                                                      p.save,'figures/rx_nh.png',resolution=res
     endif
 
+    
 
 endif
 
@@ -755,7 +820,12 @@ endif
 ;;----------------------------------------------------------------------------------------
 ;; MODELED NH DISTRUBITUION w/ STACKING RESULTS --- ANANNA+2019 AVERAGED NH
 ;;----------------------------------------------------------------------------------------
-if keyword_set(newnh) then begin
+if keyword_set(new_nhdist) then begin
+    restore,'../observed_nhdist.sav'
+    restore,'select_nhobs.sav'
+    restore,'select_group.sav'
+    restore,'rx_model.sav'
+
     ;; X-ray stack image path
     prep_dir = file_search('data_prep')
     up = ''
@@ -772,10 +842,10 @@ if keyword_set(newnh) then begin
     modoff = [[0.76,0.77],[1.31,1.32]]
     ;fxstak[1,0:1]
     ;stack_flux = [4.2155345e-16,8.9311185e-16]  ;; Chandra current cycle gamma 1.4
-    ;stack_flux = [5.7814466e-16,1.4722106e-15]  ;; Chandra current cycle gamma 1.8
-    stack_flux = [2.5651130e-16,5.4324276e-16]  ;; Chandra cycle 12 gamma 1.4 (previous step FXS)
-    ;stack_flux = [3.0934751e-16,3.9032567e-16]    ;; Chandra cycle 12 gamma 1.8
-    stack_err = [8.9192778e-17,2.1103027e-16]   ;; additional uncertainties based on photon index
+    stack_flux = [5.7814466e-16,1.4722106e-15]  ;; Chandra current cycle gamma 1.8
+    ;stack_flux = [2.5651130e-16,5.4324276e-16]  ;; Chandra cycle 12 gamma 1.4 (previous step FXS)
+    stack_err = [3.0934751e-16,5.9032567e-16]    ;; Chandra cycle 12 gamma 1.8
+    ;stack_err = [8.9192778e-17,2.1103027e-16]   ;; additional uncertainties based on photon index
     ;stack_err = [8.2510708e-17,1.6940501e-16]   ;; poisson error from STACKFAST (previous step E_FXS)
     ;stack_err = [1.24e-16,4.00e-16];[7.3145295e-17,2.2261186e-16];e_fxstak[1,0:1]
     xy = findgen(35,start=-17)
@@ -796,17 +866,36 @@ if keyword_set(newnh) then begin
     ;; variable 
     ;; soft: 1.4777313317360868e-16 \pm 6.408453646783788e-18
     ;; hard: 1.1265466583256214e-15 \pm 2.399513231681352e-16
-    sfx = [1.825227808798384e-16,1.4777313317360868e-16]
-    hfx = [1.4501219449132314e-15,1.1265466583256214e-15]
-    e_sfx = [6.617095252140283e-18,6.408453646783788e-18]
-    e_hfx = [2.4950863035050844e-16,2.399513231681352e-16]
-    fx_mod = [mean(sfx),mean(hfx)]
-    e_fx_mod = sqrt((e_sfx/sfx)^2. + (e_hfx/hfx)^2. + unc_phot^2. + unc_vari^2. + unc_simu^2. + unc_lxir^2.) * fx_mod
+    ;sfx = [1.825227808798384e-16,1.4777313317360868e-16]
+    ;hfx = [1.4501219449132314e-15,1.1265466583256214e-15]
+    ;e_sfx = [6.617095252140283e-18,6.408453646783788e-18]
+    ;e_hfx = [2.4950863035050844e-16,2.399513231681352e-16]
+    ;fx_mod = [mean(sfx),mean(hfx)]
+    ;e_fx_mod = sqrt((e_sfx/sfx)^2. + (e_hfx/hfx)^2. + unc_phot^2. + unc_vari^2. + unc_simu^2. + unc_lxir^2.) * fx_mod
+    
+    ;; MCMC
+    ;fx_mod = [mean(fx_non.csoft),mean(fx_non.chard)]
+    ;e_fx_mod = [mean(fx_non.e_csoft),mean(fx_non.e_chard)]
+    fx_mod = [mean(fx_non.csoft),mean(fx_non.chard)]
+    e_fx_mod = [mean(fx_non.e_csoft),mean(fx_non.e_chard)]
     
     ;; NH MODELING UNCERTAINTIES
-    err = nh_mod.sig/nh_mod.yh > 0.
-    e_nhmod = sqrt(err^2. + unc_phot^2. + unc_vari^2. + unc_simu^2.) * nh_mod.yh
-
+    ;err = nh_mod.sig/nh_mod.yh > 0.
+    ;e_nhmod = sqrt(err^2. + unc_phot^2. + unc_vari^2. + unc_simu^2.) * nh_mod.yh
+    
+    print, "LOG (FX MODEL - FX STACK) [dex]"
+    print, alog10(fx_mod/stack_flux)
+    
+    ;; MCMC
+    nhm = nh_mod
+    ;nhm = nh_mod_
+    err = nhm.sig/nhm.yh > 0.
+    ;; uncertainties on NH MODEL, FCT, FSCAT
+    ;e_nhm = sqrt(err^2. + (0.037/0.555)^2. + (0.13/1.04)^2. )
+    ;print, e_nhm
+    e_nhm = sqrt(err*0. + (0.037/0.555)^2. + (0.13/1.04)^2. )
+    ;print, e_nhm
+    
     ;; variables for FIXED vs FREE
     fx_models = ['FX_NON','FX_NON_']
     nh_models = ['NH_MOD','NH_MOD_']
@@ -851,16 +940,16 @@ if keyword_set(newnh) then begin
     ihard = image(hard,pos=pos[*,1],/current,/device)
     thard = text(target=phard,0.5,0.82,'  2–7 keV  ',font_style='Bold',font_size=16,fill_background=1,alignment=0.5,/relative)
     xt = text((pos[2,0]+pos[0,1])/2.,pos[1,0]-42,/device,'offset in R.A. [arcsec.]',alignment=0.5,font_name='Times',font_size=14)
-
     ;; plot X-ray flux estimates
+    
     pxd = errorplot(energy_center,stack_flux,energy_range,stack_err, $
-                   linestyle='',/xlog,/ylog,pos=pos[*,2],/current,/device, $
+                   linestyle='',errorbar_thick=2,/xlog,/ylog,pos=pos[*,2],/current,/device, $
                    xtitle='$energy  [keV]$',ytitle='$!8F!7_{X}  [erg s^{-1} cm^{-2}]$', $
                    font_name='Times',font_size=14)
     pxd = plot(energy_center,stack_flux,'s',col='black', $
-               sym_size=1.5,sym_thick=1.5,sym_filled=1,sym_fill_color='white',/ov,name='Stack')
+               sym_size=1.5,sym_thick=2,sym_filled=1,sym_fill_color='white',/ov,name='Stack')
     pxd.xra=[1e-1,1e1]
-    pxd.yra=[5e-17,1e-14]
+    pxd.yra=[5e-17,3e-14]
     ;; plot MODEL FLUXES
     fxm = fx_mod
     e_fxm = e_fx_mod
@@ -880,23 +969,23 @@ if keyword_set(newnh) then begin
     ;                sym_size=2.0,sym_thick=1.5,sym_filled=1,sym_fill_color=col[*,2],sym_transparency=20,fill_transparency=20,/ov)
     ;; AVERAGED
     pxm = errorplot(energy_center*modoff[*,0],fxm[*,0],e_fxm[*,0], $
-                        linestyle='',errorbar_capsize=0.1,/ov)
+                        linestyle='',errorbar_thick=2,errorbar_capsize=0.1,/ov)
     pxm = plot(energy_center*modoff[*,0],fxm[*,0],'S',col='black', $
-                   sym_size=2.0,sym_thick=1.5,sym_filled=1,sym_fill_color='white',sym_transparency=0,/ov)
+                   sym_size=2.0,sym_thick=2,sym_filled=1,sym_fill_color='white',sym_transparency=0,/ov)
     pxm = plot(energy_center*modoff[*,0],fxm[*,0],'S',col='black', $
-                   sym_size=2.0,sym_thick=1.5,sym_filled=1,sym_fill_color=col[*,2],sym_transparency=20,fill_transparency=20,/ov)
+                   sym_size=2.0,sym_thick=2,sym_filled=1,sym_fill_color=col[*,2],sym_transparency=20,fill_transparency=20,/ov)
     
-    ps = plot([1.5e-1],[5.30e-15],'s',col='black',sym_size=1.5,sym_thick=1.5,sym_filled=1,sym_fill_color='white',sym_transparency=0,/ov) 
+    ps = plot([1.5e-1],[1.40e-14],'s',col='black',sym_size=1.5,sym_thick=2,sym_filled=1,sym_fill_color='white',sym_transparency=0,/ov) 
     ts = text(0.15,0.84,target=pxd,/relative,'X-ray stacking',font_name='Times',font_size=14)
-    po = plot([1.5e-1],[2.80e-15],'S',col='black',sym_size=2.0,sym_thick=1.5,sym_filled=1,sym_fill_color=col[*,2],sym_transparency=10,/ov)
+    po = plot([1.5e-1],[6.50e-15],'S',col='black',sym_size=2.0,sym_thick=2,sym_filled=1,sym_fill_color=col[*,2],sym_transparency=10,/ov)
     to = text(0.15,0.72,target=pxm,/relative,'Model fluxes',font_name='Times',font_size=14)
     
     ;; plot NH DISTRIBUTION
     pct = plot([24.,26.],[1.,1.]*enh.yra[1],_extra=enh,pos=pos[*,3], $
-               fill_background=1,fill_color='light grey',fill_level=0.,fill_transparency=0)
+               fill_background=1,fill_color='light grey',fill_level=0.63,fill_transparency=0)
     pct.stairstep = 0   ;; CT shading
     
-    pnh = errorplot(nh_mod.xh+0.5,nh_mod.yh/total(nh_mod[where(nh_mod.xh lt 24.)].yh),e_nhmod,'-',thick=4,errorbar_thick=4,_extra=enh, $
+    pnh = errorplot(nhm.xh+0.5,nhm.yh/total(nhm[where(nhm.xh lt 24.)].yh),e_nhm,'-',thick=4,errorbar_thick=4,_extra=enh, $
                               pos=pos[*,3],fill_background=1,fill_color=col[*,2],fill_transparency=20,name='This work')
     
     ;pnh2 = errorplot(nh_mod_.xh+0.5,nh_mod_.yh/total(nh_mod_[where(nh_mod_.xh lt 24.)].yh),e_nhmod,':',thick=4,errorbar_thick=4,_extra=enh, $
@@ -907,7 +996,7 @@ if keyword_set(newnh) then begin
     tct = text(0.683,0.91,'CT',target=pct,/relative,font_name='Times',font_size=14)
     ;p = plot(nh_ric_int.xh,nh_ric_int.yh/total(nh_ric_int[where(nh_ric_int.xh lt 24.)].yh),':',/ov,/stairstep,thick=4)
     ;; CT Fraction text and legend
-    ctad = text(25.,enh.yra[1]/3.,'$!8f!7_{CT} = 0.562^{+0.066}_{-0.090}$',target=pnh,/data,font_size=16,font_name='Times',alignment=0.5,vertical_alignment=0.5)
+    ctad = text(25.,enh.yra[1]/3.5,'$!8f!7_{CT} = 0.555^{+0.037}_{-0.032}$',target=pnh,/data,font_size=18,font_name='Times',alignment=0.5,vertical_alignment=0.5)
     leg = legend(target=[pnh,pan],position=[0.138,0.59],/normal,horizontal_alignment=0.,sample_width=0.14,font_size=14,font_name='Times')
     
     ;; save image
@@ -920,167 +1009,383 @@ endif
 
 
 
+;;----------------------------------------------------------------------------------------
+;; FCT vs F24 and FSCATT vs F24
+;;----------------------------------------------------------------------------------------
+if keyword_set(param_comp) then begin
+
+    ;; PLOT FINAL PARAM SET
+    f24 = [0.2,0.3,0.4,0.5,0.6,0.7,0.8]
+    f25 = 1.-f24
+
+    fct = [0.552,0.550,0.565,0.555,0.559,0.559,0.551]
+    fct_upp = [0.035,0.038,0.026,0.037,0.035,0.029,0.040]
+    fct_low = [0.033,0.030,0.041,0.032,0.034,0.038,0.030]
+    fct_err = transpose([[fct_low],[fct_upp]])
+
+    fscat = [-0.91,-0.96,-0.99,-1.04,-1.08,-1.14,-1.14]
+    fscat_upp = [0.09,0.11,0.10,0.13,0.14,0.14,0.12]
+    fscat_low = [0.14,0.14,0.15,0.12,0.12,0.11,0.12]
+    fscat_err = transpose([[fscat_low],[fscat_upp]])
+
+    ;; FTC vs F24
+;   efct = {xra:[0.1,0.9],yra:[0.41,0.69], $
+;           ;xtitle:'$!8f!7_{24-25}$',ytitle:'$!8f!7_{CT}$', $
+;           xtitle:'$!8f!7_{25-26}$',ytitle:'$!8f!7_{CT}$', $
+;           font_name:'Times',font_size:14}
+;
+;   pfct = errorplot(f25,fct,fct_err,linestyle='',_extra=efct,errorbar_thick=2)
+;   p = plot(f25,fct,'o',_extra=efct,col='black',sym_filled=1,sym_fill_color=[215,48,39],sym_size=1.5,sym_thick=2,/ov)
+;   
+;   ;; save image
+;   if keyword_set(sav) then begin
+;       print, '    SAVING PLOT'
+;       if (strupcase(strtrim(sav,2)) eq 'EPS') then pfct.save,'figures/fct_vs_f25.eps',/BITMAP else $
+;                                                    pfct.save,'figures/fct_vs_f25.png',resolution=res
+;   endif    
+;
+;   ;; FSCAT vs F24
+;   efscat = {xra:[0.1,0.9],yra:[-1.5,-0.5], $
+;             sym_filled:1, $
+;             ;xtitle:'$!8f!7_{24-25}$',ytitle:'$\sigma_{scatt}$', $
+;             xtitle:'$!8f!7_{25-26}$',ytitle:'$\sigma_{scatt}$', $
+;             font_name:'Times',font_size:14}
+;
+;   pfscat = errorplot(f25,fscat,fscat_err,'o',_extra=efscat,errorbar_thick=2)
+;   p = plot(f25,fscat,'o',_extra=efscat,col='black',sym_filled=1,sym_fill_color=[69,117,180],sym_size=1.5,sym_thick=2,/ov)
+;   
+;   ;; save image
+;   if keyword_set(sav) then begin
+;       print, '    SAVING PLOT'
+;       if (strupcase(strtrim(sav,2)) eq 'EPS') then pfscat.save,'figures/fscat_vs_f25.eps',/BITMAP else $
+;                                                    pfscat.save,'figures/fscat_vs_f25.png',resolution=res
+;   endif    
+
+    ;; PLOT ADDITIONAL PARAMETER TESTS
+    par = read_csv('all_params_in_table_format.csv',header=hd)
+    for i = 0,n_elements(hd)-1 do re = execute(hd[i]+' = par.field'+string(i+1,'(i02)'))
+    ;; f24 is read in here and overwrites the previous entry. need to create f25 again
+    f25 = 1.-f24
+    
+    iio30 = oa eq 30.d
+    iio60 = oa eq 60.d
+    iir05 = refl eq 0.5d
+    iir10 = refl eq 1.0d
+    iig18 = gam eq 1.8d
+    iig19 = gam eq 1.9d
+    iig20 = gam eq 2.0d
+    
+    fct_err = abs(transpose([[fct_low],[fct_upp]]))
+    fscat_err = abs(transpose([[fscat_low],[fscat_upp]]))
+    
+    ;; FTC vs F24 BY PARAM
+    efct = {xra:[0.1,0.9],yra:[0.46,0.74], $
+            sym_color:'black', $;sym_filled:1,sym_size:1.2, $
+            ;xtitle:'$!8f!7_{24-25}$',ytitle:'$!8f!7_{CT}$', $
+            xtitle:'$!8f!7_{25-26}$',ytitle:'$!8f!7_{CT}$', $
+            font_name:'Times',font_size:14}
+
+    ;; OPENING ANGLE 30°
+    ii = where(iio30 and iir05 and iig18)
+    poa30 = errorplot(f25[ii]-0.025,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',errorbar_thick=2)
+    p1 = plot(f25[ii]-0.025,fct_mean[ii],'s',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.8')
+   
+    ii = where(iio30 and iir10 and iig18)
+    p = errorplot(f25[ii]-0.015,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p4 = plot(f25[ii]-0.015,fct_mean[ii],'s',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[215,48,39],/ov,name='$R$ = 1.0, $\Gamma$ = 1.8')
+   
+    ii = where(iio30 and iir05 and iig19)
+    p = errorplot(f25[ii]-0.005,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p2 = plot(f25[ii]-0.005,fct_mean[ii],'o',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.9')
+    
+    ii = where(iio30 and iir10 and iig19)
+    p = errorplot(f25[ii]+0.005,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p5 = plot(f25[ii]+0.005,fct_mean[ii],'o',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[215,48,39],/ov,name='$R$ = 1.0, $\Gamma$ = 1.9')
+    
+    ii = where(iio30 and iir05 and iig20)
+    p = errorplot(f25[ii]+0.015,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p3 = plot(f25[ii]+0.015,fct_mean[ii],'S',_extra=efct,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 2.0')
+    
+    ii = where(iio30 and iir10 and iig20)
+    p = errorplot(f25[ii]+0.025,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p6 = plot(f25[ii]+0.025,fct_mean[ii],'S',_extra=efct,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color=[215,48,39],/ov,name='$R$ = 1.0, $\Gamma$ = 2.0')
+
+    title = text(0.18,0.80,/normal,'Opening Angle 30$\deg$',font_name='Times',font_size=15)
+    l = legend(target=[p1,p2,p3,p4,p5,p6],position=[0.88,0.85],/normal,horizontal_spacing=0.06,sample_width=0.0,font_size=14,font_name='Times')
+     ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then poa30.save,'figures/param_fct_oa30.eps',/BITMAP else $
+                                                     poa30.save,'figures/param_fct_oa30.png',resolution=res
+    endif    
+
+    ;; OPENING ANGLE 60°
+    ii = where(iio60 and iir05 and iig18)
+    poa60 = errorplot(f25[ii]-0.025,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',errorbar_thick=2)
+    p1 = plot(f25[ii]-0.025,fct_mean[ii],'s',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.8')
+   
+    ii = where(iio60 and iir10 and iig18)
+    p = errorplot(f25[ii]-0.015,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p4 = plot(f25[ii]-0.015,fct_mean[ii],'s',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[215,48,39],/ov,name='$R$ = 1.0, $\Gamma$ = 1.8')
+   
+    ii = where(iio60 and iir05 and iig19)
+    p = errorplot(f25[ii]-0.005,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p2 = plot(f25[ii]-0.005,fct_mean[ii],'o',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.9')
+    
+    ii = where(iio60 and iir10 and iig19)
+    p = errorplot(f25[ii]+0.005,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p5 = plot(f25[ii]+0.005,fct_mean[ii],'o',_extra=efct,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[215,48,39],/ov,name='$R$ = 1.0, $\Gamma$ = 1.9')
+    
+    ii = where(iio60 and iir05 and iig20)
+    p = errorplot(f25[ii]+0.015,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p3 = plot(f25[ii]+0.015,fct_mean[ii],'S',_extra=efct,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 2.0')
+    
+    ii = where(iio60 and iir10 and iig20)
+    p = errorplot(f25[ii]+0.025,fct_mean[ii],fct_err[*,ii],_extra=efct,linestyle='',/ov,errorbar_thick=2)
+    p6 = plot(f25[ii]+0.025,fct_mean[ii],'S',_extra=efct,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color=[215,48,39],/ov,name='$R$ = 1.0, $\Gamma$ = 2.0')
+
+    title = text(0.18,0.80,/normal,'Opening Angle 60$\deg$',font_name='Times',font_size=15)
+    l = legend(target=[p1,p2,p3,p4,p5,p6],position=[0.88,0.85],/normal,horizontal_spacing=0.06,sample_width=0.0,font_size=14,font_name='Times')
+     ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then poa60.save,'figures/param_fct_oa60.eps',/BITMAP else $
+                                                     poa60.save,'figures/param_fct_oa60.png',resolution=res
+    endif    
 
 
+    ;; FSCAT vs F24 BY PARAM
+    efscat = {xra:[0.1,0.9],yra:[-1.5,-0.5], $
+              sym_color:'black', $;sym_filled:1,sym_size:1.2, $
+              ;xtitle:'$!8f!7_{24-25}$',ytitle:'$\sigma_{scatt}$', $
+              xtitle:'$!8f!7_{25-26}$',ytitle:'$\sigma_{scatt}$', $
+              font_name:'Times',font_size:14}
 
-if keyword_set(new_rxnh) then begin
+    ;; OPENING ANGLE 30°
+    ii = where(iio30 and iir05 and iig18)
+    poa30 = errorplot(f25[ii]-0.025,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',errorbar_thick=2)
+    p1 = plot(f25[ii]-0.025,fscat_mean[ii],'s',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.8')
+   
+    ii = where(iio30 and iir10 and iig18)
+    p = errorplot(f25[ii]-0.015,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p4 = plot(f25[ii]-0.015,fscat_mean[ii],'s',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[69,117,180],/ov,name='$R$ = 1.0, $\Gamma$ = 1.8')
+   
+    ii = where(iio30 and iir05 and iig19)
+    p = errorplot(f25[ii]-0.005,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p2 = plot(f25[ii]-0.005,fscat_mean[ii],'o',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.9')
+    
+    ii = where(iio30 and iir10 and iig19)
+    p = errorplot(f25[ii]+0.005,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p5 = plot(f25[ii]+0.005,fscat_mean[ii],'o',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[69,117,180],/ov,name='$R$ = 1.0, $\Gamma$ = 1.9')
+    
+    ii = where(iio30 and iir05 and iig20)
+    p = errorplot(f25[ii]+0.015,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p3 = plot(f25[ii]+0.015,fscat_mean[ii],'S',_extra=efscat,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 2.0')
+    
+    ii = where(iio30 and iir10 and iig20)
+    p = errorplot(f25[ii]+0.025,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p6 = plot(f25[ii]+0.025,fscat_mean[ii],'S',_extra=efscat,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color=[69,117,180],/ov,name='$R$ = 1.0, $\Gamma$ = 2.0')
 
-    rx = mrdfits('rx.fits',0,hd)
-    nh = mrdfits('rx.fits',3)
-    phot = mrdfits('rx.fits',4)
-    scat = mrdfits('rx.fits',5)
-    refl = mrdfits('rx.fits',6)
-    open = mrdfits('rx.fits',7)
+    title = text(0.62,0.80,/normal,'Opening Angle 30$\deg$',font_name='Times',font_size=15)
+    l = legend(target=[p1,p2,p3,p4,p5,p6],position=[0.42,0.85],/normal,horizontal_spacing=0.06,sample_width=0.0,font_size=14,font_name='Times')
+     ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then poa30.save,'figures/param_fscat_oa30.eps',/BITMAP else $
+                                                     poa30.save,'figures/param_fscat_oa30.png',resolution=res
+    endif    
 
-    ;; LEFT SIDE, 6 CHANNELS    
-    nrx = rx[7,*,*,*,*]
-    ind_left = []
-    ;; 1
-    il1 = where(nrx lt -0.75 and nrx gt -0.85,nl1)
-    indl1 = array_indices(rx,il1)
-    mm =  minmax( nrx[il1] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_left = [[ind_left],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; uniform photon index
-    ;; uniform scattering
-    ;; uniform reflection 0>=R>=1
-    ;; 10° opening angle only
-    ;; 2
-    il2 = where(nrx lt -0.6 and nrx gt -0.75,nl2)
-    indl2 = array_indices(rx,il2)
-    mm = minmax( nrx[il2] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_left = [[ind_left],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 3
-    il3 = where(nrx lt -0.45 and nrx gt -0.6,nl3)
-    indl3 = array_indices(rx,il3)
-    mm = minmax( nrx[il3] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_left = [[ind_left],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 4
-    il4 = where(nrx lt -0.35 and nrx gt -0.45,nl4)
-    indl4 = array_indices(rx,il4)
-    mm = minmax( nrx[il4] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_left = [[ind_left],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 5
-    il5 = where(nrx lt -0.24 and nrx gt -0.35,nl5)
-    indl5 = array_indices(rx,il5)
-    mm = minmax( nrx[il5] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_left = [[ind_left],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 6
-    il6 = where(nrx lt -0.15 and nrx gt -0.24,nl6)
-    indl6 = array_indices(rx,il6)
-    mm = minmax( nrx[il6] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_left = [[ind_left],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; COMBINE
-    nl = nl1+nl2+nl3+nl4+nl5+nl6
-    rx_left = []
-    for i = 0,n_elements(ind_left[0,*])-1 do begin
-        str = '*,'+strjoin(strtrim(ind_left[1:-1,i],2),',')
-        re = execute('rx_left = [[rx_left],[rx['+str+']]]')
-    endfor
+    ;; OPENING ANGLE 60°
+    ii = where(iio60 and iir05 and iig18)
+    poa60 = errorplot(f25[ii]-0.025,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',errorbar_thick=2)
+    p1 = plot(f25[ii]-0.025,fscat_mean[ii],'s',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.8')
+   
+    ii = where(iio60 and iir10 and iig18)
+    p = errorplot(f25[ii]-0.015,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p4 = plot(f25[ii]-0.015,fscat_mean[ii],'s',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[69,117,180],/ov,name='$R$ = 1.0, $\Gamma$ = 1.8')
+   
+    ii = where(iio60 and iir05 and iig19)
+    p = errorplot(f25[ii]-0.005,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p2 = plot(f25[ii]-0.005,fscat_mean[ii],'o',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 1.9')
+    
+    ii = where(iio60 and iir10 and iig19)
+    p = errorplot(f25[ii]+0.005,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p5 = plot(f25[ii]+0.005,fscat_mean[ii],'o',_extra=efscat,sym_size=1.5,sym_filled=1,sym_thick=2,col='black',sym_fill_color=[69,117,180],/ov,name='$R$ = 1.0, $\Gamma$ = 1.9')
+    
+    ii = where(iio60 and iir05 and iig20)
+    p = errorplot(f25[ii]+0.015,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p3 = plot(f25[ii]+0.015,fscat_mean[ii],'S',_extra=efscat,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color='white',/ov,name='$R$ = 0.5, $\Gamma$ = 2.0')
+    
+    ii = where(iio60 and iir10 and iig20)
+    p = errorplot(f25[ii]+0.025,fscat_mean[ii],fscat_err[*,ii],_extra=efscat,linestyle='',/ov,errorbar_thick=2)
+    p6 = plot(f25[ii]+0.025,fscat_mean[ii],'S',_extra=efscat,sym_size=2.0,sym_thick=2,col='black',sym_filled=1,sym_fill_color=[69,117,180],/ov,name='$R$ = 1.0, $\Gamma$ = 2.0')
 
-
-    ;; RIGHT SIDE, 9 CHANNELS
-    nrx = rx[16,*,*,*,*]
-    ind_right = []
-    ;; 1
-    ir1 = where(nrx lt -2.8 and nrx gt -3.0,nr1)
-    indr1 = array_indices(rx,ir1)
-    mm =  minmax( nrx[ir1] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 
-    ;; 
-    ;; 
-    ;; only 10° opening angle
-    ;; 2
-    ir2 = where(nrx lt -2.52 and nrx gt -2.7,nr2)
-    indr2 = array_indices(rx,ir2)
-    mm = minmax( nrx[ir2] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 3
-    ir3 = where(nrx lt -2.4 and nrx gt -2.52,nr3)
-    indr3 = array_indices(rx,ir3)
-    mm = minmax( nrx[ir3] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 4
-    ir4 = where(nrx lt -2.25 and nrx gt -2.4,nr4)
-    indr4 = array_indices(rx,ir4)
-    mm = minmax( nrx[ir4] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 5
-    ir5 = where(nrx lt -2.15 and nrx gt -2.25,nr5)
-    indr5 = array_indices(rx,ir5)
-    mm = minmax( nrx[ir5] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 6
-    ir6 = where(nrx lt -2.1 and nrx gt -2.15,nr6)
-    indr6 = array_indices(rx,ir6)
-    mm = minmax( nrx[ir6] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 7
-    ir7 = where(nrx lt -1.95 and nrx gt -2.1,nr7)
-    indr7 = array_indices(rx,ir7)
-    mm = minmax( nrx[ir7] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 8
-    ir8 = where(nrx lt -1.91 and nrx gt -1.95,nr8)
-    indr8 = array_indices(rx,ir8)
-    mm = minmax( nrx[ir8] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; 9
-    ir9 = where(nrx lt -1.0 and nrx gt -1.91,nr9)
-    indr9 = array_indices(rx,ir9)
-    mm = minmax( nrx[ir9] )
-    imin = where(rx eq mm[0])
-    imax = where(rx eq mm[1])
-    ind_right = [[ind_right],[array_indices(rx,imin)],[array_indices(rx,imax)]]
-    ;; COMBINE
-    nr = nr1+nr2+nr3+nr4+nr5+nr6+nr7+nr8+nr9
-    rx_right = []
-    for i = 0,n_elements(ind_right[0,*])-1 do begin
-        str = '*,'+strjoin(strtrim(ind_right[1:-1,i],2),',')
-        re = execute('rx_right = [[rx_right],[rx['+str+']]]')
-    endfor
-
-
-
-
-
-
+    title = text(0.62,0.80,/normal,'Opening Angle 60$\deg$',font_name='Times',font_size=15)
+    l = legend(target=[p1,p2,p3,p4,p5,p6],position=[0.42,0.85],/normal,horizontal_spacing=0.06,sample_width=0.0,font_size=14,font_name='Times')
+    ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then poa60.save,'figures/param_fscat_oa60.eps',/BITMAP else $
+                                                     poa60.save,'figures/param_fscat_oa60.png',resolution=res
+    endif     
 endif
 
 
 
 
+;;----------------------------------------------------------------------------------------
+;; MRLX plots
+;;----------------------------------------------------------------------------------------
+if keyword_set(mrlx) then begin
+    
+    
+    
+    ;; MRLX solo
+    readcol,'mrlx_dist.csv',grid_of_rlx,mrlx_vals,format='d,d'
+    
+    e = {xra:[-3.2,0.5],yra:[0.,0.012], $
+         thick:3, $
+         xtitle:'$!8M!7(!8R_{L_{!7X}})$',ytitle:'Probability', $
+         font_name:'Times',font_size:14}
+         
+    p = plot(grid_of_rlx,mrlx_vals/total(mrlx_vals),_extra=e,col=[69,117,180])
+    t = text(0.18,0.80,'$!8M!7(!8R_{L_{!7X}})$',/normal,font_name='Times',font_style='Bold',font_size=14,fill_background=1)
+    ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/mrlx_dist.eps',/BITMAP else $
+                                                     p.save,'figures/mrlx_dist.png',resolution=res
+    endif
+    stop
+    ;; convolution with MRLX
+    
+    ;; RX and RX-LIMIT data for sample
+    rx_data = read_csv('rx_data.csv',header=hd)
+    for i = 0,n_elements(hd)-1 do re = execute(hd[i]+' = rx_data.field'+string(i+1,'(i1)'))
+    ;; detected sources
+    iid = rx ne -99.
+
+    ;; evenly spaced grid of rlx values
+    grid_num = 600.
+    grid_of_rlx = [-3.:1:4./grid_num]
+
+    readcol,'mrlx_vals.csv',mrlx_vals,format='d'
+    readcol,'first_term_rlx_grid.csv',f1,f2,f3,f4,f5,f6,format='d'
+    first_term_rlx = [[f1],[f2],[f3],[f4],[f5],[f6]]
+    readcol,'second_term_rlx_grid.csv',s1,s2,s3,s4,s5,s6,format='d'
+    second_term_rlx = [[s1],[s2],[s3],[s4],[s5],[s6]]
+
+    col = [ $
+           ;[165,0,38],$
+           [215,48,39],$
+           [244,109,67],$
+           [253,174,97],$
+           ;[254,224,144],$
+           ;[255,255,191],$
+           ;[224,243,248],$
+           [171,217,233],$
+           [116,173,209],$
+           [69,117,180] $
+           ;[49,54,149] $
+           ]
+        
+    e = {xra:[-3.,1.0],yra:[-1.,13.], $
+         thick:3, $
+         ytickname:['','','','','','','',''], $
+         xtitle:'$!8R_{L_{!7X}}$',ytitle:'Likelihood (arbitrary)', $
+         font_name:'Times',font_size:14}
+    
+    ;; FIRST TERM RLX
+    p = plot(grid_of_rlx,first_term_rlx[*,0],_extra=e,col=col[*,0])  
+    for i = 1,5 do p = plot(grid_of_rlx,first_term_rlx[*,i]+i*2,_extra=e,/ov,col=col[*,i],transparency=0)    
+    t = text(0.18,0.80,'$!8N!7(!8R!7_{!8L!7_{X}, !8i!7} , 0.23)$',/normal,font_name='Times',font_style='Bold',font_size=14,fill_background=1)
+    ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/first_term_rlx.eps',/BITMAP else $
+                                                     p.save,'figures/first_term_rlx.png',resolution=res
+    endif
+
+    ;; MRLX CONVOLVED WITH FIRST TERM RLX
+    p = plot(grid_of_rlx,mrlx_vals*first_term_rlx[*,0],_extra=e,col=col[*,0])  
+    for i = 1,5 do p = plot(grid_of_rlx,mrlx_vals*first_term_rlx[*,i]+i*2,_extra=e,/ov,col=col[*,i],transparency=0)    
+    t = text(0.18,0.80,'$!8M!7(!8R!7_{!8L!7_{X}}) !M* !8N!7(!8R!7_{!8L!7_{X}, !8i!7} , 0.23)$',/normal,font_name='Times',font_style='Bold',font_size=14,fill_background=1)
+    ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/first_term_convolved.eps',/BITMAP else $
+                                                     p.save,'figures/first_term_convolved.png',resolution=res
+    endif
+
+    ;; SECOND TERM RLX
+    p = plot(grid_of_rlx,second_term_rlx[*,0],_extra=e,col=col[*,0])  
+    for i = 1,5 do p = plot(grid_of_rlx,second_term_rlx[*,i]+i*2,_extra=e,/ov,col=col[*,i],transparency=0)    
+    t = text(0.18,0.80,'$!8S_i!7$',/normal,font_name='Times',font_style='Bold',font_size=14,fill_background=1)
+    ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/second_term_rlx.eps',/BITMAP else $
+                                                     p.save,'figures/second_term_rlx.png',resolution=res
+    endif
+
+    ;; MRLX CONVOLVED WITH SECOND TERM RLX
+    p = plot(grid_of_rlx,mrlx_vals*second_term_rlx[*,0],_extra=e,col=col[*,0])  
+    for i = 1,5 do p = plot(grid_of_rlx,mrlx_vals*second_term_rlx[*,i]+i*2,_extra=e,/ov,col=col[*,i],transparency=0)    
+    t = text(0.18,0.80,'$!8M!7(!8R!7_{!8L!7_{X}}) !M* !8S_i!7$',/normal,font_name='Times',font_style='Bold',font_size=14,fill_background=1)
+    ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/second_term_convolved.eps',/BITMAP else $
+                                                     p.save,'figures/second_term_convolved.png',resolution=res
+    endif
+endif
 
 
 
+;;----------------------------------------------------------------------------------------
+;; CORNER PLOT
+;;----------------------------------------------------------------------------------------
+if keyword_set(corner) then begin
+
+
+    chain = read_csv('sampler_chain.csv')
+    fscat = chain.field1
+    fct = chain.field2
+
+    e = {font_name:'Times',font_size:18}
+
+    ;; load contour 
+    im = image('figures/output.png',dimension=[1028,1036],position=[50,50,978,986],/device)
+
+    ;; overplot contours
+    p = plot(fscat,fct,/nodata,/current,position=[0.116,0.097,0.721,0.6975],_extra=e)
+    ;; overplot fscat hist
+    hfs = histogram(fscat,locations=xfs,binsize=0.2,min=-1.8,max=-0.6)
+    pfs = plot(xfs,hfs/total(hfs),/stairstep,/nodata,/current,position=[0.116,0.718,0.721,0.918],_extra=e, $
+               xmajor=7,ymajor=4,xshowtext=0,yshowtext=0)
+    ;; overplot fct hist
+    hfct = histogram(fct,locations=xfct,binsize=0.05,min=0.40,max=0.70)
+
+    pfct = plot(xfct,hfct/total(hfct),/stairstep,/nodata,/current,position=[0.7415,0.097,0.9430,0.6975],_extra=e, $
+                xmajor=4,ymajor=7,xshowtext=0,yshowtext=0)
+    ;; remove ticks and text
+    ;;axes
+    t = text(0.400,0.050,'$\sigma_{scatt}$',fill_background=1,fill_color='white',font_size=22)
+    t = text(0.042,0.385,'$!8f!7_{CT}$',fill_background=1,fill_color='white',font_size=22,color='black',orientation=90)  
+    ;; labels
+    t = text(0.345,0.936,'$\sigma_{scatt} = -1.04^{+0.13}_{-0.12}$',font_size=20,font_name='Times',fill_background=1,fill_color='white')
+    t = text(0.772,0.716,'$!8f!7_{CT} = 0.555^{+0.037}_{-0.032}$',font_size=20,font_name='Times',fill_background=1,fill_color='white')
+    
+    ;; save image
+    if keyword_set(sav) then begin
+        print, '    SAVING PLOT'
+        if (strupcase(strtrim(sav,2)) eq 'EPS') then p.save,'figures/corner_plot.eps',/BITMAP else $
+                                                     p.save,'figures/corner_plot.png',resolution=res
+    endif
+
+
+
+endif
 
 
 
